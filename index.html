@@ -23,6 +23,7 @@ var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ
 var K=new URLSearchParams(location.search).get('k')||'';
 var LS='ag_s_'+K, box=document.getElementById('c');
 function msg(t,re){box.innerHTML='<p class="m"></p>';box.firstChild.textContent=t;if(re){var b=document.createElement('button');b.textContent='Reintentar';b.onclick=function(){location.reload()};box.appendChild(b)}}
+function espera(b,txt){var t0=Date.now(),old=b.textContent;b.textContent=txt;var iv=setInterval(function(){b.textContent=txt+' ('+Math.round((Date.now()-t0)/1000)+' s)'},1000);return function(){clearInterval(iv);b.textContent=old}}
 function getS(){try{return localStorage.getItem(LS)||''}catch(e){return ''}}
 function setS(v){try{if(v)localStorage.setItem(LS,v);else localStorage.removeItem(LS)}catch(e){}}
 function post(fn,args,s,n){n=n||0;
@@ -34,6 +35,7 @@ function post(fn,args,s,n){n=n||0;
 if(!K){msg('Falta tu link personal. Pedile el link a la Intendencia.');return}
 
 function abrir(S){
+  msg('Abriendo tu agenda… la primera vez del día puede tardar unos segundos.');
   post('inicio',[K],S).then(function(j){
     if(!j.ok){if(j.e==='sesion'){setS('');pedir()}else msg(j.e||'No se pudo abrir.');return}
     var html=j.r.html.replace(/^\s*<title>.*?<\/title>/i,'');var pre=JSON.stringify(j.r.rows||[]).replace(/</g,'\\u003c');
@@ -68,12 +70,12 @@ function formulario(est){
     var p1=document.getElementById('p1').value,p2=document.getElementById('p2').value;
     if(!/^\d{4,6}$/.test(p1)){e.textContent='La clave tiene que ser de 4 a 6 números.';return}
     if(nuevo&&p1!==p2){e.textContent='Las dos claves no coinciden.';return}
-    b.disabled=true;
+    b.disabled=true;var fin=espera(b,nuevo?'Creando tu clave…':'Entrando…');
     post(nuevo?'crearPin':'entrar',[K,p1],'').then(function(j){
       if(!j.ok&&nuevo&&/Ya ten/.test(j.e||'')){return post('entrar',[K,p1],'')}return j}).then(function(j){
-      if(!j.ok){b.disabled=false;e.textContent=j.e||'No se pudo entrar.';return}
+      if(!j.ok){fin();b.disabled=false;e.textContent=j.e||'No se pudo entrar.';return}
       setS(j.r.s);abrir(j.r.s);
-    }).catch(function(){b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
+    }).catch(function(){fin();b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
   });
 }
 function olvide(est){
@@ -81,11 +83,11 @@ function olvide(est){
   document.getElementById('v').onclick=function(ev){ev.preventDefault();formulario(est)};
   var b=document.getElementById('b'),e=document.getElementById('e');
   b.onclick=function(){
-    b.disabled=true;e.textContent='';
+    b.disabled=true;e.textContent='';var fin=espera(b,'Enviando código…');
     post('olvide',[K],'').then(function(j){
-      if(!j.ok){b.disabled=false;e.textContent=j.e||'No se pudo enviar el código.';return}
+      if(!j.ok){fin();b.disabled=false;e.textContent=j.e||'No se pudo enviar el código.';return}
       codigo(est);
-    }).catch(function(){b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
+    }).catch(function(){fin();b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
   };
 }
 function codigo(est){
@@ -98,11 +100,11 @@ function codigo(est){
     if(!/^\d{6}$/.test(c)){e.textContent='El código tiene 6 números.';return}
     if(!/^\d{4,6}$/.test(n1)){e.textContent='La clave tiene que ser de 4 a 6 números.';return}
     if(n1!==n2){e.textContent='Las dos claves no coinciden.';return}
-    b.disabled=true;
+    b.disabled=true;var fin=espera(b,'Cambiando tu clave…');
     post('restablecer',[K,c,n1],'').then(function(j){
-      if(!j.ok){b.disabled=false;e.textContent=j.e||'No se pudo cambiar la clave.';return}
+      if(!j.ok){fin();b.disabled=false;e.textContent=j.e||'No se pudo cambiar la clave.';return}
       setS(j.r.s);abrir(j.r.s);
-    }).catch(function(){b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
+    }).catch(function(){fin();b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
   });
 }
 function pedir(){

@@ -4,29 +4,76 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Mi agenda de servicios</title>
 <style>
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f3f5f8;color:#18202e;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
-@media (prefers-color-scheme:dark){body{background:#121821;color:#e6ebf2}}
-p{max-width:34ch;text-align:center;line-height:1.5}
-</style></head><body><p id="m">Abriendo tu agenda…</p>
+:root{--bg:#f3f5f8;--card:#fff;--fg:#18202e;--mut:#5b6678;--ac:#1d4f91;--acfg:#fff;--line:#d5dbe5;--bad:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#121821;--card:#1b2431;--fg:#e6ebf2;--mut:#9aa6b8;--ac:#6ea3e6;--acfg:#0c1420;--line:#2c3849;--bad:#ff8a80}}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--fg);display:flex;min-height:100vh;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+.c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;width:100%;max-width:340px;box-sizing:border-box}
+h1{font-size:1.15rem;margin:0 0 4px}
+p{line-height:1.45;margin:6px 0}
+.m{color:var(--mut);font-size:.92rem}
+label{display:block;font-size:.88rem;margin:14px 0 4px}
+input{width:100%;box-sizing:border-box;font-size:1.3rem;letter-spacing:.35em;text-align:center;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+button{width:100%;margin-top:16px;padding:12px;font-size:1rem;border:0;border-radius:8px;background:var(--ac);color:var(--acfg);cursor:pointer}
+button:disabled{opacity:.6}
+.e{color:var(--bad);min-height:1.3em;font-size:.92rem;margin-top:10px}
+</style></head><body><div class="c" id="c"><p class="m" id="m">Abriendo tu agenda…</p></div>
 <script>
 (function(){
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
 var K=new URLSearchParams(location.search).get('k')||'';
-function msg(t){document.getElementById('m').textContent=t}
+var LS='ag_s_'+K, box=document.getElementById('c');
+function msg(t){box.innerHTML='<p class="m"></p>';box.firstChild.textContent=t}
+function getS(){try{return localStorage.getItem(LS)||''}catch(e){return ''}}
+function setS(v){try{if(v)localStorage.setItem(LS,v);else localStorage.removeItem(LS)}catch(e){}}
+function post(fn,args,s){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:K,s:s||'',fn:fn,args:args})}).then(function(r){return r.json()})}
 if(!K){msg('Falta tu link personal. Pedile el link a la Intendencia.');return}
-var shim='(function(){var API='+JSON.stringify(API)+',K='+JSON.stringify(K)+';'+
-'function mk(h){return new Proxy({},{get:function(_,n){'+
-'if(n==="withSuccessHandler")return function(f){return mk({s:f,f:h.f})};'+
-'if(n==="withFailureHandler")return function(f){return mk({s:h.s,f:f})};'+
-'return function(){var a=Array.prototype.slice.call(arguments);'+
-'fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({k:K,fn:n,args:a})})'+
-'.then(function(r){return r.json()}).then(function(j){if(j.ok){if(h.s)h.s(j.r)}else if(h.f)h.f(new Error(j.e))})'+
-'.catch(function(e){if(h.f)h.f(e)})}}})}'+
-'window.google={script:{run:mk({})}};})();';
-fetch(API+'?api=page&k='+encodeURIComponent(K)).then(function(r){return r.json()}).then(function(j){
- if(!j.ok){msg('Este link no es válido. Pedí uno nuevo a la Intendencia.');return}
- var html=j.html.replace(/^\s*<title>.*?<\/title>/i,'');
- document.open();document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Mi agenda de servicios</title><script>'+shim+'<\/script></head><body>'+html+'</body></html>');document.close();
-}).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.')});
+
+function abrir(S){
+  post('pagina',[K],S).then(function(j){
+    if(!j.ok){if(j.e==='sesion'){setS('');pedir()}else msg(j.e||'No se pudo abrir.');return}
+    var shim='(function(){var API='+JSON.stringify(API)+',K='+JSON.stringify(K)+',S='+JSON.stringify(S)+',LS='+JSON.stringify(LS)+';'+
+    'function mk(h){return new Proxy({},{get:function(_,n){'+
+    'if(n==="withSuccessHandler")return function(f){return mk({s:f,f:h.f})};'+
+    'if(n==="withFailureHandler")return function(f){return mk({s:h.s,f:f})};'+
+    'return function(){var a=Array.prototype.slice.call(arguments);'+
+    'fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({k:K,s:S,fn:n,args:a})})'+
+    '.then(function(r){return r.json()}).then(function(j){if(j.ok){if(h.s)h.s(j.r)}else if(j.e==="sesion"){try{localStorage.removeItem(LS)}catch(e){}location.reload()}else if(h.f)h.f(new Error(j.e))})'+
+    '.catch(function(e){if(h.f)h.f(e)})}}})}'+
+    'window.google={script:{run:mk({})}};})();';
+    var html=j.r.replace(/^\s*<title>.*?<\/title>/i,'');
+    document.open();document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Mi agenda de servicios</title><script>'+shim+'<\/script></head><body>'+html+'</body></html>');document.close();
+  }).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.')});
+}
+
+function formulario(est){
+  var nuevo=!est.tienePin;
+  box.innerHTML='<h1></h1><p class="m" id="sub"></p><form id="f" autocomplete="off"><label for="p1" id="l1"></label><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><label for="p2" id="l2" hidden>Repetí la clave</label><input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" hidden><div class="e" id="e" role="alert"></div><button type="submit" id="b"></button></form>';
+  box.querySelector('h1').textContent='Hola, '+est.n.replace(/\s*\(.*\)$/,'');
+  document.getElementById('sub').textContent=nuevo?'Es tu primera vez. Creá una clave personal de 4 a 6 números. Solo vos la vas a saber.':'Ingresá tu clave para abrir la agenda.';
+  document.getElementById('l1').textContent=nuevo?'Elegí tu clave':'Tu clave';
+  document.getElementById('b').textContent=nuevo?'Crear clave y entrar':'Entrar';
+  if(nuevo){document.getElementById('l2').hidden=false;document.getElementById('p2').hidden=false}
+  var f=document.getElementById('f'),e=document.getElementById('e'),b=document.getElementById('b');
+  document.getElementById('p1').focus();
+  f.addEventListener('submit',function(ev){
+    ev.preventDefault();e.textContent='';
+    var p1=document.getElementById('p1').value,p2=document.getElementById('p2').value;
+    if(!/^\d{4,6}$/.test(p1)){e.textContent='La clave tiene que ser de 4 a 6 números.';return}
+    if(nuevo&&p1!==p2){e.textContent='Las dos claves no coinciden.';return}
+    b.disabled=true;
+    post(nuevo?'crearPin':'entrar',[K,p1],'').then(function(j){
+      if(!j.ok){b.disabled=false;e.textContent=j.e||'No se pudo entrar.';return}
+      setS(j.r.s);abrir(j.r.s);
+    }).catch(function(){b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
+  });
+}
+function pedir(){
+  post('estado',[K],'').then(function(j){
+    if(!j.ok){msg('Este link no es válido. Pedí uno nuevo a la Intendencia.');return}
+    formulario(j.r);
+  }).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.')});
+}
+var S0=getS();
+if(S0)abrir(S0);else pedir();
 })();
 </script></body></html>

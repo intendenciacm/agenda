@@ -22,10 +22,15 @@ button:disabled{opacity:.6}
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
 var K=new URLSearchParams(location.search).get('k')||'';
 var LS='ag_s_'+K, box=document.getElementById('c');
-function msg(t){box.innerHTML='<p class="m"></p>';box.firstChild.textContent=t}
+function msg(t,re){box.innerHTML='<p class="m"></p>';box.firstChild.textContent=t;if(re){var b=document.createElement('button');b.textContent='Reintentar';b.onclick=function(){location.reload()};box.appendChild(b)}}
 function getS(){try{return localStorage.getItem(LS)||''}catch(e){return ''}}
 function setS(v){try{if(v)localStorage.setItem(LS,v);else localStorage.removeItem(LS)}catch(e){}}
-function post(fn,args,s){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:K,s:s||'',fn:fn,args:args})}).then(function(r){return r.json()})}
+function post(fn,args,s,n){n=n||0;
+ var c=new AbortController(),t=setTimeout(function(){c.abort()},45000);
+ return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:K,s:s||'',fn:fn,args:args}),signal:c.signal})
+ .then(function(r){return r.json()})
+ .then(function(j){clearTimeout(t);return j})
+ .catch(function(e){clearTimeout(t);if(n<3)return new Promise(function(ok){setTimeout(ok,1500*(n+1))}).then(function(){return post(fn,args,s,n+1)});throw e})}
 if(!K){msg('Falta tu link personal. Pedile el link a la Intendencia.');return}
 
 function abrir(S){
@@ -36,13 +41,14 @@ function abrir(S){
     'if(n==="withSuccessHandler")return function(f){return mk({s:f,f:h.f})};'+
     'if(n==="withFailureHandler")return function(f){return mk({s:h.s,f:f})};'+
     'return function(){var a=Array.prototype.slice.call(arguments);'+
-    'fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({k:K,s:S,fn:n,args:a})})'+
-    '.then(function(r){return r.json()}).then(function(j){if(j.ok){if(h.s)h.s(j.r)}else if(j.e==="sesion"){try{localStorage.removeItem(LS)}catch(e){}location.reload()}else if(h.f)h.f(new Error(j.e))})'+
+    'function go(t){return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({k:K,s:S,fn:n,args:a})}).then(function(r){return r.json()}).catch(function(e){if(t<2)return new Promise(function(ok){setTimeout(ok,1500*(t+1))}).then(function(){return go(t+1)});throw e})}'+
+    'go(0)'+
+    '.then(function(j){return j}).then(function(j){if(j.ok){if(h.s)h.s(j.r)}else if(j.e==="sesion"){try{localStorage.removeItem(LS)}catch(e){}location.reload()}else if(h.f)h.f(new Error(j.e))})'+
     '.catch(function(e){if(h.f)h.f(e)})}}})}'+
     'window.google={script:{run:mk({})}};})();';
     var html=j.r.replace(/^\s*<title>.*?<\/title>/i,'');
     document.open();document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Mi agenda de servicios</title><script>'+shim+'<\/script></head><body>'+html+'</body></html>');document.close();
-  }).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.')});
+  }).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.',true)});
 }
 
 function formulario(est){
@@ -62,6 +68,7 @@ function formulario(est){
     if(nuevo&&p1!==p2){e.textContent='Las dos claves no coinciden.';return}
     b.disabled=true;
     post(nuevo?'crearPin':'entrar',[K,p1],'').then(function(j){
+      if(!j.ok&&nuevo&&/Ya ten/.test(j.e||'')){return post('entrar',[K,p1],'')}return j}).then(function(j){
       if(!j.ok){b.disabled=false;e.textContent=j.e||'No se pudo entrar.';return}
       setS(j.r.s);abrir(j.r.s);
     }).catch(function(){b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
@@ -71,7 +78,7 @@ function pedir(){
   post('estado',[K],'').then(function(j){
     if(!j.ok){msg('Este link no es válido. Pedí uno nuevo a la Intendencia.');return}
     formulario(j.r);
-  }).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.')});
+  }).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.',true)});
 }
 var S0=getS();
 if(S0)abrir(S0);else pedir();

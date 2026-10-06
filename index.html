@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Mi agenda de servicios</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f3f5f8;color:#18202e;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+@media (prefers-color-scheme:dark){body{background:#121821;color:#e6ebf2}}
+p{max-width:34ch;text-align:center;line-height:1.5}
+</style></head><body><p id="m">Abriendo tu agenda…</p>
+<script>
+(function(){
+var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
+var K=new URLSearchParams(location.search).get('k')||'';
+function msg(t){document.getElementById('m').textContent=t}
+if(!K){msg('Falta tu link personal. Pedile el link a la Intendencia.');return}
+var shim='(function(){var API='+JSON.stringify(API)+',K='+JSON.stringify(K)+';'+
+'function mk(h){return new Proxy({},{get:function(_,n){'+
+'if(n==="withSuccessHandler")return function(f){return mk({s:f,f:h.f})};'+
+'if(n==="withFailureHandler")return function(f){return mk({s:h.s,f:f})};'+
+'return function(){var a=Array.prototype.slice.call(arguments);'+
+'fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({k:K,fn:n,args:a})})'+
+'.then(function(r){return r.json()}).then(function(j){if(j.ok){if(h.s)h.s(j.r)}else if(h.f)h.f(new Error(j.e))})'+
+'.catch(function(e){if(h.f)h.f(e)})}}})}'+
+'window.google={script:{run:mk({})}};})();';
+fetch(API+'?api=page&k='+encodeURIComponent(K)).then(function(r){return r.json()}).then(function(j){
+ if(!j.ok){msg('Este link no es válido. Pedí uno nuevo a la Intendencia.');return}
+ var html=j.html.replace(/^\s*<title>.*?<\/title>/i,'');
+ document.open();document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Mi agenda de servicios</title><script>'+shim+'<\/script></head><body>'+html+'</body></html>');document.close();
+}).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.')});
+})();
+</script></body></html>

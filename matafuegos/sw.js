@@ -1,5 +1,5 @@
 // Deja abrir la app sin señal: guarda en el celular la página y los íconos (los datos los guarda la propia página).
-var V = 'mf-v1';
+var V = 'mf-v2';
 var BASE = self.registration.scope;
 function conTiempo(p, ms) {
   return new Promise(function (ok, ko) {
@@ -9,7 +9,7 @@ function conTiempo(p, ms) {
 }
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(V).then(function (c) {
-    return Promise.all(['', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'].map(function (p) {
+    return Promise.all(['', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'jakarta.woff2'].map(function (p) {
       return fetch(BASE + p, {cache: 'no-store'}).then(function (r) { if (r.ok) return c.put(BASE + p, r); }).catch(function () {});
     }));
   }).then(function () { return self.skipWaiting(); }));

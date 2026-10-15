@@ -69,6 +69,8 @@ textarea{min-height:76px;resize:vertical}
 .login{max-width:360px;margin:12vh auto 0;padding:0 18px}
 .login .logo{width:72px;height:72px;border-radius:20px;margin:0 auto 12px;display:block}
 .login input{font-size:1.5rem;letter-spacing:.4em;text-align:center;margin:6px 0 12px}
+.login input.pl{font-size:16px;letter-spacing:0;text-align:left}
+.tl{background:none;border:0;color:var(--ac);font-size:.95rem;padding:10px;font-family:inherit;text-decoration:underline;width:100%}
 .big{font-size:2rem;font-weight:800}
 .kpi{display:flex;gap:8px;margin-bottom:12px}.kpi>div{flex:1;background:var(--card);border-radius:16px;padding:10px;text-align:center;box-shadow:var(--sh)}.kpi b{display:block;font-size:1.4rem}.kpi span{font-size:.75rem;color:var(--mut)}
 a.lk{color:var(--ac)}
@@ -88,7 +90,6 @@ if(K)ls('mf_k',K);
 if(K){try{var _b=location.origin+location.pathname.replace(/[^\/]*$/,'');var _u=_b+'?k='+encodeURIComponent(K);
 var _m={name:'Matafuegos · Intendencia',short_name:'Matafuegos',start_url:_u,scope:_b,display:'standalone',orientation:'portrait',background_color:'#eef2f7',theme_color:'#16407a',lang:'es',icons:[{src:_b+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:_b+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:_b+'icon-512-maskable.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]};
 var _l=document.querySelector('link[rel=manifest]');if(_l)_l.href=URL.createObjectURL(new Blob([JSON.stringify(_m)],{type:'application/manifest+json'}));}catch(e){}}
-function pegarLink(){var v=($('#pk')||{}).value||'';var m=v.match(/[?&]k=([^&#\s]+)/);var t=m?decodeURIComponent(m[1]):v.trim();if(t.length<8){var e=$('#pke');if(e){e.hidden=false;e.textContent='No encuentro el link. Pegá el link completo que te pasó la Intendencia.'}return}ls('mf_k',t);location.replace(location.pathname+'?k='+encodeURIComponent(t))}
 var SK='ag_s_'+K; // misma sesión que la agenda (mismo sitio)
 var S=ls(SK)||'';
 var DATA=jget('mf_data_'+K,null), DRAFT=jget('mf_cur_'+K,null), QUEUE=jget('mf_q_'+K,[]);
@@ -176,11 +177,11 @@ function loginView(est){
   var nuevo=est&&!est.tienePin;
   return '<div class="login"><img class="logo" src="icon-192.png" alt=""><h2 style="text-align:center;margin:0 0 4px">'+(est?'Hola, '+esc(String(est.n||'').replace(/\s*\(.*\)$/,'')):'Matafuegos')+'</h2>'
    +'<p class="mut" style="text-align:center">'+(est?(nuevo?'Primera vez: creá una clave de 4 a 6 números.':'Ingresá tu clave para abrir la app.'):'Un momento…')+'</p>'
-   +(est?'<form data-f="login"><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">'+(nuevo?'<input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Repetí la clave">':'')+'<div id="le" class="note bad" hidden></div><button class="btn" id="lb">'+(nuevo?'Crear clave y entrar':'Entrar')+'</button></form>':'')+'</div>';
+   +(est?'<form data-f="login"><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">'+(nuevo?'<input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Repetí la clave">':'')+'<div id="le" class="note bad" hidden></div><button class="btn" id="lb">'+(nuevo?'Crear clave y entrar':'Entrar')+'</button></form><button type="button" class="tl" data-a="kolv">¿Olvidaste tu clave?</button>':'')+'</div>';
 }
 var EST=null;
 function pedirLogin(){
-  if(!K){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">Falta tu link personal. Pegá acá el link que te pasó la Intendencia (el que termina en <b>?k=...</b>) y listo: la app se lo acuerda.</p><input id="pk" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Pegá tu link" style="width:100%;padding:14px;border:1px solid #c5cfdb;border-radius:12px;font-size:1rem;margin:10px 0"><div id="pke" class="note bad" hidden></div><button class="btn" onclick="pegarLink()">Guardar y entrar</button></div>';return}
+  if(!K){nombreInit();return}
   if(!navigator.onLine){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">La primera vez necesitás conexión para entrar. Probá de nuevo cuando tengas señal.</p></div>';return}
   post('estado',[K],'').then(function(j){
     if(!j.ok){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">Este link no es válido. Pedí uno nuevo a la Intendencia.</p></div>';return}
@@ -198,6 +199,76 @@ function doLogin(ev){
     if(!j.ok){b.disabled=false;b.textContent=nuevo?'Crear clave y entrar':'Entrar';e.textContent=j.e||'No se pudo entrar.';e.hidden=false;return}
     S=j.r.s;ls(SK,S);arrancar();
   }).catch(function(){b.disabled=false;b.textContent='Entrar';e.textContent='No se pudo conectar. Intentá de nuevo.';e.hidden=false});
+}
+
+/* ---------- entrar eligiendo el nombre (misma clave de la agenda) ---------- */
+var NL={nombres:null,modo:'entrar',err:'',msg:'',nom:''};
+function pn(args){
+  var c=new AbortController(),t=setTimeout(function(){c.abort()},45000);
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:'',s:'',fn:'porNombre',args:args}),signal:c.signal})
+  .then(function(r){return r.json()}).then(function(j){clearTimeout(t);return j}).catch(function(e){clearTimeout(t);throw e});
+}
+function nErr(t){var e=$('#ne');if(e){e.textContent=t;e.hidden=false}}
+function nBusy(on,txt){var b=$('#nb');if(b){b.disabled=on;b.textContent=txt}}
+function nPintar(){$('#app').innerHTML=nombreView()}
+function nombreView(){
+  var h='<div class="login"><img class="logo" src="icon-192.png" alt=""><h2 style="text-align:center;margin:0 0 4px">Matafuegos</h2>';
+  if(!NL.nombres)return h+'<p class="mut" style="text-align:center">'+(NL.err?esc(NL.err):'Un momento…')+'</p>'+(NL.err?'<button class="btn" data-a="nreint">Reintentar</button>':'')+'</div>';
+  var sel=NL.nom||ls('mf_nom')||'';
+  if(NL.modo==='link')return h+'<p class="mut" style="text-align:center">Pegá acá el link que te pasó la Intendencia (el que termina en <b>?k=...</b>).</p><input id="pk" class="pl" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Pegá tu link"><div id="ne" class="note bad" hidden></div><button class="btn" id="nb" data-a="npegar">Guardar y entrar</button><button type="button" class="tl" data-a="nvolver">Volver</button></div>';
+  if(NL.modo==='olv1')return h+'<p class="mut" style="text-align:center">Hola, '+esc(NL.nom.replace(/\s*\(.*\)$/,''))+'. Te mandamos un código de 6 números a tu mail para que elijas una clave nueva.</p><div id="ne" class="note bad" hidden></div><button class="btn" id="nb" data-a="nenviar">Mandarme el código</button><button type="button" class="tl" data-a="nvolver">Volver</button></div>';
+  if(NL.modo==='olv2')return h+'<p class="mut" style="text-align:center">'+esc(NL.msg||'Ingresá el código que te llegó al mail y tu clave nueva.')+'</p><input id="nc" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Código"><input id="np1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Clave nueva"><input id="np2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Repetí la clave"><div id="ne" class="note bad" hidden></div><button class="btn" id="nb" data-a="nrest">Cambiar clave y entrar</button><button type="button" class="tl" data-a="nvolver">Volver</button></div>';
+  return h+'<p class="mut" style="text-align:center">Elegí tu nombre e ingresá tu clave (la misma de la agenda).</p><form data-f="nom"><select id="nsel"><option value="">Elegí tu nombre</option>'+NL.nombres.map(function(n){return '<option'+(n===sel?' selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select><input id="np1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Clave"><div id="ne" class="note bad" hidden></div><button class="btn" id="nb">Entrar</button></form><button type="button" class="tl" data-a="nolv">¿Olvidaste tu clave?</button><button type="button" class="tl" data-a="nlink">Primera vez: tengo un link</button></div>';
+}
+function nombreInit(){
+  if(!navigator.onLine){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">La primera vez necesitás conexión para entrar. Probá de nuevo cuando tengas señal.</p><button class="btn" data-a="reload">Reintentar</button></div>';return}
+  NL.err='';nPintar();
+  if(!NL.nombres)pn(['nombres']).then(function(j){if(!j.ok)throw 0;NL.nombres=j.r.slice().sort(function(a,b){return a.localeCompare(b)});nPintar()}).catch(function(){NL.err='No se pudo conectar. Revisá tu señal.';nPintar()});
+}
+function nListo(n,r){ls('mf_nom',n);ls('mf_k',r.k);ls('ag_s_'+r.k,r.s);nBusy(true,'Listo, abriendo…');location.replace(location.pathname)}
+function nSel(){var s=$('#nsel');return s?s.value:NL.nom}
+function nEntrar(){
+  var n=nSel(),p=($('#np1')||{}).value||'';NL.nom=n;
+  if(!n)return nErr('Elegí tu nombre.');
+  if(!/^\d{4,6}$/.test(p))return nErr('La clave tiene que ser de 4 a 6 números.');
+  $('#ne').hidden=true;nBusy(true,'Entrando…');
+  pn(['entrar',n,p]).then(function(j){
+    if(!j.ok){nBusy(false,'Entrar');return nErr((j.e||'No se pudo entrar.')+(/Todav/.test(j.e||'')?' Abrí el link que te pasó la Intendencia para crearla.':''))}
+    nListo(n,j.r);
+  }).catch(function(){nBusy(false,'Entrar');nErr('No se pudo conectar. Intentá de nuevo.')});
+}
+function nEnviar(){
+  $('#ne').hidden=true;nBusy(true,'Mandando…');
+  pn(['olvide',NL.nom]).then(function(j){
+    if(!j.ok){nBusy(false,'Mandarme el código');return nErr(j.e||'No se pudo mandar el código.')}
+    NL.modo='olv2';NL.msg='Te mandamos el código al mail. Vale 10 minutos. Ingresalo y elegí tu clave nueva.';nPintar();
+  }).catch(function(){nBusy(false,'Mandarme el código');nErr('No se pudo conectar. Intentá de nuevo.')});
+}
+function nRest(){
+  var cod=($('#nc')||{}).value||'',p1=($('#np1')||{}).value||'',p2=($('#np2')||{}).value||'';
+  if(!/^\d{6}$/.test(cod.replace(/\s/g,'')))return nErr('El código tiene 6 números.');
+  if(!/^\d{4,6}$/.test(p1))return nErr('La clave tiene que ser de 4 a 6 números.');
+  if(p1!==p2)return nErr('Las dos claves no coinciden.');
+  $('#ne').hidden=true;nBusy(true,'Entrando…');
+  pn(['restablecer',NL.nom,cod,p1]).then(function(j){
+    if(!j.ok){nBusy(false,'Cambiar clave y entrar');return nErr(j.e||'No se pudo cambiar la clave.')}
+    nListo(NL.nom,j.r);
+  }).catch(function(){nBusy(false,'Cambiar clave y entrar');nErr('No se pudo conectar. Intentá de nuevo.')});
+}
+function nPegar(){
+  var v=($('#pk')||{}).value||'',m=v.match(/[?&]k=([^&#\s]+)/),t=m?decodeURIComponent(m[1]):v.trim();
+  if(t.length<8)return nErr('No encuentro el link. Pegá el link completo que te pasó la Intendencia.');
+  nBusy(true,'Entrando…');ls('mf_k',t);location.replace(location.pathname+'?k='+encodeURIComponent(t));
+}
+function nAct(k){
+  if(k==='nentrar')nEntrar();else if(k==='nenviar')nEnviar();else if(k==='nrest')nRest();else if(k==='npegar')nPegar();
+  else if(k==='nolv'){NL.nom=nSel();NL.modo='olv1';if(!NL.nom){NL.modo='entrar';nErr('Primero elegí tu nombre.');return true}nPintar()}
+  else if(k==='nlink'){NL.nom=nSel();NL.modo='link';nPintar()}
+  else if(k==='nvolver'){NL.modo='entrar';if(!K)nPintar();else{NL.nombres=null;location.reload()}}
+  else if(k==='nreint'){nombreInit()}
+  else if(k==='kolv'){NL.nom=EST?EST.n:'';NL.nombres=NL.nombres||[NL.nom];NL.modo='olv1';nPintar()}
+  else return false;
+  return true;
 }
 /* ---------- vistas ---------- */
 function resumenDraft(){
@@ -313,6 +384,7 @@ function render(){
 /* ---------- acciones ---------- */
 function act(a,ev){
   var p=a.split(':'),k=p[0],x=a.slice(k.length+1);
+  if(nAct(k))return;
   if(k==='tab'){UI.tab=x;UI.view='';}
   else if(k==='iniciar'){
     var eds=edificios();UI.ed=($('#edsel')&&$('#edsel').value)||UI.ed;
@@ -368,7 +440,7 @@ document.addEventListener('input',function(ev){
   else if(t.id==='edsel'){UI.ed=t.value}
   else if(t.id==='fnota'){UI.fnota=t.value}
 });
-document.addEventListener('submit',function(ev){if(ev.target.getAttribute('data-f')==='login')doLogin(ev)});
+document.addEventListener('submit',function(ev){var f=ev.target.getAttribute('data-f');if(f==='login')doLogin(ev);else if(f==='nom'){ev.preventDefault();nEntrar()}});
 window.addEventListener('online',function(){render();sincronizar(false)});
 window.addEventListener('offline',function(){render()});
 /* ---------- arranque ---------- */

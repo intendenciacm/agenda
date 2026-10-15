@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1d4f91">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Mi agenda de servicios</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--fg:#18202e;--mut:#5b6678;--ac:#1d4f91;--acfg:#fff;--line:#d5dbe5;--bad:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#121821;--card:#1b2431;--fg:#e6ebf2;--mut:#9aa6b8;--ac:#6ea3e6;--acfg:#0c1420;--line:#2c3849;--bad:#ff8a80}}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--fg);display:flex;min-height:100vh;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+.c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;width:100%;max-width:340px;box-sizing:border-box}
+h1{font-size:1.15rem;margin:0 0 4px}
+p{line-height:1.45;margin:6px 0}
+.m{color:var(--mut);font-size:.92rem}
+label{display:block;font-size:.88rem;margin:14px 0 4px}
+input{width:100%;box-sizing:border-box;font-size:1.3rem;letter-spacing:.35em;text-align:center;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+button{width:100%;margin-top:16px;padding:12px;font-size:1rem;border:0;border-radius:8px;background:var(--ac);color:var(--acfg);cursor:pointer}
+button:disabled{opacity:.6}
+.e{color:var(--bad);min-height:1.3em;font-size:.92rem;margin-top:10px}
+</style></head><body><div class="c" id="c"><p class="m">Falta tu link personal. Pedile el link a la Intendencia.</p></div>
+<script>
+(function(){
+var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
+var K=new URLSearchParams(location.search).get('k')||'';
+// Si se abre la app instalada sin el ?k=, se usa el último link personal usado en este celular.
+try{if(K)localStorage.setItem('ag_lastK',K);else K=localStorage.getItem('ag_lastK')||''}catch(e){}
+var LS='ag_s_'+K, CK='ag_c_'+K, QK='ag_q_'+K, RK='ag_r_'+K+'_', box=document.getElementById('c');
+var SES='', PRE=null, fl=false, tm=null, intervalo=false;
+var est={deCache:false,cacheT:0,nuevo:false,msg:''};
+var READ={cargar:1,reclamos:1,contratosVivos:1,obligaciones:1,empresas:1,cargaListas:1};   // se guardan para verlas sin señal
+var COLA={guardar:1,marcarVistos:1};                                                        // se pueden hacer sin señal: quedan en cola
+
+// ---------- instalar como app + abrir sin señal ----------
+var base=location.origin+location.pathname.replace(/[^\/]*$/,'');
+var MURL='';
+try{MURL=URL.createObjectURL(new Blob([JSON.stringify({name:'Control de servicios',short_name:'Servicios',start_url:base+(K?'?k='+encodeURIComponent(K):''),scope:base,display:'standalone',background_color:'#f3f5f8',theme_color:'#1d4f91',lang:'es',icons:[{src:base+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:base+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any maskable'}]})],{type:'application/manifest+json'}))}catch(e){}
+try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}
+
+// ---------- almacenamiento en el celular ----------
+function lee(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+function guarda(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+function cola(){return lee(QK)||[]}
+function setCola(q){if(!q.length){try{localStorage.removeItem(QK)}catch(e){}return true}return guarda(QK,q)}
+function hash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return String(h)}
+function fmt(t){var d=new Date(t),p=function(n){return(n<10?'0':'')+n};return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())}
+// Aplica encima de los datos del servidor los cambios que todavía no se enviaron (para que no "vuelvan atrás").
+function overlay(rows){
+  var q=cola();if(!q.length)return rows;
+  var out=(rows||[]).map(function(r){return r.slice()}),m={};
+  out.forEach(function(r,i){m[r[0]]=i});
+  q.forEach(function(it){if(it.fn!=='guardar')return;(it.a[2]||[]).forEach(function(x){
+    if(x.log||!x.k)return;
+    if(m[x.k]!==undefined)out[m[x.k]][1]=x.j;else{m[x.k]=out.length;out.push([x.k,x.j])}})});
+  return out;
+}
+
+// ---------- red ----------
+function raw(fn,args,s,ms){
+  var c=new AbortController(),t=setTimeout(function(){c.abort()},ms||45000);
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:K,s:s||'',fn:fn,args:args}),signal:c.signal})
+    .then(function(r){return r.json()})
+    .then(function(j){clearTimeout(t);return j},function(e){clearTimeout(t);throw e});
+}
+function post(fn,args,s,n){n=n||0;
+  return raw(fn,args,s,45000).catch(function(e){if(n<3)return new Promise(function(ok){setTimeout(ok,1500*(n+1))}).then(function(){return post(fn,args,s,n+1)});throw e})}
+function msg(t,re){box.innerHTML='<p class="m"></p>';box.firstChild.textContent=t;if(re){var b=document.createElement('button');b.textContent='Reintentar';b.onclick=function(){location.reload()};box.appendChild(b)}}
+function espera(b,txt){var t0=Date.now(),old=b.textContent;b.textContent=txt;var iv=setInterval(function(){b.textContent=txt+' ('+Math.round((Date.now()-t0)/1000)+' s)'},1000);return function(){clearInterval(iv);b.textContent=old}}
+function getS(){try{return localStorage.getItem(LS)||''}catch(e){return ''}}
+function setS(v){try{if(v)localStorage.setItem(LS,v);else localStorage.removeItem(LS)}catch(e){}}
+if(!K){msg('Falta tu link personal. Pedile el link a la Intendencia.');return}
+
+// ---------- cola de cambios sin enviar ----------
+function programar(){if(!tm)tm=setTimeout(function(){tm=null;vaciar()},20000)}
+function vaciar(){
+  if(fl)return;var q=cola();if(!q.length){barra();return}
+  if(navigator.onLine===false||!SES){programar();return}
+  fl=true;var it=q[0];
+  raw(it.fn,it.a,SES,30000).then(function(j){
+    fl=false;
+    if(j.ok){var q2=cola();q2.shift();setCola(q2);barra();vaciar()}
+    else if(j.e==='sesion'){est.msg='Tu sesión venció: abrí la agenda con señal e ingresá tu clave para enviar los cambios.';barra()}
+    else{var q3=cola();if(q3.length){q3[0].n=(q3[0].n||0)+1;if(q3[0].n>=4){q3.shift();est.msg='Un cambio no se pudo guardar: '+j.e}setCola(q3)}barra();programar()}
+  },function(){fl=false;programar()});
+}
+
+// ---------- cartel inferior ----------
+function barra(){
+  var q=cola().length,t=[],b=document.getElementById('agBar');
+  if(est.deCache)t.push((navigator.onLine===false?'Sin conexión':'Datos guardados')+' · datos del '+fmt(est.cacheT));
+  if(q)t.push(q+(q===1?' cambio':' cambios')+' sin enviar');
+  if(est.msg)t.push(est.msg);
+  if(!t.length&&!est.nuevo){if(b&&b.parentNode)b.parentNode.removeChild(b);return}
+  if(!b){b=document.createElement('div');b.id='agBar';b.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:2147483000;background:#1d4f91;color:#fff;font:13px system-ui,sans-serif;padding:8px 12px;text-align:center';document.body.appendChild(b)}
+  b.textContent=t.join(' · ');
+  if(est.nuevo){var a=document.createElement('button');a.textContent='Hay datos nuevos · Actualizar';a.style.cssText='display:inline-block;width:auto;margin:0 0 0 8px;padding:4px 10px;font-size:13px;background:#fff;color:#1d4f91;border-radius:6px';a.onclick=function(){location.reload()};b.appendChild(a)}
+}
+
+// ---------- llamadas de la agenda (reemplazan a google.script.run) ----------
+function ok(h,v){if(h.s)setTimeout(function(){h.s(v)},0)}
+function ko(h,e){if(h.f)h.f(e instanceof Error?e:new Error(String(e)))}
+function go(n,a,h,t){
+  var cK=RK+n+'_'+hash(JSON.stringify(a));
+  raw(n,a,SES,45000).then(function(j){
+    if(j.ok){if(READ[n])guarda(cK,{t:Date.now(),r:j.r});ok(h,n==='cargar'?overlay(j.r):j.r)}
+    else if(j.e==='sesion'){setS('');location.reload()}
+    else ko(h,new Error(j.e));
+  },function(){
+    if(t<1&&navigator.onLine!==false){setTimeout(function(){go(n,a,h,t+1)},1500);return}
+    var c=READ[n]&&lee(cK);
+    if(c){ok(h,n==='cargar'?overlay(c.r):c.r);barra()}
+    else ko(h,new Error('Sin conexión. Esto necesita internet: probá de nuevo cuando tengas señal.'));
+  });
+}
+function run(n,a,h){
+  if(n==='cargar'&&PRE){var r0=overlay(PRE);PRE=null;ok(h,r0);return}
+  if(COLA[n]){var q=cola();q.push({fn:n,a:a,t:Date.now()});
+    if(!setCola(q)){ko(h,new Error('No hay lugar en el celular para guardar el cambio sin conexión.'));return}
+    ok(h,true);barra();vaciar();return}
+  go(n,a,h,0);
+}
+function mk(h){return new Proxy({},{get:function(_,n){
+  if(n==='withSuccessHandler')return function(f){return mk({s:f,f:h.f})};
+  if(n==='withFailureHandler')return function(f){return mk({s:h.s,f:f})};
+  return function(){run(n,Array.prototype.slice.call(arguments),h)}}})}
+window.__ag={mk:mk};
+
+// ---------- abrir la agenda ----------
+function enganchar(){
+  window.addEventListener('online',function(){vaciar();if(est.deCache)refrescarCopia()});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')vaciar()});
+  if(!intervalo){intervalo=true;setInterval(function(){if(cola().length)vaciar()},30000)}
+}
+function pintar(c,deCache){
+  est.deCache=deCache;est.cacheT=c.t;est.nuevo=false;est.msg='';
+  var html=String(c.html||'').replace(/^\s*<title>.*?<\/title>/i,'');
+  PRE=c.rows||[];
+  document.open();
+  document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#1d4f91"><link rel="manifest" href="'+(MURL||'manifest.webmanifest')+'"><link rel="apple-touch-icon" href="'+base+'icon-192.png"><title>Mi agenda de servicios</title><script>window.google={script:{run:window.__ag.mk({})}};<\/script></head><body>'+html+'</body></html>');
+  document.close();
+  enganchar();barra();vaciar();
+}
+function refrescarCopia(){
+  raw('inicio',[K],SES,45000).then(function(j){
+    if(j&&j.ok){guarda(CK,{t:Date.now(),html:j.r.html,rows:j.r.rows});est.nuevo=true;barra()}
+    else if(j&&j.e==='sesion'){setS('');location.reload()}
+  },function(){});
+}
+function manejar(j){
+  if(!j.ok){if(j.e==='sesion'){setS('');pedir()}else msg(j.e||'No se pudo abrir.');return}
+  var c={t:Date.now(),html:j.r.html,rows:j.r.rows};guarda(CK,c);pintar(c,false);
+}
+function abrir(S){
+  SES=S;var c=lee(CK);
+  if(!c||!c.html){
+    msg('Abriendo tu agenda… la primera vez del día puede tardar unos segundos.');
+    post('inicio',[K],S).then(manejar).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.',true)});
+    return;
+  }
+  msg('Abriendo tu agenda…');
+  var pI=post('inicio',[K],S,2);
+  var corte=new Promise(function(f){setTimeout(function(){f('t')},navigator.onLine===false?0:10000)});
+  Promise.race([pI.then(function(j){return{j:j}},function(){return{e:1}}),corte]).then(function(x){
+    if(x&&x.j){manejar(x.j);return}
+    pintar(c,true);   // sin respuesta a tiempo: se abre la copia guardada en el celular
+    pI.then(function(j){
+      if(j&&j.ok){guarda(CK,{t:Date.now(),html:j.r.html,rows:j.r.rows});est.nuevo=true;barra()}
+      else if(j&&j.e==='sesion'){setS('');location.reload()}
+    }).catch(function(){});
+  });
+}
+
+function formulario(est){
+  var nuevo=!est.tienePin;
+  box.innerHTML='<h1></h1><p class="m" id="sub"></p><form id="f" autocomplete="off"><label for="p1" id="l1"></label><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><label for="p2" id="l2" hidden>Repetí la clave</label><input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" hidden><div class="e" id="e" role="alert"></div><button type="submit" id="b"></button></form>';
+  box.querySelector('h1').textContent='Hola, '+est.n.replace(/\s*\(.*\)$/,'');
+  document.getElementById('sub').textContent=nuevo?'Es tu primera vez. Creá una clave personal de 4 a 6 números. Solo vos la vas a saber.':'Ingresá tu clave para abrir la agenda.';
+  document.getElementById('l1').textContent=nuevo?'Elegí tu clave':'Tu clave';
+  document.getElementById('b').textContent=nuevo?'Crear clave y entrar':'Entrar';
+  if(nuevo){document.getElementById('l2').hidden=false;document.getElementById('p2').hidden=false}
+  var f=document.getElementById('f'),e=document.getElementById('e'),b=document.getElementById('b');
+  if(!nuevo){var o=document.createElement('p');o.className='m';o.style.textAlign='center';o.style.marginTop='14px';var a=document.createElement('a');a.href='#';a.textContent='¿Olvidaste tu clave?';a.style.color='var(--ac)';a.onclick=function(ev){ev.preventDefault();olvide(est)};o.appendChild(a);box.appendChild(o)}
+  document.getElementById('p1').focus();
+  f.addEventListener('submit',function(ev){
+    ev.preventDefault();e.textContent='';
+    var p1=document.getElementById('p1').value,p2=document.getElementById('p2').value;
+    if(!/^\d{4,6}$/.test(p1)){e.textContent='La clave tiene que ser de 4 a 6 números.';return}
+    if(nuevo&&p1!==p2){e.textContent='Las dos claves no coinciden.';return}
+    b.disabled=true;var fin=espera(b,nuevo?'Creando tu clave…':'Entrando…');
+    post(nuevo?'crearPin':'entrar',[K,p1],'').then(function(j){
+      if(!j.ok&&nuevo&&/Ya ten/.test(j.e||'')){return post('entrar',[K,p1],'')}return j}).then(function(j){
+      if(!j.ok){fin();b.disabled=false;e.textContent=j.e||'No se pudo entrar.';return}
+      setS(j.r.s);abrir(j.r.s);
+    }).catch(function(){fin();b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
+  });
+}
+function olvide(est){
+  box.innerHTML='<h1>Restablecer tu clave</h1><p class="m" id="sub">Te mandamos un código de 6 números a tu mail. Tarda unos segundos.</p><div class="e" id="e" role="alert"></div><button id="b" type="button">Enviar código</button><p class="m" style="text-align:center;margin-top:14px"><a href="#" id="v" style="color:var(--ac)">Volver</a></p>';
+  document.getElementById('v').onclick=function(ev){ev.preventDefault();formulario(est)};
+  var b=document.getElementById('b'),e=document.getElementById('e');
+  b.onclick=function(){
+    b.disabled=true;e.textContent='';var fin=espera(b,'Enviando código…');
+    post('olvide',[K],'').then(function(j){
+      if(!j.ok){fin();b.disabled=false;e.textContent=j.e||'No se pudo enviar el código.';return}
+      codigo(est);
+    }).catch(function(){fin();b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
+  };
+}
+function codigo(est){
+  box.innerHTML='<h1>Ingresá el código</h1><p class="m">Revisá tu mail (y la carpeta de spam). El código vale 10 minutos.</p><form id="f" autocomplete="off"><label for="c1">Código de 6 números</label><input id="c1" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><label for="n1">Clave nueva (4 a 6 números)</label><input id="n1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><label for="n2">Repetí la clave nueva</label><input id="n2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><div class="e" id="e" role="alert"></div><button type="submit" id="b">Cambiar mi clave</button></form>';
+  var f=document.getElementById('f'),e=document.getElementById('e'),b=document.getElementById('b');
+  document.getElementById('c1').focus();
+  f.addEventListener('submit',function(ev){
+    ev.preventDefault();e.textContent='';
+    var c=document.getElementById('c1').value.replace(/\s/g,''),n1=document.getElementById('n1').value,n2=document.getElementById('n2').value;
+    if(!/^\d{6}$/.test(c)){e.textContent='El código tiene 6 números.';return}
+    if(!/^\d{4,6}$/.test(n1)){e.textContent='La clave tiene que ser de 4 a 6 números.';return}
+    if(n1!==n2){e.textContent='Las dos claves no coinciden.';return}
+    b.disabled=true;var fin=espera(b,'Cambiando tu clave…');
+    post('restablecer',[K,c,n1],'').then(function(j){
+      if(!j.ok){fin();b.disabled=false;e.textContent=j.e||'No se pudo cambiar la clave.';return}
+      setS(j.r.s);abrir(j.r.s);
+    }).catch(function(){fin();b.disabled=false;e.textContent='No se pudo conectar. Intentá de nuevo.'});
+  });
+}
+function pedir(){
+  post('estado',[K],'').then(function(j){
+    if(!j.ok){msg('Este link no es válido. Pedí uno nuevo a la Intendencia.');return}
+    formulario(j.r);
+  }).catch(function(){msg('No se pudo abrir la agenda. Revisá tu conexión e intentá de nuevo.',true)});
+}
+var S0=getS();
+if(S0)abrir(S0);else pedir();
+})();
+</script></body></html>

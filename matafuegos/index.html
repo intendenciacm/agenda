@@ -61,7 +61,8 @@ textarea{min-height:84px;resize:vertical}
 .pill.ok{background:var(--okb);color:var(--ok)}.pill.bad{background:var(--badb);color:var(--bad)}.pill.warn{background:var(--warnb);color:var(--warn)}
 .eq{background:var(--card);border-radius:var(--r);border:1px solid var(--line);box-shadow:var(--sh);padding:14px;margin-bottom:10px}
 .eq.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}.eq.bad{border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
-.eq.tap:active{transform:scale(.99)}
+.eq.tap:active,.card.tap:active{transform:scale(.99)}
+.pend{background:var(--bg);border-radius:16px;padding:12px 14px;margin-bottom:10px}
 .ficha{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:12px 0}.ficha div span{display:block;font-size:.75rem;color:var(--mut);font-weight:600}.ficha div b{font-weight:700;font-size:.95rem}
 .eqh{display:flex;gap:12px;align-items:center;margin-bottom:12px}
 .av{width:44px;height:44px;border-radius:14px;background:var(--badb);color:var(--bad);display:flex;align-items:center;justify-content:center;flex:none}
@@ -113,7 +114,7 @@ a.lk{color:var(--ac)}
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.2';
+var VERSION='1.3';
 var ED_COD=null;
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -328,6 +329,8 @@ function viewInicio(){
     h+='<div class="hero"><h2>Nueva recorrida</h2><p>Elegí el edificio y andá marcando cada matafuego. No sale ningún mail hasta que cierres la recorrida.</p><select id="edsel">'+eds.map(function(x){return '<option'+(x===UI.ed?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select><div style="height:10px"></div><button class="btn w" data-a="iniciar">Empezar recorrida</button></div>';
   }
   var fa=DATA.fallas.filter(function(f){return f.est!=='Verificado'&&f.est!=='Anulada'}).length;
+  var pt=pendTotal();
+  if(pt)h+='<div class="card tap" role="button" data-a="verpend" style="display:flex;gap:12px;align-items:center;margin-bottom:12px"><span class="av" style="background:var(--warnb);color:var(--warn)">'+IC.warn+'</span><div style="flex:1"><b>'+pt+(pt===1?' equipo con pendientes':' equipos con pendientes')+'</b><div class="mut">Sin soporte o sin baliza. Tocá para verlos.</div></div></div>';
   h+='<div class="kpi"><div><b>'+eqs().filter(function(e){return e.est!=='Baja'}).length+'</b><span>equipos</span></div><div><b>'+fa+'</b><span>fallas en trámite</span></div><div><b>'+(DATA.recs||[]).length+'</b><span>recorridas</span></div></div>';
   var rec=(DATA.recs||[]).slice().reverse().slice(0,6);
   h+='<h3 class="sec">Últimas recorridas</h3>';
@@ -380,6 +383,25 @@ function sheetCerrar(){
   h+='<div class="row" style="margin-top:6px"><button class="btn sec" data-a="cerrarsheet">Seguir</button><button class="btn" data-a="confirmar">Cerrar y enviar</button></div><button class="btn bad" style="margin-top:8px" data-a="descartar">Descartar recorrida</button></div></div>';
   return h;
 }
+
+/* ---------- pendientes del equipo (sin soporte / sin baliza) ---------- */
+function tipoDe(que){var t=(DATA&&DATA.tipos||[]).filter(function(x){return x.indexOf(que)>=0})[0];return t||''}
+function fallaAbierta(id,que){return (DATA.fallas||[]).filter(function(f){return f.eq===id&&f.tipo.indexOf(que)>=0&&f.est!=='Verificado'&&f.est!=='Anulada'})[0]||null}
+function pendientes(e){var o=[];if(e.sop!=='OK')o.push('soporte');if(e.bal!=='OK')o.push('baliza');return o}
+function nomPend(que){return que==='soporte'?'Falta el soporte (apoyado en el piso)':'Falta la chapa baliza'}
+function diasDesde(s){var m=/^(\d\d)\/(\d\d)\/(\d{4})/.exec(String(s||''));if(!m)return null;var d=new Date(Number(m[3]),Number(m[2])-1,Number(m[1])),h=new Date();h.setHours(0,0,0,0);return Math.round((h-d)/864e5)}
+function txtDias(n){return n==null?'':n<=0?'hoy':n===1?'ayer':'hace '+n+' días'}
+function pendTotal(){return eqs().filter(function(e){return e.est!=='Baja'&&pendientes(e).length}).length}
+function llamar(fn,args,okMsg,confirmTxt){
+  if(!navigator.onLine){toast('Sin señal: esto se hace con conexión.','bad');return}
+  if(confirmTxt&&!confirm(confirmTxt))return;
+  if(UI.busy)return;UI.busy=true;toast('Un momento…');
+  post(fn,args,undefined,2).then(function(j){
+    UI.busy=false;
+    if(!j.ok){if(j.e==='sesion'){ls(SK,null);S='';render();return}toast(j.e||'No se pudo.','bad');return}
+    toast(typeof okMsg==='function'?okMsg(j.r):okMsg,'ok');return refrescar(true).then(function(){if(UI.eid)UI.sheet=sheetEq(UI.eid);render()});
+  }).catch(function(){UI.busy=false;toast('No se pudo conectar. Revisá la señal y probá de nuevo.','bad')});
+}
 function sheetEq(id){
   var e=eqs().filter(function(x){return x.id===id})[0];if(!e)return null;
   var ab=DATA.fallas.filter(function(f){return f.eq===id&&f.est!=='Verificado'&&f.est!=='Anulada'});
@@ -387,14 +409,31 @@ function sheetEq(id){
   var h='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><div class="eqh" style="margin-bottom:4px"><span class="av">'+IC.ext+'</span><div><h3 style="margin:0">'+esc(nroT(e))+'</h3><div class="mut">'+esc(e.id)+' · '+esc(e.ed)+'</div></div></div>';
   h+='<div class="ficha"><div><span>Ubicación</span><b>'+v(e.ub)+'</b></div><div><span>Tipo</span><b>'+v(e.ag)+' '+(e.kg&&e.kg!=='-'?esc(e.kg)+' kg':'')+'</b></div><div><span>Año de fabricación</span><b>'+v(e.anio)+'</b></div><div><span>Vencimiento de carga</span><b>'+v(e.vc)+'</b></div><div><span>Prueba hidráulica</span><b>'+v(e.ph)+'</b></div><div><span>Baliza</span><b>'+(e.bal==='OK'?'Sí':v(e.bal))+'</b></div><div><span>Soporte</span><b>'+(e.sop==='OK'?'Sí':v(e.sop))+'</b></div><div><span>Último control</span><b>'+v(e.ult)+(e.por&&e.por!=='-'?'<br><span style="display:inline;font-weight:500">'+esc(e.por)+'</span>':'')+'</b></div></div>';
   if(e.obs&&e.obs!=='-')h+='<div class="note info" style="background:var(--bg);color:var(--fg)">'+esc(e.obs)+'</div>';
-  h+=ab.length?'<h3 class="sec" style="margin-top:14px">Fallas en trámite</h3>'+ab.map(function(f){return '<div class="li" style="padding:10px 0"><span class="av" style="background:var(--badb);color:var(--bad)">'+IC.warn+'</span><div class="m"><b>'+esc(f.tipo)+'</b><span class="mut">'+fmtF(f.f)+' · '+esc(f.por)+'</span></div><span class="pill '+(f.est==='Informado'?'warn':'bad')+'">'+esc(f.est)+'</span></div>'}).join(''):'<div class="note info">Sin fallas en trámite.</div>';
+  var pe=pendientes(e),puede=DATA.puede;
+  if(pe.length){
+    h+='<h3 class="sec" style="margin-top:14px">Pendientes</h3>'+pe.map(function(q){
+      var fa=fallaAbierta(id,q),dd=fa?diasDesde(fa.rec||''):null,bt='';
+      if(puede){
+        if(!fa)bt='<button class="btn sec" data-a="pend:reclamar:'+q+'">Reclamar a la empresa</button>';
+        else if(fa.est==='Informado')bt='<button class="btn sec" data-a="pend:enviar:'+esc(fa.n)+'">Enviar reclamo</button>';
+        else bt='<button class="btn sec" data-a="pend:reiterar:'+esc(fa.n)+'">Reiterar reclamo</button>';
+        bt='<div class="row" style="margin-top:10px">'+bt+'<button class="btn ok" data-a="pend:ok:'+q+'">'+IC.chk+'Ya lo colocaron</button></div>';
+      }
+      return '<div class="pend"><b>'+nomPend(q)+'</b><div class="mut">'+(fa?'Reclamo '+esc(fa.est.toLowerCase())+(fa.rec&&dd!=null?' · último envío '+txtDias(dd):'')+' · '+esc(fa.n):'Todavía no se reclamó a la empresa')+'</div>'+bt+'</div>';
+    }).join('');
+  }
+  var otras=ab.filter(function(f){return f.tipo.indexOf('soporte')<0&&f.tipo.indexOf('baliza')<0});
+  if(otras.length){
+    h+='<h3 class="sec" style="margin-top:14px">Fallas en trámite</h3>'+otras.map(function(f){var dd=diasDesde(f.rec||'');return '<div class="pend"><div class="li" style="padding:0"><span class="av" style="background:var(--badb);color:var(--bad)">'+IC.warn+'</span><div class="m"><b>'+esc(f.tipo)+'</b><span class="mut">'+fmtF(f.f)+' · '+esc(f.por)+(f.rec&&dd!=null?' · reclamo '+txtDias(dd):'')+'</span></div><span class="pill '+(f.est==='Informado'?'warn':'bad')+'">'+esc(f.est)+'</span></div>'+(puede?'<div style="margin-top:10px">'+(f.est==='Informado'?'<button class="btn sec" data-a="pend:enviar:'+esc(f.n)+'">Enviar reclamo</button>':'<button class="btn sec" data-a="pend:reiterar:'+esc(f.n)+'">Reiterar reclamo</button>')+'</div>':'')+'</div>'}).join('');
+  }
+  if(!pe.length&&!otras.length)h+='<div class="note info">Todo en orden. No tiene pendientes ni fallas en trámite.</div>';
   return h+'<button class="btn sec" style="margin-top:14px" data-a="cerrarsheet">Cerrar</button></div></div>';
 }
 function viewEquipos(){
   if(!DATA)return viewInicio();
   var q=UI.eqq.trim().toLowerCase(),eds=['Todos'].concat(edificios());
-  var lista=eqs().filter(function(e){return e.est!=='Baja'&&(UI.eqed==='Todos'||e.ed===UI.eqed)&&(!q||[e.nro,e.id,e.ub,e.ed,e.ag].join(' ').toLowerCase().indexOf(q)>=0)});
-  var h='<input type="search" id="eqq" placeholder="Número del cilindro, piso o sector" value="'+esc(UI.eqq)+'" style="margin-bottom:10px"><div class="chips">'+eds.map(function(x){return '<button class="chip" data-a="eqed:'+esc(x)+'" aria-pressed="'+(UI.eqed===x)+'">'+esc(x)+'</button>'}).join('')+'</div><div class="mut" style="margin:0 2px 8px">'+lista.length+' equipos</div>';
+  var lista=eqs().filter(function(e){return e.est!=='Baja'&&(UI.eqed==='Todos'||e.ed===UI.eqed)&&(!UI.eqpend||pendientes(e).length)&&(!q||[e.nro,e.id,e.ub,e.ed,e.ag].join(' ').toLowerCase().indexOf(q)>=0)});
+  var h='<input type="search" id="eqq" placeholder="Número del cilindro, piso o sector" value="'+esc(UI.eqq)+'" style="margin-bottom:10px"><div class="chips"><button class="chip" data-a="eqpend" aria-pressed="'+(!!UI.eqpend)+'">Con pendientes ('+pendTotal()+')</button></div><div class="chips">'+eds.map(function(x){return '<button class="chip" data-a="eqed:'+esc(x)+'" aria-pressed="'+(UI.eqed===x)+'">'+esc(x)+'</button>'}).join('')+'</div><div class="mut" style="margin:0 2px 8px">'+lista.length+' equipos</div>';
   h+=lista.slice(0,60).map(function(e){
     var ab=DATA.fallas.filter(function(f){return f.eq===e.id&&f.est!=='Verificado'&&f.est!=='Anulada'});
     return '<div class="eq tap'+(ab.length?' bad':'')+'" role="button" data-a="eqver:'+esc(e.id)+'"><div class="eqh"><span class="av">'+IC.ext+'</span><div><div class="t">'+esc(nroT(e))+' <span class="mut" style="font-weight:500">· '+esc(e.id)+'</span></div><div class="u">'+esc(e.ed)+' · '+esc(ubT(e))+'<br>'+esc(e.ag)+' '+esc(e.kg)+' kg'+(e.vc&&e.vc!=='-'?' · carga '+esc(e.vc):'')+'</div></div></div>'+
@@ -405,7 +444,7 @@ function viewEquipos(){
 function viewFallas(){
   if(!DATA)return viewInicio();
   var ab=DATA.fallas.filter(function(f){return f.est!=='Verificado'&&f.est!=='Anulada'}).slice().reverse();
-  var h=ab.length?ab.map(function(f){return '<div class="card"><b>'+esc(f.tipo)+'</b> <span class="pill '+(f.est==='Informado'?'warn':'bad')+'">'+esc(f.est)+'</span><div class="mut">Matafuego N° '+esc(f.nro)+' · '+esc(f.ed)+'<br>'+esc(f.ub&&f.ub!=='-'?f.ub:'sin ubicación cargada')+' · '+fmtF(f.f)+' · '+esc(f.por)+(f.emp?'<br>Empresa: '+esc(f.emp):'')+'</div></div>'}).join(''):'<div class="empty">No hay fallas en trámite.</div>';
+  var h=ab.length?ab.map(function(f){return '<div class="card"><b>'+esc(f.tipo)+'</b> <span class="pill '+(f.est==='Informado'?'warn':'bad')+'">'+esc(f.est)+'</span><div class="mut">Matafuego N° '+esc(f.nro)+' · '+esc(f.ed)+'<br>'+esc(f.ub&&f.ub!=='-'?f.ub:'sin ubicación cargada')+' · '+fmtF(f.f)+' · '+esc(f.por)+(f.emp?'<br>Empresa: '+esc(f.emp):'')+'</div>'+(DATA.puede?'<div style="margin-top:10px">'+(f.est==='Informado'?'<button class="btn sec" data-a="pend:enviar:'+esc(f.n)+'">Enviar reclamo</button>':'<button class="btn sec" data-a="pend:reiterar:'+esc(f.n)+'">Reiterar reclamo</button>')+'</div>':'')+'</div>'}).join(''):'<div class="empty">No hay fallas en trámite.</div>';
   return shell('Fallas','En trámite',h,{});
 }
 function viewYo(){
@@ -441,7 +480,16 @@ function act(a,ev){
   else if(k==='filtro'){UI.filtro=x}
   else if(k==='ok'){DRAFT.items[x]={e:'OK',fallas:[]};save()}
   else if(k==='deshacer'){delete DRAFT.items[x];save()}
-  else if(k==='eqver'){UI.sheet=sheetEq(x)}
+  else if(k==='eqver'){UI.eid=x;UI.sheet=sheetEq(x)}
+  else if(k==='verpend'){UI.tab='equipos';UI.eqpend=true;UI.eqed='Todos';UI.view=''}
+  else if(k==='eqpend'){UI.eqpend=!UI.eqpend}
+  else if(k==='pend'){
+    var pp=x.split(':'),acc=pp[0],par=pp.slice(1).join(':'),eid=UI.eid;
+    if(acc==='ok'){llamar('equipoPendiente',[K,eid,par],function(r){return r.cerradas?'Listo: queda corregido y se cerró el reclamo.':'Listo: queda corregido.'},'¿Confirmás que ya está colocado? Se anota a tu nombre y desaparece de los pendientes.');return}
+    if(acc==='reclamar'){llamar('equipoFalla',[K,eid,tipoDe(par),'',true],'Reclamo enviado a la empresa (prueba).','¿Enviar el reclamo a la empresa ahora? Sale un mail.');return}
+    if(acc==='enviar'){llamar('equipoReclamar',[K,par],'Reclamo enviado a la empresa (prueba).','¿Enviar el reclamo a la empresa ahora? Sale un mail.');return}
+    if(acc==='reiterar'){llamar('equipoReiterar',[K,par],'Reclamo reiterado (prueba).','¿Reiterar el reclamo a la empresa? Sale un mail nuevo.');return}
+  }
   else if(k==='falla'){UI.sheet=sheetFalla(x)}
   else if(k==='ftipo'){var t=DATA.tipos[Number(x)],i=UI.fsel.indexOf(t);if(i>=0)UI.fsel.splice(i,1);else UI.fsel.push(t);UI.fnota=($('#fnota')||{}).value||UI.fnota;var id=UI.fid;UI.sheet=sheetFalla2();}
   else if(k==='guardarfalla'){

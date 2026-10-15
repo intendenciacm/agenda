@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#16407a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Matafuegos</title>
+<style>
+:root{--bg:#eef2f7;--card:#fff;--fg:#17202e;--mut:#5f6b7d;--ac:#1d4f91;--ac2:#16407a;--acfg:#fff;--line:#dbe2ec;--ok:#1b7f4b;--okb:#e3f4ea;--bad:#c0332b;--badb:#fdeceb;--warn:#a65f00;--warnb:#fff3de;--sh:0 2px 10px rgba(20,40,80,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#0e141d;--card:#18212e;--fg:#e8edf4;--mut:#9aa7ba;--ac:#6ea3e6;--ac2:#14305a;--acfg:#0b1522;--line:#2a3648;--ok:#5ed39a;--okb:#143a28;--bad:#ff8f86;--badb:#3d1b19;--warn:#f0b35a;--warnb:#3b2c10;--sh:0 2px 10px rgba(0,0,0,.4)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);font-size:16px;line-height:1.35;overscroll-behavior:none}
+#app{display:flex;flex-direction:column;height:100%;max-width:640px;margin:0 auto;position:relative;background:var(--bg)}
+header.top{background:linear-gradient(135deg,var(--ac2),var(--ac));color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 14px;display:flex;align-items:center;gap:10px;flex:none}
+header.top h1{font-size:1.15rem;margin:0;flex:1;font-weight:700;letter-spacing:.2px}
+header.top .sub{font-size:.8rem;opacity:.85;font-weight:400}
+.dot{width:10px;height:10px;border-radius:50%;background:#7be3a5;flex:none}.dot.off{background:#ffb4ab}
+.back{background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:12px;width:40px;height:40px;font-size:1.3rem;flex:none}
+main{flex:1;overflow-y:auto;padding:14px 14px 96px;-webkit-overflow-scrolling:touch}
+nav.tabs{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(env(safe-area-inset-bottom) + 6px);z-index:5}
+nav.tabs button{flex:1;background:none;border:0;color:var(--mut);padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;border-radius:12px;position:relative}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current=true]{color:var(--ac);font-weight:700}
+nav.tabs .bd{position:absolute;top:0;right:22%;background:var(--bad);color:#fff;border-radius:10px;min-width:18px;height:18px;font-size:.7rem;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--sh);padding:14px;margin-bottom:12px}
+.card h2,.card h3{margin:0 0 6px;font-size:1.05rem}
+.mut{color:var(--mut);font-size:.9rem}
+.hero{background:linear-gradient(135deg,var(--ac2),var(--ac));color:#fff;border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+.hero h2{margin:0 0 4px;font-size:1.25rem}.hero p{margin:0 0 12px;opacity:.9;font-size:.92rem}
+select,input[type=search],input[type=text],textarea,input[type=password],input[type=number]{width:100%;font-size:16px;padding:13px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--fg);font-family:inherit}
+.hero select{border:0}
+textarea{min-height:76px;resize:vertical}
+.btn{border:0;border-radius:14px;padding:14px 16px;font-size:1rem;font-weight:600;background:var(--ac);color:var(--acfg);min-height:50px;font-family:inherit;width:100%}
+.btn.w{background:#fff;color:var(--ac2)}
+.btn.sec{background:var(--card);color:var(--ac);border:1.5px solid var(--ac)}
+.btn.ok{background:var(--ok);color:#fff}.btn.bad{background:var(--badb);color:var(--bad)}
+.btn:disabled{opacity:.55}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.pill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:.78rem;font-weight:600;background:var(--line);color:var(--mut)}
+.pill.ok{background:var(--okb);color:var(--ok)}.pill.bad{background:var(--badb);color:var(--bad)}.pill.warn{background:var(--warnb);color:var(--warn)}
+.eq{background:var(--card);border-radius:18px;box-shadow:var(--sh);padding:12px 14px;margin-bottom:10px;border-left:5px solid transparent}
+.eq.ok{border-left-color:var(--ok)}.eq.bad{border-left-color:var(--bad)}
+.eq .t{font-weight:700;font-size:1.05rem}.eq .u{color:var(--mut);font-size:.92rem;margin:2px 0 8px}
+.eq .btns{display:flex;gap:8px}.eq .btns .btn{padding:12px 8px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:8px 14px;font-size:.92rem;font-family:inherit}
+.chip[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:var(--acfg);font-weight:600}
+.bar{height:8px;border-radius:6px;background:rgba(255,255,255,.28);overflow:hidden;margin-top:8px}.bar>i{display:block;height:100%;background:#7be3a5;border-radius:6px;transition:width .25s}
+.fab{position:absolute;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:6}
+.fab .btn{box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 16px);width:100%;max-height:88%;overflow-y:auto}
+.sheet h3{margin:0 0 4px;font-size:1.15rem}
+.opt{display:flex;gap:10px;align-items:center;padding:12px;border:1.5px solid var(--line);border-radius:14px;margin-bottom:8px;font-size:.98rem}
+.opt[aria-pressed=true]{border-color:var(--bad);background:var(--badb);font-weight:600}
+.opt i{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.85rem}
+.opt[aria-pressed=true] i{background:var(--bad);border-color:var(--bad);color:#fff}
+.toast{position:absolute;left:14px;right:14px;top:calc(env(safe-area-inset-top) + 70px);background:#17202e;color:#fff;border-radius:14px;padding:12px 14px;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:.95rem}
+.toast.ok{background:var(--ok)}.toast.bad{background:var(--bad)}
+.note{border-radius:14px;padding:10px 12px;font-size:.92rem;margin:8px 0;background:var(--warnb);color:var(--warn)}
+.note.info{background:var(--okb);color:var(--ok)}.note.bad{background:var(--badb);color:var(--bad)}
+.empty{text-align:center;color:var(--mut);padding:28px 10px}
+.login{max-width:360px;margin:12vh auto 0;padding:0 18px}
+.login .logo{width:72px;height:72px;border-radius:20px;margin:0 auto 12px;display:block}
+.login input{font-size:1.5rem;letter-spacing:.4em;text-align:center;margin:6px 0 12px}
+.big{font-size:2rem;font-weight:800}
+.kpi{display:flex;gap:8px;margin-bottom:12px}.kpi>div{flex:1;background:var(--card);border-radius:16px;padding:10px;text-align:center;box-shadow:var(--sh)}.kpi b{display:block;font-size:1.4rem}.kpi span{font-size:.75rem;color:var(--mut)}
+a.lk{color:var(--ac)}
+</style></head>
+<body><div id="app"><div class="login"><p class="mut" style="text-align:center">Abriendo…</p></div></div>
+<script>
+(function(){
+'use strict';
+var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
+var VERSION='1.0';
+var ED_COD=null;
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
+function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}
+var K=new URLSearchParams(location.search).get('k')||ls('mf_k')||'';
+if(K)ls('mf_k',K);
+var SK='ag_s_'+K; // misma sesión que la agenda (mismo sitio)
+var S=ls(SK)||'';
+var DATA=jget('mf_data_'+K,null), DRAFT=jget('mf_cur_'+K,null), QUEUE=jget('mf_q_'+K,[]);
+var UI={tab:'inicio',view:'',ed:'',filtro:'faltan',q:'',eqq:'',eqed:'Todos',sheet:null,toast:null,busy:false,online:navigator.onLine,sync:'',last:jget('mf_last_'+K,'')};
+var $=function(s,r){return (r||document).querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function save(){ls('mf_cur_'+K,DRAFT?JSON.stringify(DRAFT):null);ls('mf_q_'+K,JSON.stringify(QUEUE))}
+function saveData(){ls('mf_data_'+K,JSON.stringify(DATA))}
+function two(n){return(n<10?'0':'')+n}
+function nowTxt(){var d=new Date();return two(d.getDate())+'/'+two(d.getMonth()+1)+'/'+d.getFullYear()+' '+two(d.getHours())+':'+two(d.getMinutes())}
+function isoHoy(){var d=new Date();return d.getFullYear()+'-'+two(d.getMonth()+1)+'-'+two(d.getDate())}
+function fmtF(s){var p=String(s||'').split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:String(s||'')}
+/* ---------- red ---------- */
+function post(fn,args,s,n){n=n||0;
+  var c=new AbortController(),t=setTimeout(function(){c.abort()},fn==='recorridaLote'?90000:45000);
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:K,s:s===undefined?S:s,fn:fn,args:args}),signal:c.signal})
+  .then(function(r){return r.json()}).then(function(j){clearTimeout(t);return j})
+  .catch(function(e){clearTimeout(t);if(n<2&&fn!=='recorridaLote')return new Promise(function(ok){setTimeout(ok,1200*(n+1))}).then(function(){return post(fn,args,s,n+1)});throw e});
+}
+/* ---------- datos ---------- */
+var eqObj=function(a){return{id:a[0],ed:a[1],puesto:a[2],ub:a[3],ag:a[4],kg:a[5],nro:a[6],anio:a[7],vc:a[8],ph:a[9],bal:a[10],sop:a[11],obs:a[13],rel:a[14],ult:a[15],por:a[16],est:a[17]||'Activo'}};
+function eqs(){return DATA?DATA.eq.map(eqObj):[]}
+function nroT(e){return(e.nro&&e.nro!=='-')?'N° '+e.nro:'Sin número ('+e.id+')'}
+function ubT(e){return(e.ub&&e.ub!=='-')?e.ub:'sin ubicación cargada'}
+function edificios(){var m={},o=[];eqs().forEach(function(e){if(e.est!=='Baja'&&!m[e.ed]){m[e.ed]=1;o.push(e.ed)}});return o.sort(function(a,b){return a.localeCompare(b)})}
+function refrescar(sil){
+  if(!navigator.onLine||!S)return Promise.resolve(false);
+  return post('equiposLista',[K]).then(function(j){
+    if(!j.ok){if(j.e==='sesion'){ls(SK,null);S='';render();return false}if(!sil)toast(j.e||'No se pudo actualizar','bad');return false}
+    DATA=j.r;saveData();UI.last=nowTxt();ls('mf_last_'+K,UI.last);render();return true;
+  }).catch(function(){return false});
+}
+function sincronizar(manual){
+  if(UI.sync==='run')return Promise.resolve();
+  if(!S){return Promise.resolve()}
+  if(!navigator.onLine){if(manual)toast('Sin señal. Se envía cuando vuelva la conexión.','bad');return Promise.resolve()}
+  UI.sync='run';render();
+  var hechos=[],fallo=null;
+  function sig(){
+    var it=QUEUE.filter(function(x){return !x.err})[0];
+    if(!it)return Promise.resolve();
+    return post('recorridaLote',[K,it.lote]).then(function(j){
+      if(j.ok){QUEUE=QUEUE.filter(function(x){return x!==it});save();hechos.push(j.r);return sig()}
+      if(j.e==='sesion'){ls(SK,null);S='';fallo='sesion';return}
+      it.err=j.e||'No se pudo enviar';save();fallo='err';return sig();
+    }).catch(function(){fallo='red'});
+  }
+  return sig().then(function(){
+    UI.sync='';
+    if(fallo==='sesion'){render();return}
+    var p=hechos.length?refrescar(true):(manual?refrescar(true):refrescar(true));
+    return p.then(function(){
+      if(hechos.length){var m=0,f=0;hechos.forEach(function(r){m+=r.enviados||0;f+=(r.rec&&r.rec.fal)||0});toast('Recorrida enviada: '+f+(f===1?' falla':' fallas')+', '+m+(m===1?' mail':' mails')+' a las empresas (prueba).','ok')}
+      else if(fallo==='red'&&manual)toast('No se pudo conectar. Queda guardado en el celular.','bad');
+      else if(manual&&!QUEUE.length)toast('Todo al día.','ok');
+      render();
+    });
+  });
+}
+/* ---------- UI helpers ---------- */
+var toastT=null;
+function toast(t,k){UI.toast={t:t,k:k||''};render();clearTimeout(toastT);toastT=setTimeout(function(){UI.toast=null;render()},4200)}
+var IC={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
+ list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
+ warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>',
+ user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>'
+};
+function shell(title,sub,body,opts){
+  opts=opts||{};
+  var pend=QUEUE.length;
+  var h='<header class="top">'+(opts.back?'<button class="back" data-a="back" aria-label="Volver">‹</button>':'')+'<h1>'+esc(title)+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+'</h1><span class="dot'+(navigator.onLine?'':' off')+'" title="'+(navigator.onLine?'Con señal':'Sin señal')+'"></span></header>';
+  h+='<main id="main">'+body+'</main>';
+  if(opts.fab)h+='<div class="fab">'+opts.fab+'</div>';
+  if(!opts.nonav){
+    h+='<nav class="tabs">'+[['inicio','Inicio',IC.home],['equipos','Equipos',IC.list],['fallas','Fallas',IC.warn],['yo','Yo',IC.user]].map(function(t){
+      return '<button data-a="tab:'+t[0]+'" aria-current="'+(UI.tab===t[0]&&!opts.back)+'">'+t[2]+t[1]+(t[0]==='yo'&&pend?'<span class="bd">'+pend+'</span>':'')+'</button>'}).join('')+'</nav>';
+  }
+  if(UI.sheet)h+=UI.sheet;
+  if(UI.toast)h+='<div class="toast '+UI.toast.k+'">'+esc(UI.toast.t)+'</div>';
+  return h;
+}
+/* ---------- login ---------- */
+function loginView(est){
+  var nuevo=est&&!est.tienePin;
+  return '<div class="login"><img class="logo" src="icon-192.png" alt=""><h2 style="text-align:center;margin:0 0 4px">'+(est?'Hola, '+esc(String(est.n||'').replace(/\s*\(.*\)$/,'')):'Matafuegos')+'</h2>'
+   +'<p class="mut" style="text-align:center">'+(est?(nuevo?'Primera vez: creá una clave de 4 a 6 números.':'Ingresá tu clave para abrir la app.'):'Un momento…')+'</p>'
+   +(est?'<form data-f="login"><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">'+(nuevo?'<input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Repetí la clave">':'')+'<div id="le" class="note bad" hidden></div><button class="btn" id="lb">'+(nuevo?'Crear clave y entrar':'Entrar')+'</button></form>':'')+'</div>';
+}
+var EST=null;
+function pedirLogin(){
+  if(!K){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">Falta tu link personal. Abrí esta app desde el link que te pasó la Intendencia.</p></div>';return}
+  if(!navigator.onLine){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">La primera vez necesitás conexión para entrar. Probá de nuevo cuando tengas señal.</p></div>';return}
+  post('estado',[K],'').then(function(j){
+    if(!j.ok){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">Este link no es válido. Pedí uno nuevo a la Intendencia.</p></div>';return}
+    EST=j.r;$('#app').innerHTML=loginView(EST);var p=$('#p1');if(p)p.focus();
+  }).catch(function(){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">No se pudo conectar. Revisá tu señal.</p><button class="btn" data-a="reload">Reintentar</button></div>'});
+}
+function doLogin(ev){
+  ev.preventDefault();var nuevo=EST&&!EST.tienePin,e=$('#le'),b=$('#lb'),p1=$('#p1').value,p2=$('#p2')?$('#p2').value:'';
+  e.hidden=true;
+  if(!/^\d{4,6}$/.test(p1)){e.textContent='La clave tiene que ser de 4 a 6 números.';e.hidden=false;return}
+  if(nuevo&&p1!==p2){e.textContent='Las dos claves no coinciden.';e.hidden=false;return}
+  b.disabled=true;b.textContent='Entrando…';
+  post(nuevo?'crearPin':'entrar',[K,p1],'').then(function(j){
+    if(!j.ok&&nuevo&&/Ya ten/.test(j.e||''))return post('entrar',[K,p1],'');return j}).then(function(j){
+    if(!j.ok){b.disabled=false;b.textContent=nuevo?'Crear clave y entrar':'Entrar';e.textContent=j.e||'No se pudo entrar.';e.hidden=false;return}
+    S=j.r.s;ls(SK,S);arrancar();
+  }).catch(function(){b.disabled=false;b.textContent='Entrar';e.textContent='No se pudo conectar. Intentá de nuevo.';e.hidden=false});
+}
+/* ---------- vistas ---------- */
+function resumenDraft(){
+  if(!DRAFT)return{c:0,ok:0,f:0,tot:0};
+  var ks=Object.keys(DRAFT.items),ok=0,f=0;ks.forEach(function(k){var it=DRAFT.items[k];if(it.e==='OK')ok++;else f+=it.fallas.length});
+  var tot=eqs().filter(function(e){return e.ed===DRAFT.ed&&e.est!=='Baja'}).length;
+  return{c:ks.length,ok:ok,f:f,tot:tot};
+}
+function viewInicio(){
+  var nom=(DATA&&DATA.yo)?String(DATA.yo).replace(/\s*\(.*\)$/,''):'';
+  var h='';
+  if(!DATA)return shell('Matafuegos','',(S?'<div class="empty">Cargando los equipos… la primera vez necesita señal.</div>':''),{});
+  if(!DATA.puede)h+='<div class="note">Tu usuario puede ver los equipos pero no hacer recorridas. Eso lo hacen el titular y los ayudantes de Matafuegos y jefatura.</div>';
+  var pend=QUEUE.length;
+  if(pend)h+='<div class="note">'+(QUEUE.some(function(x){return x.err})?'⚠ Hay una recorrida que no se pudo enviar. Mirala en «Yo».':'📤 '+pend+(pend===1?' recorrida guardada':' recorridas guardadas')+' en el celular, se '+(pend===1?'envía':'envían')+' apenas haya señal.')+'</div>';
+  if(DRAFT){
+    var r=resumenDraft();
+    h+='<div class="hero"><h2>Recorrida en curso</h2><p>'+esc(DRAFT.ed)+' · '+r.c+' de '+r.tot+' controlados'+(r.f?' · '+r.f+(r.f===1?' falla':' fallas'):'')+'</p><div class="bar"><i style="width:'+(r.tot?Math.round(r.c*100/r.tot):0)+'%"></i></div><div style="height:12px"></div><button class="btn w" data-a="seguir">Seguir recorriendo</button></div>';
+  } else if(DATA.puede){
+    var eds=edificios();if(!UI.ed||eds.indexOf(UI.ed)<0)UI.ed=eds[0]||'';
+    h+='<div class="hero"><h2>Nueva recorrida</h2><p>Elegí el edificio y andá marcando cada matafuego. No sale ningún mail hasta que cierres la recorrida.</p><select id="edsel">'+eds.map(function(x){return '<option'+(x===UI.ed?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select><div style="height:10px"></div><button class="btn w" data-a="iniciar">▶ Empezar recorrida</button></div>';
+  }
+  var fa=DATA.fallas.filter(function(f){return f.est!=='Verificado'&&f.est!=='Anulada'}).length;
+  h+='<div class="kpi"><div><b>'+eqs().filter(function(e){return e.est!=='Baja'}).length+'</b><span>equipos</span></div><div><b>'+fa+'</b><span>fallas en trámite</span></div><div><b>'+(DATA.recs||[]).length+'</b><span>recorridas</span></div></div>';
+  var rec=(DATA.recs||[]).slice().reverse().slice(0,6);
+  h+='<h3 style="margin:6px 4px 8px">Últimas recorridas</h3>';
+  h+=QUEUE.map(function(q){return '<div class="card"><b>'+esc(q.lote.ed)+'</b> <span class="pill warn">'+(q.err?'No se pudo enviar':'Por enviar')+'</span><div class="mut">'+esc(q.lote.ini)+' · '+q.lote.items.length+' equipos</div></div>'}).join('');
+  h+=rec.length?rec.map(function(r){return '<div class="card"><b>'+esc(r.ed)+'</b> <span class="pill '+(r.est==='Cerrada'?'ok':'')+'">'+esc(r.est)+'</span><div class="mut">'+fmtF(r.f)+' · '+esc(r.por)+'<br>'+r.ctl+' controlados · '+r.ok+' en orden · '+r.fal+(r.fal===1?' falla':' fallas')+(r.mails?' · '+esc(r.mails):'')+'</div></div>'}).join(''):(QUEUE.length?'':'<div class="empty">Todavía no hay recorridas.</div>');
+  return shell(nom?'Hola, '+nom:'Matafuegos',UI.last?'Actualizado '+UI.last:'',h,{});
+}
+function estadoEq(id){var it=DRAFT&&DRAFT.items[id];return it?it.e:''}
+function viewRecorrida(){
+  var r=resumenDraft(),all=eqs().filter(function(e){return e.ed===DRAFT.ed&&e.est!=='Baja'}),q=UI.q.trim().toLowerCase();
+  var lista=all.filter(function(e){
+    var s=estadoEq(e.id);
+    if(UI.filtro==='faltan'&&s)return false;
+    if(UI.filtro==='fallas'&&s!=='Falla')return false;
+    if(q&&[e.nro,e.id,e.ub,e.ag].join(' ').toLowerCase().indexOf(q)<0)return false;
+    return true});
+  var h='<div style="margin:-2px 0 10px"><div class="bar" style="background:var(--line)"><i style="width:'+(r.tot?Math.round(r.c*100/r.tot):0)+'%;background:var(--ok)"></i></div><div class="mut" style="margin-top:6px">'+r.c+' de '+r.tot+' controlados · '+r.ok+' en orden · '+r.f+(r.f===1?' falla':' fallas')+'</div></div>';
+  h+='<div class="chips">'+[['faltan','Faltan ('+(r.tot-r.c)+')'],['todos','Todos'],['fallas','Con falla ('+r.f+')']].map(function(c){return '<button class="chip" data-a="filtro:'+c[0]+'" aria-pressed="'+(UI.filtro===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>';
+  h+='<input type="search" id="qq" placeholder="Buscar número o ubicación" value="'+esc(UI.q)+'" style="margin-bottom:12px">';
+  h+=lista.length?lista.map(function(e){
+    var it=DRAFT.items[e.id],cl=it?(it.e==='OK'?' ok':' bad'):'';
+    return '<div class="eq'+cl+'"><div class="t">'+esc(nroT(e))+'</div><div class="u">'+esc(ubT(e))+' · '+esc(e.ag)+' '+esc(e.kg)+' kg</div>'+
+     (it?'<div style="margin-bottom:8px">'+(it.e==='OK'?'<span class="pill ok">✓ En orden</span>':it.fallas.map(function(f){return '<span class="pill bad" style="margin:0 4px 4px 0">⚠ '+esc(f.tipo)+'</span>'}).join(''))+(it.e==='Falla'&&it.fallas[0]&&it.fallas[0].nota?'<div class="mut">'+esc(it.fallas.map(function(f){return f.nota}).filter(Boolean).join(' · '))+'</div>':'')+'</div>':'')+
+     '<div class="btns">'+(it?'<button class="btn bad" data-a="deshacer:'+e.id+'">Deshacer</button><button class="btn sec" data-a="falla:'+e.id+'">Editar falla</button>':'<button class="btn ok" data-a="ok:'+e.id+'">✓ En orden</button><button class="btn bad" data-a="falla:'+e.id+'">⚠ Falla</button>')+'</div></div>'}).join(''):'<div class="empty">'+(UI.filtro==='faltan'&&!q?'¡Controlaste todos los equipos! Cerrá la recorrida.':'No hay equipos con ese filtro.')+'</div>';
+  return shell(DRAFT.ed,'Recorrida de matafuegos',h,{back:true,nonav:true,fab:'<button class="btn" data-a="cerrar"'+(r.c?'':' disabled')+'>Cerrar recorrida'+(r.c?' ('+r.c+' controlados'+(r.f?', '+r.f+(r.f===1?' falla':' fallas'):'')+')':'')+'</button>'});
+}
+function sheetFalla(id){
+  var e=eqs().filter(function(x){return x.id===id})[0],it=DRAFT.items[id],sel=it&&it.e==='Falla'?it.fallas.map(function(f){return f.tipo}):[],nota=it&&it.fallas[0]?it.fallas[0].nota:'';
+  UI.fsel=sel.slice();UI.fnota=nota||'';
+  return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>¿Qué falla encontraste?</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(ubT(e))+'</div>'+
+   (DATA.tipos||[]).map(function(t,i){return '<div class="opt" role="button" data-a="ftipo:'+i+'" aria-pressed="'+(sel.indexOf(t)>=0)+'"><i>'+(sel.indexOf(t)>=0?'✓':'')+'</i>'+esc(t)+'</div>'}).join('')+
+   '<textarea id="fnota" placeholder="Observaciones (opcional)" style="margin:6px 0 12px">'+esc(nota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+id+'">Guardar falla</button></div></div></div>';
+}
+function gruposLocal(){
+  var emp=(DATA.emp&&DATA.emp[DRAFT.ed])||{n:'',mail:''},n=0;
+  Object.keys(DRAFT.items).forEach(function(k){var it=DRAFT.items[k];if(it.e==='Falla')n+=it.fallas.length});
+  return{emp:emp,n:n};
+}
+function sheetCerrar(){
+  var r=resumenDraft(),g=gruposLocal(),sin=r.tot-r.c,h='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Cerrar la recorrida</h3><div class="mut" style="margin-bottom:10px">'+esc(DRAFT.ed)+'</div>'+
+   '<div class="kpi"><div><b>'+r.c+'</b><span>controlados</span></div><div><b>'+r.ok+'</b><span>en orden</span></div><div><b>'+r.f+'</b><span>fallas</span></div></div>';
+  if(sin>0)h+='<div class="note">Quedan '+sin+' equipos sin controlar. Podés cerrar igual o seguir.</div>';
+  if(g.n){
+    h+='<div class="card" style="box-shadow:none;border:1.5px solid var(--line)"><b>Va a salir 1 mail</b><div class="mut">Para: '+esc(g.emp.n||'(sin empresa asignada)')+(g.emp.mail?' · '+esc(g.emp.mail):'')+'<br>Con '+g.n+(g.n===1?' falla':' fallas')+' juntas.</div></div>';
+    if(!g.emp.n)h+='<div class="note bad">Este edificio no tiene empresa de matafuegos cargada: el mail no va a tener destinatario.</div>';
+    else if(!g.emp.mail)h+='<div class="note bad">'+esc(g.emp.n)+' no tiene mail cargado.</div>';
+    h+='<div class="mut" style="margin-bottom:8px">Por ahora los mails salen a las direcciones de prueba, con «[Prueba]» en el asunto.</div>';
+  } else h+='<div class="note info">No hay fallas: no sale ningún mail. La recorrida queda registrada.</div>';
+  if(!navigator.onLine)h+='<div class="note">Estás sin señal: la recorrida se guarda en el celular y se envía sola apenas haya conexión.</div>';
+  h+='<div class="row" style="margin-top:6px"><button class="btn sec" data-a="cerrarsheet">Seguir</button><button class="btn" data-a="confirmar">Cerrar y enviar</button></div><button class="btn bad" style="margin-top:8px" data-a="descartar">Descartar recorrida</button></div></div>';
+  return h;
+}
+function viewEquipos(){
+  if(!DATA)return viewInicio();
+  var q=UI.eqq.trim().toLowerCase(),eds=['Todos'].concat(edificios());
+  var lista=eqs().filter(function(e){return e.est!=='Baja'&&(UI.eqed==='Todos'||e.ed===UI.eqed)&&(!q||[e.nro,e.id,e.ub,e.ed,e.ag].join(' ').toLowerCase().indexOf(q)>=0)});
+  var h='<input type="search" id="eqq" placeholder="Número del cilindro, piso o sector" value="'+esc(UI.eqq)+'" style="margin-bottom:10px"><div class="chips">'+eds.map(function(x){return '<button class="chip" data-a="eqed:'+esc(x)+'" aria-pressed="'+(UI.eqed===x)+'">'+esc(x)+'</button>'}).join('')+'</div><div class="mut" style="margin:0 2px 8px">'+lista.length+' equipos</div>';
+  h+=lista.slice(0,60).map(function(e){
+    var ab=DATA.fallas.filter(function(f){return f.eq===e.id&&f.est!=='Verificado'&&f.est!=='Anulada'});
+    return '<div class="eq'+(ab.length?' bad':'')+'"><div class="t">'+esc(nroT(e))+' <span class="mut" style="font-weight:400">· '+esc(e.id)+'</span></div><div class="u">'+esc(e.ed)+' · '+esc(ubT(e))+'<br>'+esc(e.ag)+' '+esc(e.kg)+' kg'+(e.vc&&e.vc!=='-'?' · carga '+esc(e.vc):'')+'</div>'+
+      (e.sop!=='OK'?'<span class="pill warn">Sin soporte</span> ':'')+(e.bal!=='OK'?'<span class="pill warn">Sin baliza</span> ':'')+ab.map(function(f){return '<span class="pill bad">'+esc(f.tipo)+' · '+esc(f.est)+'</span> '}).join('')+'</div>'}).join('');
+  if(lista.length>60)h+='<div class="empty">Mostrando 60. Escribí en el buscador para afinar.</div>';
+  return shell('Equipos','Matafuegos',h,{});
+}
+function viewFallas(){
+  if(!DATA)return viewInicio();
+  var ab=DATA.fallas.filter(function(f){return f.est!=='Verificado'&&f.est!=='Anulada'}).slice().reverse();
+  var h=ab.length?ab.map(function(f){return '<div class="card"><b>'+esc(f.tipo)+'</b> <span class="pill '+(f.est==='Informado'?'warn':'bad')+'">'+esc(f.est)+'</span><div class="mut">Matafuego N° '+esc(f.nro)+' · '+esc(f.ed)+'<br>'+esc(f.ub&&f.ub!=='-'?f.ub:'sin ubicación cargada')+' · '+fmtF(f.f)+' · '+esc(f.por)+(f.emp?'<br>Empresa: '+esc(f.emp):'')+'</div></div>'}).join(''):'<div class="empty">No hay fallas en trámite.</div>';
+  return shell('Fallas','En trámite',h,{});
+}
+function viewYo(){
+  var h='<div class="card"><h3>'+esc(DATA&&DATA.yo?DATA.yo:'Mi usuario')+'</h3><div class="mut">'+(navigator.onLine?'Con señal':'Sin señal')+' · última actualización: '+esc(UI.last||'nunca')+'</div><div style="height:10px"></div><button class="btn" data-a="sync"'+(UI.sync==='run'?' disabled':'')+'>'+(UI.sync==='run'?'Sincronizando…':'Sincronizar ahora')+'</button></div>';
+  if(QUEUE.length)h+='<h3 style="margin:6px 4px 8px">Para enviar</h3>'+QUEUE.map(function(q,i){return '<div class="card"><b>'+esc(q.lote.ed)+'</b> <span class="pill '+(q.err?'bad':'warn')+'">'+(q.err?'Con error':'Por enviar')+'</span><div class="mut">'+esc(q.lote.ini)+' · '+q.lote.items.length+' equipos'+(q.err?'<br>'+esc(q.err):'')+'</div>'+(q.err?'<div class="row" style="margin-top:8px"><button class="btn sec" data-a="reintentar:'+i+'">Reintentar</button><button class="btn bad" data-a="borrarq:'+i+'">Descartar</button></div>':'')+'</div>'}).join('');
+  h+='<div class="card"><div class="mut">Versión '+VERSION+'. La app guarda los equipos en el celular para poder usarla sin señal.</div><div style="height:10px"></div><button class="btn bad" data-a="salir">Cerrar sesión</button></div>';
+  return shell('Yo','Mi cuenta',h,{});
+}
+function render(){
+  var app=$('#app');if(!app)return;
+  if(!S){return}
+  var keepQ=document.activeElement&&document.activeElement.id,sel=null;
+  try{if(keepQ&&document.activeElement.selectionStart!=null)sel=[document.activeElement.selectionStart,document.activeElement.selectionEnd]}catch(e){}
+  var sc=$('#main')?$('#main').scrollTop:0;
+  var v;
+  if(UI.view==='rec'&&DRAFT)v=viewRecorrida();
+  else{UI.view='';v=UI.tab==='equipos'?viewEquipos():UI.tab==='fallas'?viewFallas():UI.tab==='yo'?viewYo():viewInicio()}
+  app.innerHTML=v;
+  if($('#main'))$('#main').scrollTop=sc;
+  if(keepQ&&$('#'+keepQ)){$('#'+keepQ).focus();try{if(sel)$('#'+keepQ).setSelectionRange(sel[0],sel[1])}catch(e){}}
+}
+/* ---------- acciones ---------- */
+function act(a,ev){
+  var p=a.split(':'),k=p[0],x=a.slice(k.length+1);
+  if(k==='tab'){UI.tab=x;UI.view='';}
+  else if(k==='iniciar'){
+    var eds=edificios();UI.ed=($('#edsel')&&$('#edsel').value)||UI.ed;
+    DRAFT={cid:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),ed:UI.ed,f:isoHoy(),ini:nowTxt(),items:{}};save();UI.view='rec';UI.filtro='faltan';UI.q='';
+  }
+  else if(k==='seguir'){UI.view='rec';UI.filtro='faltan';UI.q=''}
+  else if(k==='back'){UI.view=''}
+  else if(k==='filtro'){UI.filtro=x}
+  else if(k==='ok'){DRAFT.items[x]={e:'OK',fallas:[]};save()}
+  else if(k==='deshacer'){delete DRAFT.items[x];save()}
+  else if(k==='falla'){UI.sheet=sheetFalla(x)}
+  else if(k==='ftipo'){var t=DATA.tipos[Number(x)],i=UI.fsel.indexOf(t);if(i>=0)UI.fsel.splice(i,1);else UI.fsel.push(t);UI.fnota=($('#fnota')||{}).value||UI.fnota;var id=UI.fid;UI.sheet=sheetFalla2();}
+  else if(k==='guardarfalla'){
+    var n=($('#fnota')||{}).value||'';if(!UI.fsel.length){toast('Elegí al menos un tipo de falla.','bad');return}
+    DRAFT.items[x]={e:'Falla',fallas:UI.fsel.map(function(t){return{tipo:t,nota:n.trim().slice(0,500)}})};save();UI.sheet=null;
+  }
+  else if(k==='cerrarsheet'){UI.sheet=null}
+  else if(k==='cerrar'){UI.sheet=sheetCerrar()}
+  else if(k==='descartar'){if(confirm('¿Descartar la recorrida? Se pierde lo que marcaste.')){DRAFT=null;save();UI.sheet=null;UI.view=''}}
+  else if(k==='confirmar'){
+    var items=[];Object.keys(DRAFT.items).forEach(function(id){var it=DRAFT.items[id];if(it.e==='OK')items.push({eq:id,e:'OK'});else it.fallas.forEach(function(f){items.push({eq:id,e:'Falla',tipo:f.tipo,nota:f.nota})})});
+    QUEUE.push({lote:{cid:DRAFT.cid,ed:DRAFT.ed,f:DRAFT.f,ini:DRAFT.ini,items:items},ts:Date.now()});
+    DRAFT=null;save();UI.sheet=null;UI.view='';UI.tab='inicio';
+    toast(navigator.onLine?'Enviando la recorrida…':'Guardada en el celular. Se envía cuando haya señal.','ok');
+    render();sincronizar(false);return;
+  }
+  else if(k==='sync'){sincronizar(true);return}
+  else if(k==='reintentar'){QUEUE[Number(x)].err=null;save();sincronizar(true);return}
+  else if(k==='borrarq'){if(confirm('¿Descartar esta recorrida? No se va a enviar.')){QUEUE.splice(Number(x),1);save()}}
+  else if(k==='eqed'){UI.eqed=x}
+  else if(k==='salir'){if(confirm('¿Cerrar sesión? También se cierra la sesión de la agenda en este celular.')){ls(SK,null);S='';location.reload();return}}
+  else if(k==='reload'){location.reload();return}
+  render();
+}
+function sheetFalla2(){ // vuelve a dibujar la hoja de falla manteniendo la selección
+  var e=eqs().filter(function(x){return x.id===UI.fid})[0];
+  return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>¿Qué falla encontraste?</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(ubT(e))+'</div>'+
+   (DATA.tipos||[]).map(function(t,i){return '<div class="opt" role="button" data-a="ftipo:'+i+'" aria-pressed="'+(UI.fsel.indexOf(t)>=0)+'"><i>'+(UI.fsel.indexOf(t)>=0?'✓':'')+'</i>'+esc(t)+'</div>'}).join('')+
+   '<textarea id="fnota" placeholder="Observaciones (opcional)" style="margin:6px 0 12px">'+esc(UI.fnota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+UI.fid+'">Guardar falla</button></div></div></div>';
+}
+document.addEventListener('click',function(ev){
+  var t=ev.target.closest('[data-a]');
+  if(!t)return;
+  if(t.classList.contains('sheet-bg')&&ev.target!==t)return; // clic dentro de la hoja
+  var a=t.getAttribute('data-a');
+  if(a.indexOf('falla:')===0&&a.indexOf('guardar')!==0){UI.fid=a.slice(6)}
+  act(a,ev);
+});
+document.addEventListener('input',function(ev){
+  var t=ev.target;
+  if(t.id==='qq'){UI.q=t.value;render()}
+  else if(t.id==='eqq'){UI.eqq=t.value;render()}
+  else if(t.id==='edsel'){UI.ed=t.value}
+  else if(t.id==='fnota'){UI.fnota=t.value}
+});
+document.addEventListener('submit',function(ev){if(ev.target.getAttribute('data-f')==='login')doLogin(ev)});
+window.addEventListener('online',function(){render();sincronizar(false)});
+window.addEventListener('offline',function(){render()});
+/* ---------- arranque ---------- */
+function arrancar(){
+  if(!S){pedirLogin();return}
+  if(DRAFT&&UI.view===''&&false)UI.view='rec';
+  render();
+  sincronizar(false).then(function(){if(!DATA||!UI.last)return refrescar(true)});
+}
+if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}}
+arrancar();
+window.__MF={UI:UI,get DATA(){return DATA},get DRAFT(){return DRAFT},get QUEUE(){return QUEUE}};
+})();
+</script></body></html>

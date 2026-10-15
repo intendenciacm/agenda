@@ -61,6 +61,8 @@ textarea{min-height:84px;resize:vertical}
 .pill.ok{background:var(--okb);color:var(--ok)}.pill.bad{background:var(--badb);color:var(--bad)}.pill.warn{background:var(--warnb);color:var(--warn)}
 .eq{background:var(--card);border-radius:var(--r);border:1px solid var(--line);box-shadow:var(--sh);padding:14px;margin-bottom:10px}
 .eq.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}.eq.bad{border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.eq.tap:active{transform:scale(.99)}
+.ficha{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:12px 0}.ficha div span{display:block;font-size:.75rem;color:var(--mut);font-weight:600}.ficha div b{font-weight:700;font-size:.95rem}
 .eqh{display:flex;gap:12px;align-items:center;margin-bottom:12px}
 .av{width:44px;height:44px;border-radius:14px;background:var(--badb);color:var(--bad);display:flex;align-items:center;justify-content:center;flex:none}
 .av svg{width:24px;height:24px}
@@ -111,7 +113,7 @@ a.lk{color:var(--ac)}
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.1';
+var VERSION='1.2';
 var ED_COD=null;
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -378,6 +380,16 @@ function sheetCerrar(){
   h+='<div class="row" style="margin-top:6px"><button class="btn sec" data-a="cerrarsheet">Seguir</button><button class="btn" data-a="confirmar">Cerrar y enviar</button></div><button class="btn bad" style="margin-top:8px" data-a="descartar">Descartar recorrida</button></div></div>';
   return h;
 }
+function sheetEq(id){
+  var e=eqs().filter(function(x){return x.id===id})[0];if(!e)return null;
+  var ab=DATA.fallas.filter(function(f){return f.eq===id&&f.est!=='Verificado'&&f.est!=='Anulada'});
+  function v(x){return(x&&x!=='-')?esc(x):'<span class="mut">—</span>'}
+  var h='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><div class="eqh" style="margin-bottom:4px"><span class="av">'+IC.ext+'</span><div><h3 style="margin:0">'+esc(nroT(e))+'</h3><div class="mut">'+esc(e.id)+' · '+esc(e.ed)+'</div></div></div>';
+  h+='<div class="ficha"><div><span>Ubicación</span><b>'+v(e.ub)+'</b></div><div><span>Tipo</span><b>'+v(e.ag)+' '+(e.kg&&e.kg!=='-'?esc(e.kg)+' kg':'')+'</b></div><div><span>Año de fabricación</span><b>'+v(e.anio)+'</b></div><div><span>Vencimiento de carga</span><b>'+v(e.vc)+'</b></div><div><span>Prueba hidráulica</span><b>'+v(e.ph)+'</b></div><div><span>Baliza</span><b>'+(e.bal==='OK'?'Sí':v(e.bal))+'</b></div><div><span>Soporte</span><b>'+(e.sop==='OK'?'Sí':v(e.sop))+'</b></div><div><span>Último control</span><b>'+v(e.ult)+(e.por&&e.por!=='-'?'<br><span style="display:inline;font-weight:500">'+esc(e.por)+'</span>':'')+'</b></div></div>';
+  if(e.obs&&e.obs!=='-')h+='<div class="note info" style="background:var(--bg);color:var(--fg)">'+esc(e.obs)+'</div>';
+  h+=ab.length?'<h3 class="sec" style="margin-top:14px">Fallas en trámite</h3>'+ab.map(function(f){return '<div class="li" style="padding:10px 0"><span class="av" style="background:var(--badb);color:var(--bad)">'+IC.warn+'</span><div class="m"><b>'+esc(f.tipo)+'</b><span class="mut">'+fmtF(f.f)+' · '+esc(f.por)+'</span></div><span class="pill '+(f.est==='Informado'?'warn':'bad')+'">'+esc(f.est)+'</span></div>'}).join(''):'<div class="note info">Sin fallas en trámite.</div>';
+  return h+'<button class="btn sec" style="margin-top:14px" data-a="cerrarsheet">Cerrar</button></div></div>';
+}
 function viewEquipos(){
   if(!DATA)return viewInicio();
   var q=UI.eqq.trim().toLowerCase(),eds=['Todos'].concat(edificios());
@@ -385,7 +397,7 @@ function viewEquipos(){
   var h='<input type="search" id="eqq" placeholder="Número del cilindro, piso o sector" value="'+esc(UI.eqq)+'" style="margin-bottom:10px"><div class="chips">'+eds.map(function(x){return '<button class="chip" data-a="eqed:'+esc(x)+'" aria-pressed="'+(UI.eqed===x)+'">'+esc(x)+'</button>'}).join('')+'</div><div class="mut" style="margin:0 2px 8px">'+lista.length+' equipos</div>';
   h+=lista.slice(0,60).map(function(e){
     var ab=DATA.fallas.filter(function(f){return f.eq===e.id&&f.est!=='Verificado'&&f.est!=='Anulada'});
-    return '<div class="eq'+(ab.length?' bad':'')+'"><div class="eqh"><span class="av">'+IC.ext+'</span><div><div class="t">'+esc(nroT(e))+' <span class="mut" style="font-weight:500">· '+esc(e.id)+'</span></div><div class="u">'+esc(e.ed)+' · '+esc(ubT(e))+'<br>'+esc(e.ag)+' '+esc(e.kg)+' kg'+(e.vc&&e.vc!=='-'?' · carga '+esc(e.vc):'')+'</div></div></div>'+
+    return '<div class="eq tap'+(ab.length?' bad':'')+'" role="button" data-a="eqver:'+esc(e.id)+'"><div class="eqh"><span class="av">'+IC.ext+'</span><div><div class="t">'+esc(nroT(e))+' <span class="mut" style="font-weight:500">· '+esc(e.id)+'</span></div><div class="u">'+esc(e.ed)+' · '+esc(ubT(e))+'<br>'+esc(e.ag)+' '+esc(e.kg)+' kg'+(e.vc&&e.vc!=='-'?' · carga '+esc(e.vc):'')+'</div></div></div>'+
       (e.sop!=='OK'?'<span class="pill warn">Sin soporte</span> ':'')+(e.bal!=='OK'?'<span class="pill warn">Sin baliza</span> ':'')+ab.map(function(f){return '<span class="pill bad">'+esc(f.tipo)+' · '+esc(f.est)+'</span> '}).join('')+'</div>'}).join('');
   if(lista.length>60)h+='<div class="empty">Mostrando 60. Escribí en el buscador para afinar.</div>';
   return shell('Equipos','Matafuegos',h,{});
@@ -429,6 +441,7 @@ function act(a,ev){
   else if(k==='filtro'){UI.filtro=x}
   else if(k==='ok'){DRAFT.items[x]={e:'OK',fallas:[]};save()}
   else if(k==='deshacer'){delete DRAFT.items[x];save()}
+  else if(k==='eqver'){UI.sheet=sheetEq(x)}
   else if(k==='falla'){UI.sheet=sheetFalla(x)}
   else if(k==='ftipo'){var t=DATA.tipos[Number(x)],i=UI.fsel.indexOf(t);if(i>=0)UI.fsel.splice(i,1);else UI.fsel.push(t);UI.fnota=($('#fnota')||{}).value||UI.fnota;var id=UI.fid;UI.sheet=sheetFalla2();}
   else if(k==='guardarfalla'){

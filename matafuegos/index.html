@@ -84,6 +84,11 @@ function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null
 function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}
 var K=new URLSearchParams(location.search).get('k')||ls('mf_k')||'';
 if(K)ls('mf_k',K);
+// manifest dinámico: el ícono instalado abre con el link personal incluido (iPhone no comparte el almacenamiento con Safari)
+if(K){try{var _b=location.origin+location.pathname.replace(/[^\/]*$/,'');var _u=_b+'?k='+encodeURIComponent(K);
+var _m={name:'Matafuegos · Intendencia',short_name:'Matafuegos',start_url:_u,scope:_b,display:'standalone',orientation:'portrait',background_color:'#eef2f7',theme_color:'#16407a',lang:'es',icons:[{src:_b+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:_b+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:_b+'icon-512-maskable.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]};
+var _l=document.querySelector('link[rel=manifest]');if(_l)_l.href=URL.createObjectURL(new Blob([JSON.stringify(_m)],{type:'application/manifest+json'}));}catch(e){}}
+function pegarLink(){var v=($('#pk')||{}).value||'';var m=v.match(/[?&]k=([^&#\s]+)/);var t=m?decodeURIComponent(m[1]):v.trim();if(t.length<8){var e=$('#pke');if(e){e.hidden=false;e.textContent='No encuentro el link. Pegá el link completo que te pasó la Intendencia.'}return}ls('mf_k',t);location.replace(location.pathname+'?k='+encodeURIComponent(t))}
 var SK='ag_s_'+K; // misma sesión que la agenda (mismo sitio)
 var S=ls(SK)||'';
 var DATA=jget('mf_data_'+K,null), DRAFT=jget('mf_cur_'+K,null), QUEUE=jget('mf_q_'+K,[]);
@@ -175,7 +180,7 @@ function loginView(est){
 }
 var EST=null;
 function pedirLogin(){
-  if(!K){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">Falta tu link personal. Abrí esta app desde el link que te pasó la Intendencia.</p></div>';return}
+  if(!K){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">Falta tu link personal. Pegá acá el link que te pasó la Intendencia (el que termina en <b>?k=...</b>) y listo: la app se lo acuerda.</p><input id="pk" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Pegá tu link" style="width:100%;padding:14px;border:1px solid #c5cfdb;border-radius:12px;font-size:1rem;margin:10px 0"><div id="pke" class="note bad" hidden></div><button class="btn" onclick="pegarLink()">Guardar y entrar</button></div>';return}
   if(!navigator.onLine){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">La primera vez necesitás conexión para entrar. Probá de nuevo cuando tengas señal.</p></div>';return}
   post('estado',[K],'').then(function(j){
     if(!j.ok){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">Este link no es válido. Pedí uno nuevo a la Intendencia.</p></div>';return}

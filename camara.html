@@ -27,6 +27,7 @@ pre{margin:0;white-space:pre-wrap;font-size:12px;color:var(--muted)}
 <div class="c"><b>Qué se pudo usar en este celular</b><pre id="diag"></pre></div>
 <canvas id="cv" hidden></canvas>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.2/umd/index.min.js"></script>
 <script>
 /* Lector de códigos de barras 1D (Code 128, Code 39, ITF), sin internet. Tomado de la app de relevamiento de matafuegos. */
 const CODE128_PATTERNS = [
@@ -300,17 +301,34 @@ const $=id=>document.getElementById(id);
 let stream=null,timer=null,det=null,n=0;
 async function motorNativo(){ if(!('BarcodeDetector' in window)) return null; try{ return new BarcodeDetector({formats:['code_128','code_39','itf','qr_code','ean_13','ean_8']}); }catch(e){ return null; } }
 function mostrar(txt,motor){ $('res').textContent=txt; $('res').className='r ok'; $('mot').textContent='Leído con: '+motor; if(navigator.vibrate) navigator.vibrate(60); }
-async function leer(cv,ctx,w,h){
+let ult={t:'',n:0};
+function zxLeer(src,w,h,sc,ct){
+  const c=document.createElement('canvas'); c.width=Math.round(w*sc); c.height=Math.round(h*sc);
+  const x=c.getContext('2d',{willReadFrequently:true}); x.imageSmoothingEnabled=true; x.drawImage(src,0,0,c.width,c.height);
+  const d=x.getImageData(0,0,c.width,c.height).data,len=c.width*c.height,lum=new Uint8ClampedArray(len);
+  for(let i=0,j=0;i<len;i++,j+=4){ let v=((d[j]+(d[j+1]<<1)+d[j+2])>>2); if(ct) v=Math.max(0,Math.min(255,(v-128)*1.8+128)); lum[i]=v; }
+  const bb=new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.RGBLuminanceSource(lum,c.width,c.height)));
+  return window.__zx.decodeWithState(bb).getText();
+}
+async function leer(cv,ctx,w,h,modo){
   const id=ctx.getImageData(0,0,w,h);
   try{ const r=decode1DFromImageData(id,w,h); if(r){ mostrar(r.trim(),'lector 1D propio'); return true; } }catch(e){}
   if(window.jsQR){ try{ const q=jsQR(id.data,w,h,{inversionAttempts:'attemptBoth'}); if(q&&q.data){ mostrar(q.data,'jsQR'); return true; } }catch(e){} }
+  if(window.ZXing){
+    if(!window.__zx){ window.__zx=new ZXing.MultiFormatReader(); const hs=new Map(); hs.set(ZXing.DecodeHintType.TRY_HARDER,true); window.__zx.setHints(hs); }
+    const pasos=modo==='foto'?[[1,0],[1.5,0],[2,0],[2,1],[3,0]]:(n%2?[[2,0],[1,0]]:[[1.5,1],[2,1]]);
+    for(const [sc,ct] of pasos){ let t=null; try{ t=zxLeer(cv,w,h,sc,ct); }catch(e){}
+      if(t){ if(modo==='foto'){ mostrar(t.trim(),'lector universal (ZXing)'); return true; }
+        if(ult.t===t) ult.n++; else { ult.t=t; ult.n=1; }
+        if(ult.n>=2){ mostrar(t.trim(),'lector universal (ZXing)'); ult={t:'',n:0}; return true; } break; } }
+  }
   if(det){ try{ const r=await det.detect(cv); if(r&&r.length){ mostrar(r[0].rawValue,'lector del navegador'); return true; } }catch(e){} }
   return false;
 }
 async function frame(){
   const v=$('v'); if(!v.videoWidth) return;
   const cv=$('cv'),ctx=cv.getContext('2d',{willReadFrequently:true}); cv.width=v.videoWidth; cv.height=v.videoHeight; ctx.drawImage(v,0,0);
-  n++; await leer(cv,ctx,cv.width,cv.height);
+  n++; await leer(cv,ctx,cv.width,cv.height,'vivo');
 }
 $('go').onclick=async()=>{
   $('est').textContent='Pidiendo permiso de cámara…';
@@ -326,11 +344,12 @@ $('stop').onclick=()=>{ clearInterval(timer); if(stream){stream.getTracks().forE
 $('foto').onchange=async e=>{
   const f=e.target.files[0]; if(!f) return; const img=new Image(); img.src=URL.createObjectURL(f); await img.decode();
   const cv=$('cv'),ctx=cv.getContext('2d',{willReadFrequently:true}); const k=Math.min(1,1600/Math.max(img.width,img.height)); cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k); ctx.drawImage(img,0,0,cv.width,cv.height);
-  det=await motorNativo(); const ok=await leer(cv,ctx,cv.width,cv.height); if(!ok){ $('res').textContent='No se pudo leer el código en la foto'; $('res').className='r bad'; $('mot').textContent=''; }
+  det=await motorNativo(); const ok=await leer(cv,ctx,cv.width,cv.height,'foto'); if(!ok){ $('res').textContent='No se pudo leer el código en la foto'; $('res').className='r bad'; $('mot').textContent=''; }
 };
 (async()=>{ det=await motorNativo();
   $('diag').textContent=['Cámara (getUserMedia): '+(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia?'sí':'no'),
    'Lector del navegador (BarcodeDetector): '+('BarcodeDetector' in window?'sí':'no'),
    'Lector QR (jsQR): '+(window.jsQR?'sí':'no (necesita internet en esta prueba)'),
+   'Lector universal ZXing (EAN, UPC, Code 128, QR…): '+(window.ZXing?'sí':'no (necesita internet en esta prueba)'),
    'Lector 1D propio: sí','Conexión segura (https): '+(location.protocol==='https:'?'sí':'no'),'Navegador: '+navigator.userAgent].join('\n'); })();
 </script></body></html>

@@ -26,7 +26,7 @@ header.top .sub{font-size:.85rem;color:var(--mut);font-weight:500;letter-spacing
 .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
 .back{background:var(--card);border:1px solid var(--line);color:var(--fg);border-radius:50%;width:42px;height:42px;flex:none;display:flex;align-items:center;justify-content:center;padding:0}
 .back svg{width:22px;height:22px}
-main{flex:1;overflow-y:auto;padding:12px 16px 110px;-webkit-overflow-scrolling:touch}
+main{overscroll-behavior-y:contain;flex:1;overflow-y:auto;padding:12px 16px 110px;-webkit-overflow-scrolling:touch}
 nav.tabs{position:absolute;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:8px 8px calc(env(safe-area-inset-bottom) + 8px);z-index:5}
 nav.tabs button{flex:1;background:none;border:0;color:var(--mut);padding:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.72rem;font-weight:600;position:relative}
 nav.tabs button i{display:flex;align-items:center;justify-content:center;width:60px;height:32px;border-radius:999px;transition:background .2s}
@@ -78,8 +78,8 @@ textarea{min-height:84px;resize:vertical}
 .fab .btn{box-shadow:var(--fab);min-height:56px;font-size:1.02rem}
 .sheet-bg{position:absolute;inset:0;background:rgba(10,16,32,.5);z-index:20;display:flex;align-items:flex-end;animation:fade .2s}
 .sheet{background:var(--card);border-radius:28px 28px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 18px);width:100%;max-height:90%;overflow-y:auto;animation:up .26s cubic-bezier(.2,.8,.2,1)}
-.sheet::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
-@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{overscroll-behavior:contain;touch-action:pan-y}.sheet::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+@keyframes pgl{from{transform:translateX(34px);opacity:.25}to{transform:none;opacity:1}}@keyframes pgr{from{transform:translateX(-34px);opacity:.25}to{transform:none;opacity:1}}.pgl{animation:pgl .22s ease-out}.pgr{animation:pgr .22s ease-out}@media (prefers-reduced-motion:reduce){.pgl,.pgr{animation:none}}@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}@keyframes fade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.sheet,.sheet-bg{animation:none}.btn{transition:none}}
 .sheet h3{margin:0 0 4px;font-size:1.25rem;font-weight:800;letter-spacing:-.015em}
 .opt{display:flex;gap:12px;align-items:center;padding:14px;border:1.5px solid var(--line);border-radius:16px;margin-bottom:8px;font-size:.98rem;font-weight:500}
@@ -124,7 +124,7 @@ img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.4';
+var VERSION='1.5';
 var ED_COD=null;
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
@@ -488,7 +488,7 @@ function render(){
   if(UI.view==='rec'&&DRAFT)v=viewRecorrida();
   else{UI.view='';v=UI.tab==='equipos'?viewEquipos():UI.tab==='fallas'?viewFallas():UI.tab==='yo'?viewYo():viewInicio()}
   app.innerHTML=v;
-  if($('#main'))$('#main').scrollTop=sc;
+  if($('#main')){$('#main').scrollTop=sc;if(UI.anim){$('#main').classList.add(UI.anim>0?'pgl':'pgr');UI.anim=0}}
   if(keepQ&&$('#'+keepQ)){$('#'+keepQ).focus();try{if(sel)$('#'+keepQ).setSelectionRange(sel[0],sel[1])}catch(e){}}
 }
 /* ---------- acciones ---------- */
@@ -611,7 +611,7 @@ function lkKey(x){
   else if(mode==='new1'){LKS.first=pin;LKS.buf='';LKS.mode='new2';lkDraw()}
   else if(mode==='new2'){
     if(pin!==LKS.first){LKS.first='';LKS.buf='';LKS.mode='new1';LKS.bad=true;LKS.msg='No coinciden. Probá de nuevo.';lkDraw();return}
-    var salt=b64u(lkRand(12));lkHash(pin,salt).then(function(h){LK={h:h,s:salt,bio:(LK&&LK.bio)||null};ls('mf_lock',JSON.stringify(LK));LKS.locked=false;lkClose();toast('Bloqueo activado. Se pide el PIN al abrir la app.','ok')})}
+    var salt=b64u(lkRand(12));lkHash(pin,salt).then(function(h){LK={h:h,s:salt,bio:(LK&&LK.bio)||null};ls('mf_lock',JSON.stringify(LK));LKS.locked=false;lkClose();toast(BIO?'Bloqueo activado. Ahora confirmá con tu huella o rostro para entrar sin escribir el PIN.':'Bloqueo activado. Se pide el PIN al abrir la app.','ok');if(BIO&&!LK.bio)setTimeout(lkBioSet,350)})}
 }
 function lkBio(){
   if(!LK||!LK.bio||!navigator.credentials)return;
@@ -629,12 +629,46 @@ function lkAcc(x){
   if(x==='biooff'){LK.bio=null;ls('mf_lock',JSON.stringify(LK));toast('Ya no se usa la huella o el rostro. Queda el PIN.','ok');render()}
 }
 function lkCard(){
-  if(!LK)return '<div class="card"><h3>Bloqueo de la app</h3><div class="mut">Pide un PIN de 4 números cada vez que abrís la app. Sirve si prestás el celular o se te pierde.</div><div style="height:10px"></div><button class="btn sec" data-a="lk:setup">'+IC.lk+'Activar bloqueo</button></div>';
-  return '<div class="card"><h3>Bloqueo de la app <span class="pill ok">Activado</span></h3><div class="mut">Se pide el PIN al abrir la app y cuando volvés a ella después de un minuto.</div><div class="lkrow"><button class="btn sec" data-a="lk:change">Cambiar PIN</button>'+(BIO?(LK.bio?'<button class="btn sec" data-a="lk:biooff">Quitar huella o rostro</button>':'<button class="btn sec" data-a="lk:bioon">Usar huella o rostro</button>'):'')+'<button class="btn sec" data-a="lk:off">Desactivar</button></div></div>'}
+  if(!LK)return '<div class="card"><h3>Bloqueo de la app</h3><div class="mut">Pide un PIN de 4 números al abrir la app y, si tu celular tiene huella o rostro, también podés entrar solo con eso, como en el banco. Tu usuario queda recordado en este celular.</div><div style="height:10px"></div><button class="btn sec" data-a="lk:setup">'+IC.lk+'Activar bloqueo</button></div>';
+  return '<div class="card"><h3>Bloqueo de la app <span class="pill ok">Activado</span></h3><div class="mut">Se pide la huella, el rostro o el PIN al abrir la app y cuando volvés a ella después de un minuto. Tu usuario queda recordado en este celular.</div><div class="lkrow"><button class="btn sec" data-a="lk:change">Cambiar PIN</button>'+(BIO?(LK.bio?'<button class="btn sec" data-a="lk:biooff">Quitar huella o rostro</button>':'<button class="btn sec" data-a="lk:bioon">Usar huella o rostro</button>'):'')+'<button class="btn sec" data-a="lk:off">Desactivar</button></div></div>'}
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){LKS.away=Date.now();return}
-  if(LK&&S&&!LKS.locked&&!LKS.mode&&LKS.away&&Date.now()-LKS.away>60000){LKS.locked=true;lkShow('unlock')}
+  if(LK&&S&&!LKS.locked&&!LKS.mode&&LKS.away&&Date.now()-LKS.away>60000){LKS.locked=true;lkShow('unlock');if(LK.bio){try{lkBio()}catch(e){}}}
 });
+/* ---------- gestos: deslizar entre pestañas, volver y cerrar hojas ---------- */
+(function(){
+var TABS=['inicio','equipos','fallas','yo'],g=null;
+function noDesliza(t){while(t&&t!==document.body){if(t.nodeType===1){var n=t.tagName;if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT')return true;var o=getComputedStyle(t).overflowX;if((o==='auto'||o==='scroll')&&t.scrollWidth>t.clientWidth+2)return true}t=t.parentNode}return false}
+function soltar(o){o.sheet.style.transition='transform .2s';o.sheet.style.transform='';if(o.sheet.parentNode)o.sheet.parentNode.style.background='';setTimeout(function(){if(o.sheet){o.sheet.style.transition='';o.sheet.style.animation=''}},230)}
+function ir(d){
+  if(UI.sheet)return;
+  if(UI.view==='rec'){if(d<0){UI.anim=-1;act('back');render()}return}
+  var i=TABS.indexOf(UI.tab),j=i+d;if(i<0||j<0||j>=TABS.length)return;
+  UI.tab=TABS[j];UI.view='';UI.anim=d;render()
+}
+document.addEventListener('touchstart',function(ev){
+  g=null;if(ev.touches.length!==1||!S||LKS.locked||LKS.mode)return;
+  var t=ev.target,te=ev.touches[0],sh=t.closest?t.closest('.sheet'):null,bg=t.closest?t.closest('.sheet-bg'):null;
+  g={x:te.clientX,y:te.clientY,t:Date.now(),sheet:sh,inSheet:!!bg,sob:noDesliza(t),mode:'',dy:0,top:sh?(te.clientY-sh.getBoundingClientRect().top<56):false};
+},{passive:true});
+document.addEventListener('touchmove',function(ev){
+  if(!g)return;var te=ev.touches[0],dx=te.clientX-g.x,dy=te.clientY-g.y;
+  if(!g.mode){
+    if(Math.abs(dx)<8&&Math.abs(dy)<8)return;
+    if(g.inSheet)g.mode=(g.sheet&&dy>0&&Math.abs(dy)>Math.abs(dx)&&(g.top||g.sheet.scrollTop<=0))?'sheet':'no';
+    else g.mode=(!g.sob&&Math.abs(dx)>Math.abs(dy)*1.5)?'h':'no';
+  }
+  if(g.mode==='sheet'){ev.preventDefault();g.dy=Math.max(0,dy);var s=g.sheet;s.style.animation='none';s.style.transition='none';s.style.transform='translateY('+g.dy+'px)';if(s.parentNode)s.parentNode.style.background='rgba(10,16,32,'+(0.5*Math.max(0.15,1-g.dy/450))+')'}
+},{passive:false});
+document.addEventListener('touchend',function(ev){
+  if(!g)return;var o=g;g=null;var te=ev.changedTouches[0],dx=te.clientX-o.x,dt=Math.max(Date.now()-o.t,1);
+  if(o.mode==='sheet'){
+    if(o.dy>110||(o.dy>40&&o.dy/dt>0.6)){o.sheet.style.transition='transform .18s ease-in';o.sheet.style.transform='translateY(100%)';setTimeout(function(){UI.sheet=null;render()},170)}
+    else soltar(o);return}
+  if(o.mode==='h'&&Math.abs(dx)>70&&dt<700)ir(dx<0?1:-1);
+},{passive:true});
+document.addEventListener('touchcancel',function(){if(g&&g.mode==='sheet')soltar(g);g=null},{passive:true});
+})();
 /* ---------- arranque ---------- */
 function arrancar(){
   if(!S){pedirLogin();return}

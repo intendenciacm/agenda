@@ -38,7 +38,7 @@ var LS='ag_s_'+K, CK='ag_c_'+K, QK='ag_q_'+K, RK='ag_r_'+K+'_', box=document.get
 var SES='', PRE=null, fl=false, tm=null, intervalo=false;
 var est={deCache:false,cacheT:0,nuevo:false,msg:''};
 var READ={cargar:1,reclamos:1,contratosVivos:1,obligaciones:1,empresas:1,cargaListas:1,plLista:1};   // se guardan para verlas sin señal
-var LARGA={plSubir:1,plLink:1,plLeer:1};   // cargas de pliegos: tardan (leen el texto del PDF), sin reintento para no duplicar
+var LARGA={plSubir:1,plLink:1,plLeer:1,iaPreguntar:1};   // cargas de pliegos: tardan (leen el texto del PDF), sin reintento para no duplicar
 var COLA={guardar:1,marcarVistos:1};                                                        // se pueden hacer sin señal: quedan en cola
 
 // ---------- instalar como app + abrir sin señal ----------

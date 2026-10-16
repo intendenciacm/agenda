@@ -2,7 +2,7 @@
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#14213D">
+<meta name="theme-color" content="#14213D"><meta name="apple-mobile-web-app-title" content="Agenda">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Mi agenda de servicios</title>
@@ -42,7 +42,7 @@ var COLA={guardar:1,marcarVistos:1};                                            
 // ---------- instalar como app + abrir sin señal ----------
 var base=location.origin+location.pathname.replace(/[^\/]*$/,'');
 var MURL='';
-try{MURL=URL.createObjectURL(new Blob([JSON.stringify({name:'Control de servicios · Intendencia',short_name:'Servicios',start_url:base+(K?'?k='+encodeURIComponent(K):''),scope:base,display:'standalone',background_color:'#F6F4EE',theme_color:'#14213D',lang:'es',icons:[{src:base+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:base+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:base+'icon-512-maskable.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]})],{type:'application/manifest+json'}))}catch(e){}
+try{MURL=URL.createObjectURL(new Blob([JSON.stringify({name:'Agenda',short_name:'Agenda',start_url:base+(K?'?k='+encodeURIComponent(K):''),scope:base,display:'standalone',background_color:'#F6F4EE',theme_color:'#14213D',lang:'es',icons:[{src:base+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:base+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:base+'icon-512-maskable.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]})],{type:'application/manifest+json'}))}catch(e){}
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}
 
 // ---------- almacenamiento en el celular ----------
@@ -146,7 +146,7 @@ function pintar(c,deCache){
   var html=String(c.html||'').replace(/^\s*<title>.*?<\/title>/i,'');
   PRE=c.rows||[];
   document.open();
-  document.write('<!doctype html><html lang="es"'+(function(){try{return localStorage.getItem('ag_lock')?' data-lk="1"':''}catch(e){return ''}})()+'><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#14213D"><link rel="manifest" href="'+(MURL||'manifest.webmanifest')+'"><link rel="apple-touch-icon" href="'+base+'apple-touch-icon.png"><title>Mi agenda de servicios</title><script>window.google={script:{run:window.__ag.mk({})}};<\/script></head><body>'+html+'</body></html>');
+  document.write('<!doctype html><html lang="es"'+(function(){try{return localStorage.getItem('ag_lock')?' data-lk="1"':''}catch(e){return ''}})()+'><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#14213D"><meta name="apple-mobile-web-app-title" content="Agenda"><link rel="manifest" href="'+(MURL||'manifest.webmanifest')+'"><link rel="apple-touch-icon" href="'+base+'apple-touch-icon.png"><title>Mi agenda de servicios</title><script>window.google={script:{run:window.__ag.mk({})}};<\/script></head><body>'+html+'</body></html>');
   document.close();
   enganchar();barra();vaciar();
 }

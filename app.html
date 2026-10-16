@@ -80,12 +80,14 @@ function vaciar(){
   raw(it.fn,it.a,SES,30000).then(function(j){
     fl=false;
     if(j.ok){var q2=cola();q2.shift();setCola(q2);barra();vaciar()}
-    else if(j.e==='sesion'){est.msg='Tu sesión venció: abrí la agenda con señal e ingresá tu clave para enviar los cambios.';barra()}
-    else{var q3=cola();if(q3.length){q3[0].n=(q3[0].n||0)+1;if(q3[0].n>=4){q3.shift();est.msg='Un cambio no se pudo guardar: '+j.e}setCola(q3)}barra();programar()}
+    else if(j.e==='sesion'){avisar('Tu sesión venció: abrí la agenda con señal e ingresá tu clave para enviar los cambios.',12000)}
+    else{var q3=cola();if(q3.length){q3[0].n=(q3[0].n||0)+1;if(q3[0].n>=4){q3.shift();avisar('Un cambio no se pudo guardar: '+j.e,8000)}setCola(q3)}barra();programar()}
   },function(){fl=false;programar()});
 }
 
 // ---------- cartel inferior ----------
+var _avT=0;
+function avisar(m,ms){est.msg=m;barra();clearTimeout(_avT);_avT=setTimeout(function(){est.msg='';barra()},ms||8000)}
 function barra(){
   var q=cola().length,t=[],b=document.getElementById('agBar');
   if(est.deCache)t.push((navigator.onLine===false?'Sin conexión':'Datos guardados')+' · datos del '+fmt(est.cacheT));

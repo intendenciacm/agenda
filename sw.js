@@ -1,5 +1,5 @@
 // Permite abrir la agenda sin señal: guarda en el celular la página de entrada (no guarda datos: eso lo hace la página).
-var V = 'ag-v2';
+var V = 'ag-v3';
 var BASE = self.registration.scope;
 function conTiempo(p, ms) {
   return new Promise(function (ok, ko) {
@@ -9,7 +9,7 @@ function conTiempo(p, ms) {
 }
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(V).then(function (c) {
-    return Promise.all(['', 'index.html', 'app.html', 'icon-192.png', 'icon-512.png'].map(function (p) {
+    return Promise.all(['', 'index.html', 'icon-192.png', 'icon-512.png', 'icon-512-maskable.png', 'apple-touch-icon.png', 'jakarta.woff2'].map(function (p) {
       return fetch(BASE + p, {cache: 'no-store'}).then(function (r) { if (r.ok) return c.put(BASE + p, r); }).catch(function () {});
     }));
   }).then(function () { return self.skipWaiting(); }));

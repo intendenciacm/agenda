@@ -76,7 +76,12 @@ function msg(t,re){box.innerHTML='<p class="m"></p>';box.firstChild.textContent=
 function espera(b,txt){var t0=Date.now(),old=b.textContent;b.textContent=txt;var iv=setInterval(function(){b.textContent=txt+' ('+Math.round((Date.now()-t0)/1000)+' s)'},1000);return function(){clearInterval(iv);b.textContent=old}}
 function getS(){try{return localStorage.getItem(LS)||''}catch(e){return ''}}
 function setS(v){try{if(v)localStorage.setItem(LS,v);else localStorage.removeItem(LS)}catch(e){}}
-if(!K){msg('Falta tu link personal. Pedile el link a la Intendencia.');return}
+if(!K){
+  box.innerHTML='<h1>Agenda</h1><p class="m">Esta app todavía no sabe quién sos. Pegá acá tu link personal (el que te pasó la Intendencia) una sola vez.</p><form id="lf" autocomplete="off"><label for="lk">Tu link personal</label><input id="lk" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://intendenciacm.github.io/agenda/?k=…" style="font-size:1rem;letter-spacing:0;text-align:left"><div class="e" id="le" role="alert"></div><button type="submit">Guardar y entrar</button></form>';
+  document.getElementById('lf').onsubmit=function(ev){ev.preventDefault();var v=document.getElementById('lk').value.trim(),m=v.match(/[?&]k=([^&#\s]+)/),t=m?decodeURIComponent(m[1]):v;
+    if(!/^[A-Za-z0-9_-]{16,}$/.test(t)){document.getElementById('le').textContent='No parece un link válido. Copiá el link completo que te pasó la Intendencia.';return}
+    try{localStorage.setItem('ag_lastK',t)}catch(e){}location.href=location.pathname+'?k='+encodeURIComponent(t)};
+  return}
 
 // ---------- cola de cambios sin enviar ----------
 function programar(){if(!tm)tm=setTimeout(function(){tm=null;vaciar()},20000)}

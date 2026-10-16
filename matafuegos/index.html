@@ -120,13 +120,18 @@ img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
 #lock .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;justify-items:center}#lock .pad button{width:74px;height:74px;border-radius:50%;border:0;background:var(--card);color:var(--fg);font-size:1.6rem;font-weight:600;box-shadow:var(--sh);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0}#lock .pad button:active{background:var(--act)}#lock .pad button.nb{background:transparent;border-color:transparent;box-shadow:none;font-size:1rem;color:var(--ac)}#lock .pad button svg{width:30px;height:30px}
 #lock .lkl{margin-top:20px;background:none;border:0;color:var(--ac);font-weight:700;font-size:.95rem;padding:10px}
 .lkrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.lkrow .btn{flex:1 1 140px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fl{display:block;min-width:0}.fl>span{display:block;font-size:.74rem;font-weight:700;color:var(--mut);margin:0 2px 4px}
+.fl select,.fl input[type=text]{padding:12px 34px 12px 12px;font-size:.92rem;border-radius:14px}.fl input[type=text]{padding-right:12px}.fl textarea{border-radius:14px}
+.pisoh{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:12px 2px 6px}
+.mprev{white-space:pre-wrap;word-break:break-word;font-size:.86rem;line-height:1.45;background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:12px;max-height:260px;overflow-y:auto}
+.adj{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line);border-radius:16px;padding:10px;margin-bottom:10px}.adj img{width:72px;height:72px;object-fit:cover;border-radius:10px}.adj .pdfi{width:72px;height:72px;border-radius:10px;background:var(--badb);color:var(--bad);display:flex;align-items:center;justify-content:center;font-weight:800}
 </style></head>
 <body><div id="app"><div class="login"><p class="mut" style="text-align:center">Abriendo…</p></div></div>
 <script>
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.12';
+var VERSION='1.13';
 var ED_COD=null;
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
@@ -140,7 +145,7 @@ var _l=document.querySelector('link[rel=manifest]');if(_l)_l.href=URL.createObje
 var SK='ag_s_'+K; // misma sesión que la agenda (mismo sitio)
 var S=ls(SK)||'';
 var DATA=jget('mf_data_'+K,null), DRAFT=jget('mf_cur_'+K,null), QUEUE=jget('mf_q_'+K,[]);
-var UI={tab:'inicio',view:'',ed:'',filtro:'faltan',q:'',eqq:'',eqed:'Todos',eqn:60,sheet:null,toast:null,busy:false,online:navigator.onLine,sync:'',last:jget('mf_last_'+K,'')};
+var UI={tab:'inicio',view:'',ed:'',filtro:'faltan',q:'',eqq:'',eqed:'Todos',eqn:60,ord:'asc',rpiso:'',eqag:'',eqkg:'',eqan:'',eqpiso:'',eqord:'',eqbaja:false,edv:{},bmot:'',badj:null,cextra:'',sheet:null,toast:null,busy:false,online:navigator.onLine,sync:'',last:jget('mf_last_'+K,'')};
 var $=function(s,r){return (r||document).querySelector(s)};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function save(){var a=lsok('mf_cur_'+K,DRAFT?JSON.stringify(DRAFT):null),b=lsok('mf_q_'+K,JSON.stringify(QUEUE));return a&&b}
@@ -355,27 +360,61 @@ function viewInicio(){
   h+=li?'<div class="list">'+li+'</div>':'<div class="empty">Todavía no hay recorridas.</div>';
   return shell(nom?'Hola, '+nom:'Matafuegos',UI.last?'Actualizado '+UI.last:'',h,{});
 }
+
+/* ---------- piso / zona: de abajo hacia arriba ---------- */
+function pisoDe(ub){
+  var s=String(ub||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim(),m;
+  if(!s||s==='-')return{k:999,t:'Sin piso'};
+  if((m=/(\d+)\s*°?\s*(SS|SUBSUELO|SOTANO)\b/.exec(s)))return{k:-Number(m[1]),t:'Subsuelo '+Number(m[1])};
+  if((m=/(?:^|\s)(?:SUBSUELO|SOTANO)\s*(\d+)?/.exec(s))){var n=m[1]?Number(m[1]):1;return{k:-n,t:'Subsuelo '+n}}
+  if((m=/(\d+)\s*°?\s*PIS(?:O)?\b/.exec(s))||(m=/\bPISO\s*(\d+)/.exec(s))){var p=Number(m[1]);return{k:p,t:'Piso '+p}}
+  if(/\b(PB|PLANTA BAJA)\b/.test(s))return{k:0,t:'Planta baja'};
+  if(/\b(EP|ENTREPISO)\b/.test(s))return{k:0.5,t:'Entrepiso'};
+  if(/\b(TERRAZA|AZOTEA)\b/.test(s))return{k:1000,t:'Terraza'};
+  return{k:999,t:'Sin piso'};
+}
+function ordenar(l,dir){
+  var d=dir==='desc'?-1:1;
+  return l.slice().sort(function(a,b){var pa=pisoDe(a.ub).k,pb=pisoDe(b.ub).k;if(pa!==pb)return(pa-pb)*d;
+    var u=String(a.ub).localeCompare(String(b.ub),'es',{numeric:true});return u||String(a.nro).localeCompare(String(b.nro),'es',{numeric:true})});
+}
+function pisosDe(l,dir){
+  var m={},o=[];l.forEach(function(e){var p=pisoDe(e.ub);if(!m[p.k]){m[p.k]={k:p.k,t:p.t,n:0};o.push(m[p.k])}m[p.k].n++});
+  o.sort(function(a,b){return dir==='desc'?b.k-a.k:a.k-b.k});return o;
+}
+function selOpts(vals,cur,todos){return '<option value="">'+esc(todos)+'</option>'+vals.map(function(v){return '<option value="'+esc(v[0])+'"'+(String(v[0])===String(cur)?' selected':'')+'>'+esc(v[1])+'</option>'}).join('')}
 function estadoEq(id){var it=DRAFT&&DRAFT.items[id];return it?it.e:''}
 function viewRecorrida(){
   var r=resumenDraft(),all=eqs().filter(function(e){return e.ed===DRAFT.ed&&e.est!=='Baja'}),q=UI.q.trim().toLowerCase();
-  var lista=all.filter(function(e){
+  var pisos=pisosDe(all,UI.ord);if(UI.rpiso!==''&&!pisos.some(function(p){return String(p.k)===String(UI.rpiso)}))UI.rpiso='';
+  var lista=ordenar(all,UI.ord).filter(function(e){
     var s=estadoEq(e.id);
+    if(UI.rpiso!==''&&String(pisoDe(e.ub).k)!==String(UI.rpiso))return false;
     if(UI.filtro==='faltan'&&s)return false;
     if(UI.filtro==='fallas'&&s!=='Falla')return false;
     if(q&&[e.nro,e.id,e.ub,e.ag].join(' ').toLowerCase().indexOf(q)<0)return false;
     return true});
   var h='<div style="margin:-2px 0 10px"><div class="bar" style="background:var(--line)"><i style="width:'+(r.tot?Math.round(r.c*100/r.tot):0)+'%;background:var(--ok)"></i></div><div class="mut" style="margin-top:6px">'+r.c+' de '+r.tot+' controlados · '+r.ok+' en orden · '+r.f+(r.f===1?' falla':' fallas')+'</div><div style="text-align:right;margin-top:2px"><button type="button" class="chip" style="padding:7px 14px;font-size:.82rem" data-a="cancelrec">Cancelar recorrida</button></div></div>';
   h+='<div class="chips">'+[['faltan','Faltan ('+(r.tot-r.c)+')'],['todos','Todos'],['fallas','Con falla ('+r.f+')']].map(function(c){return '<button class="chip" data-a="filtro:'+c[0]+'" aria-pressed="'+(UI.filtro===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>';
+  var pm={};all.forEach(function(e){var k=pisoDe(e.ub).k;pm[k]=pm[k]||{t:0,c:0};pm[k].t++;if(estadoEq(e.id))pm[k].c++});
+  h+='<div class="fgrid"><label class="fl"><span>Piso o zona</span><select id="rpiso">'+selOpts(pisos.map(function(p){return[p.k,p.t+' · '+pm[p.k].c+'/'+pm[p.k].t]}),UI.rpiso,'Todos los pisos')+'</select></label><label class="fl"><span>Orden</span><select id="rord"><option value="asc"'+(UI.ord==='asc'?' selected':'')+'>De abajo hacia arriba</option><option value="desc"'+(UI.ord==='desc'?' selected':'')+'>De arriba hacia abajo</option></select></label></div>';
   h+='<input type="search" id="qq" placeholder="Buscar número o ubicación" value="'+esc(UI.q)+'" style="margin-bottom:12px">';
+  var ult=null;
   h+=lista.length?lista.map(function(e){
-    var it=DRAFT.items[e.id],cl=it?(it.e==='OK'?' ok':' bad'):'';
-    return '<div class="eq'+cl+'"><div class="eqh"><span class="av">'+(it&&it.e==='OK'?IC.chk:IC.ext)+'</span><div><div class="t">'+esc(nroT(e))+'</div><div class="u">'+esc(ubT(e))+' · '+esc(e.ag)+' '+esc(e.kg)+' kg</div></div></div>'+
+    var it=DRAFT.items[e.id],cl=it?(it.e==='OK'?' ok':' bad'):'',pp=pisoDe(e.ub),enc='';
+    if(UI.rpiso===''&&ult!==pp.k){ult=pp.k;enc='<div class="pisoh">'+esc(pp.t)+'</div>'}
+    return enc+'<div class="eq'+cl+'"><div class="eqh"><span class="av">'+(it&&it.e==='OK'?IC.chk:IC.ext)+'</span><div><div class="t">'+esc(nroT(e))+'</div><div class="u">'+esc(ubT(e))+' · '+esc(e.ag)+' '+esc(e.kg)+' kg</div></div></div>'+
      (it?'<div style="margin-bottom:8px">'+(it.e==='OK'?'<span class="pill ok">✓ En orden</span>':it.fallas.map(function(f){return '<span class="pill bad" style="margin:0 4px 4px 0">⚠ '+esc(f.tipo)+'</span>'}).join(''))+(it.e==='Falla'&&it.fotos&&it.fotos.length?'<span class="pill" style="margin:0 4px 4px 0">'+it.fotos.length+(it.fotos.length===1?' foto':' fotos')+'</span>':'')+(it.e==='Falla'&&it.fallas[0]&&it.fallas[0].nota?'<div class="mut">'+esc(it.fallas.map(function(f){return f.nota}).filter(Boolean).join(' · '))+'</div>':'')+'</div>':'')+
      '<div class="btns">'+(it?'<button class="btn bad" data-a="deshacer:'+e.id+'">Deshacer</button><button class="btn sec" data-a="falla:'+e.id+'">Editar falla</button>':'<button class="btn ok" data-a="ok:'+e.id+'">'+IC.chk+'En orden</button><button class="btn bad" data-a="falla:'+e.id+'">'+IC.warn+'Falla</button>')+'</div></div>'}).join(''):'<div class="empty">'+(UI.filtro==='faltan'&&!q?'¡Controlaste todos los equipos! Cerrá la recorrida.':'No hay equipos con ese filtro.')+'</div>';
+  if(!lista.length&&UI.rpiso!==''&&UI.filtro==='faltan'&&!q){
+    var sig=pisos.filter(function(p){return pm[p.k].c<pm[p.k].t&&String(p.k)!==String(UI.rpiso)});
+    var ia=pisos.map(function(p){return String(p.k)}).indexOf(String(UI.rpiso)),prox=sig.filter(function(p){return pisos.indexOf(p)>ia})[0]||sig[0];
+    h+=prox?'<button class="btn" style="margin-top:6px" data-a="rpiso:'+prox.k+'">Siguiente: '+esc(prox.t)+'</button>':'';
+  }
   return shell(DRAFT.ed,'Recorrida de matafuegos',h,{back:true,nonav:true,fab:'<button class="btn" data-a="cerrar"'+(r.c?'':' disabled')+'>Cerrar recorrida'+(r.c?' ('+r.c+' controlados'+(r.f?', '+r.f+(r.f===1?' falla':' fallas'):'')+')':'')+'</button>'});
 }
 function fotosHtml(){var f=UI.ffotos||[];return '<div class="fotos">'+f.map(function(u,i){return '<div class="th"><img src="'+u+'" alt="Foto '+(i+1)+'"><button class="x" data-a="fotoq:'+i+'" aria-label="Quitar la foto">×</button></div>'}).join('')+(f.length<3?'<label class="add" for="ffile">'+IC.cam+'<span>Foto</span></label><input type="file" id="ffile" accept="image/*" capture="environment" hidden>':'')+'</div>'}
-function reducir(file,cb){var fr=new FileReader();fr.onload=function(){var im=new Image();im.onload=function(){var m=1000,w=im.width,h=im.height,k=Math.min(1,m/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);try{cb(c.toDataURL('image/jpeg',0.6))}catch(e){cb(null)}};im.onerror=function(){cb(null)};im.src=fr.result};fr.onerror=function(){cb(null)};fr.readAsDataURL(file)}
+function reducir(file,cb,mx,q){var fr=new FileReader();fr.onload=function(){var im=new Image();im.onload=function(){var m=mx||1000,w=im.width,h=im.height,k=Math.min(1,m/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);try{cb(c.toDataURL('image/jpeg',q||0.6))}catch(e){cb(null)}};im.onerror=function(){cb(null)};im.src=fr.result};fr.onerror=function(){cb(null)};fr.readAsDataURL(file)}
 function fotoBtn(f){return(f.fo&&f.fo.length)?'<div style="margin-top:10px"><button class="btn sec" data-a="fotosver:'+esc(f.n)+'">'+IC.cam+'Ver fotos ('+f.fo.length+')</button></div>':''}
 function sheetFotos(f,out){return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Fotos de la falla</h3><div class="mut" style="margin-bottom:10px">'+esc(f.tipo)+' · N° '+esc(f.nro)+'</div>'+(out.length?out.map(function(u){return '<img class="big" src="'+u+'" alt="Foto de la falla">'}).join(''):'<div class="empty">No se pudo abrir ninguna foto.</div>')+'<button class="btn sec" style="margin-top:6px" data-a="cerrarsheet">Cerrar</button></div></div>'}
 function verFotos(n){var f=DATA.fallas.filter(function(z){return z.n===n})[0];if(!f||!f.fo||!f.fo.length)return;
@@ -383,27 +422,40 @@ function verFotos(n){var f=DATA.fallas.filter(function(z){return z.n===n})[0];if
   UI.sheet='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Fotos de la falla</h3><div class="mut">Abriendo…</div></div></div>';render();
   var out=[];(function sig(i){if(i>=f.fo.length){UI.sheet=sheetFotos(f,out);render();return}
     post('verAdjunto',[K,f.fo[i]]).then(function(j){if(j&&j.ok&&j.r)out.push('data:'+j.r.type+';base64,'+j.r.b64);sig(i+1)}).catch(function(){UI.sheet=null;toast('No se pudieron abrir las fotos.','bad')})})(0)}
+function esOtra(t){return /^Otra/.test(String(t))}
 function sheetFalla(id){
   var e=eqs().filter(function(x){return x.id===id})[0],it=DRAFT.items[id],sel=it&&it.e==='Falla'?it.fallas.map(function(f){return f.tipo}):[],nota=it&&it.fallas[0]?it.fallas[0].nota:'';
   UI.fsel=sel.slice();UI.fnota=nota||'';UI.ffotos=((it&&it.fotos)||[]).slice();
   return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>¿Qué falla encontraste?</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(ubT(e))+'</div>'+
    (DATA.tipos||[]).map(function(t,i){return '<div class="opt" role="button" data-a="ftipo:'+i+'" aria-pressed="'+(sel.indexOf(t)>=0)+'"><i>'+(sel.indexOf(t)>=0?'✓':'')+'</i>'+esc(t)+'</div>'}).join('')+
-   fotosHtml()+'<textarea id="fnota" placeholder="Observaciones (opcional)" style="margin:6px 0 12px">'+esc(nota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+id+'">Guardar falla</button></div></div></div>';
+   fotosHtml()+'<textarea id="fnota" placeholder="'+(sel.some(esOtra)?'Explicá cuál es la falla (obligatorio)':'Observaciones (opcional)')+'" style="margin:6px 0 12px'+(sel.some(esOtra)?';border-color:var(--bad)':'')+'">'+esc(nota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+id+'">Guardar falla</button></div></div></div>';
 }
 function gruposLocal(){
   var emp=(DATA.emp&&DATA.emp[DRAFT.ed])||{n:'',mail:''},n=0;
   Object.keys(DRAFT.items).forEach(function(k){var it=DRAFT.items[k];if(it.e==='Falla')n+=it.fallas.length});
   return{emp:emp,n:n};
 }
+function mailPrevio(){
+  var g=gruposLocal(),e=g.emp,ls=[],fo=0,eq={};eqs().forEach(function(x){eq[x.id]=x});
+  Object.keys(DRAFT.items).forEach(function(id){var it=DRAFT.items[id];if(it.e!=='Falla')return;fo+=(it.fotos||[]).length;
+    it.fallas.forEach(function(f){var x=eq[id]||{};ls.push((ls.length+1)+'. Matafuego '+(x.nro&&x.nro!=='-'?'N° '+x.nro:'sin número de cilindro registrado')+' (código '+id+') · '+(x.ub&&x.ub!=='-'?x.ub:'sin ubicación cargada')+'\n   Problema: '+f.tipo+(f.nota?'\n   Observaciones: '+f.nota:''))})});
+  var fe=String(DRAFT.f||'').split('-').reverse().join('/'),ex=(UI.cextra||'').trim();
+  return{para:e.mail||'',emp:e.n||'',asunto:'Reclamo – Matafuegos – '+DRAFT.ed+' ('+ls.length+(ls.length===1?' falla':' fallas')+')',fotos:fo,
+    cuerpo:'Estimados '+(e.n||'(empresa sin definir)')+':\n\nEn la recorrida realizada el '+fe+' en '+DRAFT.ed+' se detectaron las siguientes situaciones:\n\n'+ls.join('\n\n')+(ex?'\n\n'+ex:'')+'\n\nSolicitamos su reparación o reposición y que nos confirmen la fecha de atención.\n\nSaludos,\nIntendencia de Edificios'};
+}
+function mailTxt(m){return 'Asunto: '+m.asunto+'\n\n'+m.cuerpo+(m.fotos?'\n\n(Se adjuntan '+m.fotos+(m.fotos===1?' foto':' fotos')+' de los equipos.)':'')}
 function sheetCerrar(){
   var r=resumenDraft(),g=gruposLocal(),sin=r.tot-r.c,h='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Cerrar la recorrida</h3><div class="mut" style="margin-bottom:10px">'+esc(DRAFT.ed)+'</div>'+
    '<div class="kpi"><div><b>'+r.c+'</b><span>controlados</span></div><div><b>'+r.ok+'</b><span>en orden</span></div><div><b>'+r.f+'</b><span>fallas</span></div></div>';
   if(sin>0)h+='<div class="note">Quedan '+sin+' equipos sin controlar. Podés cerrar igual o seguir.</div>';
   if(g.n){
+    var m=mailPrevio();
     h+='<div class="card" style="box-shadow:none;border:1.5px solid var(--line)"><b>Va a salir 1 mail</b><div class="mut">Para: '+esc(g.emp.n||'(sin empresa asignada)')+(g.emp.mail?' · '+esc(g.emp.mail):'')+'<br>Con '+g.n+(g.n===1?' falla':' fallas')+' juntas.</div></div>';
     if(!g.emp.n)h+='<div class="note bad">Este edificio no tiene empresa de matafuegos cargada: el mail no va a tener destinatario.</div>';
     else if(!g.emp.mail)h+='<div class="note bad">'+esc(g.emp.n)+' no tiene mail cargado.</div>';
-    h+='<div class="mut" style="margin-bottom:8px">Por ahora los mails salen a las direcciones de prueba, con «[Prueba]» en el asunto.</div>';
+    h+='<h3 class="sec" style="margin-top:12px">Así va a salir</h3><div id="mprev" class="mprev">'+esc(mailTxt(m))+'</div>';
+    h+='<textarea id="cr_extra" placeholder="Agregar un texto al mail (opcional)" style="margin:10px 0 8px">'+esc(UI.cextra||'')+'</textarea>';
+    h+='<div class="mut" style="margin-bottom:8px">El texto que escribas se agrega antes de «Solicitamos su reparación…». Por ahora los mails salen a las direcciones de prueba, con «[Prueba]» en el asunto.</div>';
   } else h+='<div class="note info">No hay fallas: no sale ningún mail. La recorrida queda registrada.</div>';
   if(!navigator.onLine)h+='<div class="note">Estás sin señal: la recorrida se guarda en el celular y se envía sola apenas haya conexión.</div>';
   h+='<div class="row" style="margin-top:6px"><button class="btn sec" data-a="cerrarsheet">Seguir</button><button class="btn" data-a="confirmar">Cerrar y enviar</button></div><button class="btn bad" style="margin-top:8px" data-a="descartar">Descartar recorrida</button></div></div>';
@@ -436,6 +488,10 @@ function sheetEq(id){
   h+='<div class="ficha"><div><span>Ubicación</span><b>'+v(e.ub)+'</b></div><div><span>Tipo</span><b>'+v(e.ag)+' '+(e.kg&&e.kg!=='-'?esc(e.kg)+' kg':'')+'</b></div><div><span>Año de fabricación</span><b>'+v(e.anio)+'</b></div><div><span>Vencimiento de carga</span><b>'+v(e.vc)+'</b></div><div><span>Prueba hidráulica</span><b>'+v(e.ph)+'</b></div><div><span>Baliza</span><b>'+(e.bal==='OK'?'Sí':v(e.bal))+'</b></div><div><span>Soporte</span><b>'+(e.sop==='OK'?'Sí':v(e.sop))+'</b></div><div><span>Último control</span><b>'+v(e.ult)+(e.por&&e.por!=='-'?'<br><span style="display:inline;font-weight:500">'+esc(e.por)+'</span>':'')+'</b></div></div>';
   if(e.obs&&e.obs!=='-')h+='<div class="note info" style="background:var(--bg);color:var(--fg)">'+esc(e.obs)+'</div>';
   var pe=pendientes(e),puede=DATA.puede;
+  if(e.est==='Baja'){
+    h+='<div class="note bad">Este equipo está dado de baja.</div><button class="btn sec" style="margin-top:10px" data-a="bajanota">Ver el motivo y la nota adjunta</button>'+(puede?'<button class="btn sec" style="margin-top:8px" data-a="reactivar">Reactivar el equipo</button>':'');
+    return h+'<button class="btn sec" style="margin-top:14px" data-a="cerrarsheet">Cerrar</button></div></div>';
+  }
   if(pe.length){
     h+='<h3 class="sec" style="margin-top:14px">Pendientes</h3>'+pe.map(function(q){
       var fa=fallaAbierta(id,q),dd=fa?diasDesde(fa.rec||''):null,bt='';
@@ -453,18 +509,84 @@ function sheetEq(id){
     h+='<h3 class="sec" style="margin-top:14px">Fallas en trámite</h3>'+otras.map(function(f){var dd=diasDesde(f.rec||'');return '<div class="pend"><div class="li" style="padding:0"><span class="av" style="background:var(--badb);color:var(--bad)">'+IC.warn+'</span><div class="m"><b>'+esc(f.tipo)+'</b><span class="mut">'+fmtF(f.f)+' · '+esc(f.por)+(f.rec&&dd!=null?' · reclamo '+txtDias(dd):'')+'</span></div><span class="pill '+(f.est==='Informado'?'warn':'bad')+'">'+esc(f.est)+'</span></div>'+fotoBtn(f)+(puede?'<div style="margin-top:10px">'+(f.est==='Informado'?'<button class="btn sec" data-a="pend:enviar:'+esc(f.n)+'">Enviar reclamo</button>':'<button class="btn sec" data-a="pend:reiterar:'+esc(f.n)+'">Reiterar reclamo</button>')+'</div>':'')+'</div>'}).join('');
   }
   if(!pe.length&&!otras.length)h+='<div class="note info">Todo en orden. No tiene pendientes ni fallas en trámite.</div>';
-  return h+'<button class="btn sec" style="margin-top:14px" data-a="cerrarsheet">Cerrar</button></div></div>';
+  if(puede)h+='<div class="row" style="margin-top:14px"><button class="btn sec" data-a="editar">Editar datos</button><button class="btn bad" data-a="bajar">Dar de baja</button></div>';
+  return h+'<button class="btn sec" style="margin-top:10px" data-a="cerrarsheet">Cerrar</button></div></div>';
+}
+
+/* ---------- editar equipo / dar de baja ---------- */
+var CAMPOS=[['ed','Edificio','sel'],['ub','Ubicación (piso y sector)','txt'],['puesto','Puesto','txt'],['ag','Tipo de extintor','ag'],['kg','Capacidad (kg)','txt'],['nro','N° de cilindro','txt'],['anio','Año de fabricación','txt'],['vc','Vence la carga (MM/AAAA)','txt'],['ph','Vence la prueba hidráulica (MM/AAAA)','txt'],['bal','Chapa baliza','okf'],['sop','Soporte','okf'],['obs','Observaciones','area']];
+function valIni(e,c){var v=e[c];return(v==null||v==='-')?'':String(v)}
+function sheetEdit(id){
+  var e=eqs().filter(function(x){return x.id===id})[0];if(!e)return null;
+  if(!UI.edv||UI.edv._id!==id){UI.edv={_id:id};CAMPOS.forEach(function(c){UI.edv[c[0]]=valIni(e,c[0])})}
+  var h='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Editar equipo</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(e.id)+'</div>';
+  var ags={};eqs().forEach(function(x){if(x.ag&&x.ag!=='-')ags[x.ag]=1});
+  CAMPOS.forEach(function(c){var k=c[0],v=UI.edv[k];h+='<label class="fl" style="margin-bottom:10px"><span>'+c[1]+'</span>';
+    if(c[2]==='sel')h+='<select id="ed_'+k+'">'+edificios().map(function(x){return '<option'+(x===v?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select>';
+    else if(c[2]==='okf')h+='<select id="ed_'+k+'"><option value="OK"'+(v==='OK'?' selected':'')+'>OK (está colocada)</option><option value="Falta"'+(v!=='OK'?' selected':'')+'>Falta</option></select>';
+    else if(c[2]==='area')h+='<textarea id="ed_'+k+'" style="min-height:64px">'+esc(v)+'</textarea>';
+    else h+='<input type="text" id="ed_'+k+'" value="'+esc(v)+'"'+(c[2]==='ag'?' list="agl"':'')+(k==='kg'?' inputmode="decimal"':k==='anio'?' inputmode="numeric"':'')+' autocomplete="off">'+(c[2]==='ag'?'<datalist id="agl">'+Object.keys(ags).map(function(a){return '<option value="'+esc(a)+'">'}).join('')+'</datalist>':'');
+    h+='</label>'});
+  return h+'<div class="row"><button class="btn sec" data-a="eqver:'+esc(id)+'">Cancelar</button><button class="btn" data-a="guardaredit">Guardar cambios</button></div></div></div>';
+}
+function sheetBaja(id){
+  var e=eqs().filter(function(x){return x.id===id})[0];if(!e)return null;
+  var a=UI.badj;
+  return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Dar de baja</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(ubT(e))+'</div>'+
+   '<div class="note">El equipo sale de las recorridas y de la lista, pero queda guardado con su historial. Se puede reactivar.</div>'+
+   '<label class="fl"><span>Motivo de la baja</span><textarea id="bj_mot" placeholder="Por qué se da de baja, o por cuál equipo se reemplaza" style="margin:4px 0 10px">'+esc(UI.bmot||'')+'</textarea></label>'+
+   '<div class="fl"><span>Nota firmada de la empresa (respaldo)</span></div>'+
+   (a?'<div class="adj">'+(a.pdf?'<div class="pdfi">PDF</div>':'<img src="'+a.d+'" alt="Nota adjunta">')+'<div class="m"><b>'+esc(a.n||'Adjunto')+'</b><button class="chip" data-a="adjq" style="margin-top:6px">Quitar</button></div></div>':
+     '<label class="btn sec" for="bfile" style="margin-bottom:10px">'+IC.cam+'Sacar foto o elegir archivo</label><input type="file" id="bfile" accept="image/*,application/pdf" hidden><div class="mut" style="margin-bottom:10px">Foto o PDF (hasta 4 MB). Es opcional, pero conviene dejar la nota como respaldo.</div>')+
+   '<div class="row"><button class="btn sec" data-a="eqver:'+esc(id)+'">Cancelar</button><button class="btn bad" data-a="confirmbaja">Dar de baja</button></div></div></div>';
+}
+function sheetBajaVer(o){
+  var id=UI.eid,e=eqs().filter(function(x){return x.id===id})[0]||{},h='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Baja del equipo</h3><div class="mut" style="margin-bottom:10px">'+esc(e.id||'')+' · '+esc(e.ed||'')+'</div>';
+  if(!o)h+='<div class="mut">Abriendo…</div>';
+  else if(!o.b)h+='<div class="note">No encuentro el registro de la baja.</div>';
+  else{h+='<div class="ficha"><div><span>Fecha</span><b>'+esc(o.b[0])+'</b></div><div><span>Lo registró</span><b>'+esc(o.b[1])+'</b></div></div><div class="note info" style="background:var(--bg);color:var(--fg)"><b>Motivo:</b> '+esc(o.b[5]||'—')+'</div>';
+    if(!o.b[6])h+='<div class="mut">No se adjuntó ninguna nota.</div>';
+    else if(!o.a)h+='<div class="note bad">No se pudo abrir la nota adjunta.</div>';
+    else if(o.a.type==='application/pdf')h+='<a class="btn sec" href="'+o.url+'" target="_blank" rel="noopener" style="margin-top:6px">Abrir la nota (PDF)</a>';
+    else h+='<img class="big" src="data:'+o.a.type+';base64,'+o.a.b64+'" alt="Nota de la empresa">';}
+  return h+'<button class="btn sec" style="margin-top:10px" data-a="eqver:'+esc(id)+'">Volver a la ficha</button></div></div>';
+}
+function pdfUrl(b64){var b=atob(b64),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return URL.createObjectURL(new Blob([a],{type:'application/pdf'}))}
+function verBaja(id){
+  if(!navigator.onLine){toast('Necesitás señal para ver la nota.','bad');return}
+  UI.sheet=sheetBajaVer(null);render();
+  post('equipoCambios',[K,id]).then(function(j){
+    if(!j||!j.ok)throw new Error('x');
+    var rows=(j.r||[]).filter(function(x){return x[2]==='Estado'&&x[4]==='Baja'}),b=rows[rows.length-1];
+    if(!b||!b[6]){UI.sheet=sheetBajaVer({b:b});render();return}
+    return post('verAdjunto',[K,b[6]]).then(function(a){var r=a&&a.ok&&a.r?a.r:null;UI.sheet=sheetBajaVer({b:b,a:r,url:r&&r.type==='application/pdf'?pdfUrl(r.b64):''});render()})
+  }).catch(function(){UI.sheet=null;toast('No se pudo abrir la baja. Revisá la señal.','bad');render()});
 }
 function viewEquipos(){
   if(!DATA)return viewInicio();
-  var q=UI.eqq.trim().toLowerCase(),eds=['Todos'].concat(edificios());
-  var lista=eqs().filter(function(e){return e.est!=='Baja'&&(UI.eqed==='Todos'||e.ed===UI.eqed)&&(!UI.eqpend||pendientes(e).length)&&(!q||[e.nro,e.id,e.ub,e.ed,e.ag].join(' ').toLowerCase().indexOf(q)>=0)});
-  var h='<input type="search" id="eqq" placeholder="Número del cilindro, piso o sector" value="'+esc(UI.eqq)+'" style="margin-bottom:10px"><div class="chips"><button class="chip" data-a="eqpend" aria-pressed="'+(!!UI.eqpend)+'">Con pendientes ('+pendTotal()+')</button></div><div class="chips">'+eds.map(function(x){return '<button class="chip" data-a="eqed:'+esc(x)+'" aria-pressed="'+(UI.eqed===x)+'">'+esc(x)+'</button>'}).join('')+'</div><div class="mut" style="margin:0 2px 8px">'+lista.length+' equipos</div>';
-  var tope=UI.eqn||60;
+  var q=UI.eqq.trim().toLowerCase(),todos=eqs(),nBaja=todos.filter(function(e){return e.est==='Baja'}).length;
+  var base=todos.filter(function(e){return UI.eqbaja?e.est==='Baja':e.est!=='Baja'});
+  var porEd=base.filter(function(e){return UI.eqed==='Todos'||e.ed===UI.eqed});
+  var ags=[],kgs=[],ans=[];porEd.forEach(function(e){if(e.ag&&e.ag!=='-'&&ags.indexOf(e.ag)<0)ags.push(e.ag);if(e.kg&&e.kg!=='-'&&kgs.indexOf(e.kg)<0)kgs.push(e.kg);if(e.anio&&e.anio!=='-'&&ans.indexOf(e.anio)<0)ans.push(e.anio)});
+  ags.sort(function(a,b){return a.localeCompare(b)});kgs.sort(function(a,b){return parseFloat(a)-parseFloat(b)});ans.sort(function(a,b){return b-a});
+  var pisos=pisosDe(porEd,'asc');
+  function ok(v,l){return v===''||l.indexOf(v)>=0}
+  var fag=ok(UI.eqag,ags)?UI.eqag:'',fkg=ok(UI.eqkg,kgs)?UI.eqkg:'',fan=ok(UI.eqan,ans)?UI.eqan:'',fpi=(UI.eqpiso===''||pisos.some(function(p){return String(p.k)===String(UI.eqpiso)}))?UI.eqpiso:'';
+  var lista=porEd.filter(function(e){return(!UI.eqpend||pendientes(e).length)&&(!fag||e.ag===fag)&&(!fkg||e.kg===fkg)&&(!fan||e.anio===fan)&&(fpi===''||String(pisoDe(e.ub).k)===String(fpi))&&(!q||[e.nro,e.id,e.ub,e.ed,e.ag].join(' ').toLowerCase().indexOf(q)>=0)});
+  if(UI.eqord)lista=ordenar(lista,UI.eqord);
+  var act=(UI.eqed!=='Todos')+(!!fag)+(!!fkg)+(!!fan)+(fpi!=='')+(!!UI.eqpend);
+  var h='<input type="search" id="eqq" placeholder="Número del cilindro, piso o sector" value="'+esc(UI.eqq)+'" style="margin-bottom:10px"><div class="chips"><button class="chip" data-a="eqpend" aria-pressed="'+(!!UI.eqpend)+'">Con pendientes ('+pendTotal()+')</button>'+(nBaja?'<button class="chip" data-a="eqbaja" aria-pressed="'+UI.eqbaja+'">Dados de baja ('+nBaja+')</button>':'')+(act?'<button class="chip" data-a="eqlimpiar">Quitar filtros ('+act+')</button>':'')+'</div>';
+  h+='<label class="fl" style="margin-bottom:8px"><span>Edificio</span><select id="eqed">'+selOpts(edificios().map(function(x){return[x,x]}),UI.eqed==='Todos'?'':UI.eqed,'Todos los edificios')+'</select></label>';
+  h+='<div class="fgrid"><label class="fl"><span>Tipo de extintor</span><select id="eqag">'+selOpts(ags.map(function(x){return[x,x]}),fag,'Todos')+'</select></label><label class="fl"><span>Kilos</span><select id="eqkg">'+selOpts(kgs.map(function(x){return[x,x+' kg']}),fkg,'Todos')+'</select></label><label class="fl"><span>Año de fabricación</span><select id="eqan">'+selOpts(ans.map(function(x){return[x,x]}),fan,'Todos')+'</select></label><label class="fl"><span>Piso o zona</span><select id="eqpiso">'+selOpts(pisos.map(function(p){return[p.k,p.t+' ('+p.n+')']}),fpi,'Todos')+'</select></label></div>';
+  h+='<label class="fl" style="margin:8px 0"><span>Orden</span><select id="eqord"><option value="">Como está cargado</option><option value="asc"'+(UI.eqord==='asc'?' selected':'')+'>Por piso: de abajo hacia arriba</option><option value="desc"'+(UI.eqord==='desc'?' selected':'')+'>Por piso: de arriba hacia abajo</option></select></label>';
+  h+='<div class="mut" style="margin:0 2px 8px">'+lista.length+(lista.length===1?' equipo':' equipos')+(UI.eqbaja?' dados de baja':'')+'</div>';
+  var tope=UI.eqn||60,ult=null;
   h+=lista.slice(0,tope).map(function(e){
-    var ab=DATA.fallas.filter(function(f){return f.eq===e.id&&f.est!=='Verificado'&&f.est!=='Anulada'});
-    return '<div class="eq tap'+(ab.length?' bad':'')+'" role="button" data-a="eqver:'+esc(e.id)+'"><div class="eqh"><span class="av">'+IC.ext+'</span><div><div class="t">'+esc(nroT(e))+' <span class="mut" style="font-weight:500">· '+esc(e.id)+'</span></div><div class="u">'+esc(e.ed)+' · '+esc(ubT(e))+'<br>'+esc(e.ag)+' '+esc(e.kg)+' kg'+(e.vc&&e.vc!=='-'?' · carga '+esc(e.vc):'')+'</div></div></div>'+
-      (e.sop!=='OK'?'<span class="pill warn">Sin soporte</span> ':'')+(e.bal!=='OK'?'<span class="pill warn">Sin baliza</span> ':'')+ab.map(function(f){return '<span class="pill bad">'+esc(f.tipo)+' · '+esc(f.est)+'</span> '}).join('')+'</div>'}).join('');
+    var ab=DATA.fallas.filter(function(f){return f.eq===e.id&&f.est!=='Verificado'&&f.est!=='Anulada'}),pp=pisoDe(e.ub),enc='';
+    if(UI.eqord&&ult!==pp.k){ult=pp.k;enc='<div class="pisoh">'+esc(pp.t)+'</div>'}
+    return enc+'<div class="eq tap'+(ab.length?' bad':'')+'" role="button" data-a="eqver:'+esc(e.id)+'"><div class="eqh"><span class="av">'+IC.ext+'</span><div><div class="t">'+esc(nroT(e))+' <span class="mut" style="font-weight:500">· '+esc(e.id)+'</span></div><div class="u">'+esc(e.ed)+' · '+esc(ubT(e))+'<br>'+esc(e.ag)+' '+esc(e.kg)+' kg'+(e.anio&&e.anio!=='-'?' · '+esc(e.anio):'')+(e.vc&&e.vc!=='-'?' · carga '+esc(e.vc):'')+'</div></div></div>'+
+      (e.est==='Baja'?'<span class="pill bad">Dado de baja</span> ':'')+(e.est!=='Baja'&&e.sop!=='OK'?'<span class="pill warn">Sin soporte</span> ':'')+(e.est!=='Baja'&&e.bal!=='OK'?'<span class="pill warn">Sin baliza</span> ':'')+ab.map(function(f){return '<span class="pill bad">'+esc(f.tipo)+' · '+esc(f.est)+'</span> '}).join('')+'</div>'}).join('');
+  if(!lista.length)h+='<div class="empty">No hay equipos con esos filtros.</div>';
   if(lista.length>tope){var rest=lista.length-tope;h+='<div class="mut" style="text-align:center;margin:10px 0 6px">Mostrando '+tope+' de '+lista.length+'</div><button class="btn sec" data-a="eqmas">Ver más ('+rest+(rest===1?' restante':' restantes')+')</button>'}
   else if(lista.length>60)h+='<div class="mut" style="text-align:center;margin:10px 0 6px">Mostrando los '+lista.length+' equipos</div>';
   return shell('Equipos','Matafuegos',h,{});
@@ -508,9 +630,10 @@ function act(a,ev){
   if(k==='tab'){UI.tab=x;UI.view='';}
   else if(k==='iniciar'){
     var eds=edificios();UI.ed=($('#edsel')&&$('#edsel').value)||UI.ed;
-    DRAFT={cid:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),ed:UI.ed,f:isoHoy(),ini:nowTxt(),items:{}};save();UI.view='rec';UI.filtro='faltan';UI.q='';
+    DRAFT={cid:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),ed:UI.ed,f:isoHoy(),ini:nowTxt(),items:{}};save();UI.view='rec';UI.filtro='faltan';UI.q='';UI.rpiso='';UI.cextra='';
   }
-  else if(k==='seguir'){UI.view='rec';UI.filtro='faltan';UI.q=''}
+  else if(k==='seguir'){UI.view='rec';UI.filtro='faltan';UI.q='';UI.rpiso=''}
+  else if(k==='rpiso'){UI.rpiso=x}
   else if(k==='back'){UI.view=''}
   else if(k==='filtro'){UI.filtro=x}
   else if(k==='ok'){DRAFT.items[x]={e:'OK',fallas:[]};save()}
@@ -530,6 +653,7 @@ function act(a,ev){
   else if(k==='ftipo'){var t=DATA.tipos[Number(x)],i=UI.fsel.indexOf(t);if(i>=0)UI.fsel.splice(i,1);else UI.fsel.push(t);UI.fnota=($('#fnota')||{}).value||UI.fnota;var id=UI.fid;UI.sheet=sheetFalla2();}
   else if(k==='guardarfalla'){
     var n=($('#fnota')||{}).value||'';if(!UI.fsel.length){toast('Elegí al menos un tipo de falla.','bad');return}
+    if(UI.fsel.some(esOtra)&&n.trim().length<3){toast('Si la falla es «Otra», explicá cuál es en el cuadro de texto.','bad');return}
     DRAFT.items[x]={e:'Falla',fallas:UI.fsel.map(function(t){return{tipo:t,nota:n.trim().slice(0,500)}}),fotos:(UI.ffotos||[]).slice()};
     if(!save()){DRAFT.items[x].fotos=[];save();toast('No hay lugar en el celular para la foto: la falla se guardó sin foto.','bad');UI.sheet=null;return}
     UI.sheet=null;
@@ -538,10 +662,10 @@ function act(a,ev){
   else if(k==='fotosver'){verFotos(x);return}
   else if(k==='cerrarsheet'){UI.sheet=null}
   else if(k==='cerrar'){UI.sheet=sheetCerrar()}
-  else if(k==='descartar'||k==='cancelrec'){var nm=DRAFT?Object.keys(DRAFT.items||{}).length:0;if(!DRAFT||nm===0||confirm('¿Cancelar la recorrida? Se pierde lo que marcaste ('+nm+(nm===1?' equipo':' equipos')+'). No se envía nada.')){var hab=!!DRAFT;DRAFT=null;save();UI.sheet=null;UI.view='';UI.tab='inicio';if(hab)toast('Recorrida cancelada. No se envió nada.','ok')}}
+  else if(k==='descartar'||k==='cancelrec'){var nm=DRAFT?Object.keys(DRAFT.items||{}).length:0;if(!DRAFT||nm===0||confirm('¿Cancelar la recorrida? Se pierde lo que marcaste ('+nm+(nm===1?' equipo':' equipos')+'). No se envía nada.')){var hab=!!DRAFT;DRAFT=null;UI.cextra='';save();UI.sheet=null;UI.view='';UI.tab='inicio';if(hab)toast('Recorrida cancelada. No se envió nada.','ok')}}
   else if(k==='confirmar'){
     var items=[];Object.keys(DRAFT.items).forEach(function(id){var it=DRAFT.items[id];if(it.e==='OK')items.push({eq:id,e:'OK'});else it.fallas.forEach(function(f,i){var o={eq:id,e:'Falla',tipo:f.tipo,nota:f.nota};if(i===0&&it.fotos&&it.fotos.length)o.fotos=it.fotos;items.push(o)})});
-    QUEUE.push({lote:{cid:DRAFT.cid,ed:DRAFT.ed,f:DRAFT.f,ini:DRAFT.ini,items:items},ts:Date.now()});
+    QUEUE.push({lote:{cid:DRAFT.cid,ed:DRAFT.ed,f:DRAFT.f,ini:DRAFT.ini,items:items,extra:(UI.cextra||'').trim().slice(0,1500)},ts:Date.now()});UI.cextra='';
     DRAFT=null;var sinfoto=false;if(!save()){QUEUE[QUEUE.length-1].lote.items.forEach(function(o){delete o.fotos});save();sinfoto=true}UI.sheet=null;UI.view='';UI.tab='inicio';
     toast(navigator.onLine?'Enviando la recorrida…':'Guardada en el celular. Se envía cuando haya señal.','ok');
     if(sinfoto)toast('Las fotos no entraron en el celular: la recorrida se envía sin fotos.','bad');
@@ -552,6 +676,24 @@ function act(a,ev){
   else if(k==='reintentar'){QUEUE[Number(x)].err=null;save();sincronizar(true);return}
   else if(k==='borrarq'){if(confirm('¿Descartar esta recorrida? No se va a enviar.')){QUEUE.splice(Number(x),1);save()}}
   else if(k==='eqed'){UI.eqed=x;UI.eqn=60}
+  else if(k==='eqbaja'){UI.eqbaja=!UI.eqbaja;UI.eqn=60}
+  else if(k==='eqlimpiar'){UI.eqed='Todos';UI.eqag='';UI.eqkg='';UI.eqan='';UI.eqpiso='';UI.eqpend=false;UI.eqn=60}
+  else if(k==='editar'){UI.edv={};UI.sheet=sheetEdit(UI.eid)}
+  else if(k==='guardaredit'){
+    var e0=eqs().filter(function(z){return z.id===UI.eid})[0],ch={};
+    if(e0){CAMPOS.forEach(function(c){var nv=String(UI.edv[c[0]]==null?'':UI.edv[c[0]]).trim(),ov=valIni(e0,c[0]);if(c[0]==='bal'||c[0]==='sop'){ov=e0[c[0]]==='OK'?'OK':'Falta'}if(nv!==ov)ch[c[0]]=nv})}
+    if(!Object.keys(ch).length){toast('No cambiaste nada.','bad');UI.sheet=sheetEdit(UI.eid);render();return}
+    llamar('equipoEditar',[K,UI.eid,ch],'Equipo actualizado.');return;
+  }
+  else if(k==='bajar'){UI.bmot='';UI.badj=null;UI.sheet=sheetBaja(UI.eid)}
+  else if(k==='adjq'){UI.badj=null;UI.sheet=sheetBaja(UI.eid)}
+  else if(k==='confirmbaja'){
+    var mt=(UI.bmot||'').trim();if(mt.length<3){toast('Escribí el motivo de la baja.','bad');UI.sheet=sheetBaja(UI.eid);render();return}
+    var adj=UI.badj?{d:UI.badj.d,n:UI.badj.n}:null,eb=UI.eid;UI.bmot='';UI.badj=null;
+    llamar('equipoBaja',[K,eb,mt,false,adj],'Equipo dado de baja.','¿Dar de baja este equipo? Sale de las recorridas y de la lista (queda guardado y se puede reactivar).');return;
+  }
+  else if(k==='reactivar'){llamar('equipoBaja',[K,UI.eid,'',true],'Equipo reactivado.','¿Reactivar este equipo? Vuelve a las recorridas.');return}
+  else if(k==='bajanota'){verBaja(UI.eid);return}
   else if(k==='salir'){if(confirm('¿Cerrar sesión? También se cierra la sesión de la agenda en este celular.')){ls('mf_lock',null);ls(SK,null);S='';location.reload();return}}
   else if(k==='reload'){location.reload();return}
   render();
@@ -560,7 +702,7 @@ function sheetFalla2(){ // vuelve a dibujar la hoja de falla manteniendo la sele
   var e=eqs().filter(function(x){return x.id===UI.fid})[0];
   return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>¿Qué falla encontraste?</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(ubT(e))+'</div>'+
    (DATA.tipos||[]).map(function(t,i){return '<div class="opt" role="button" data-a="ftipo:'+i+'" aria-pressed="'+(UI.fsel.indexOf(t)>=0)+'"><i>'+(UI.fsel.indexOf(t)>=0?'✓':'')+'</i>'+esc(t)+'</div>'}).join('')+
-   fotosHtml()+'<textarea id="fnota" placeholder="Observaciones (opcional)" style="margin:6px 0 12px">'+esc(UI.fnota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+UI.fid+'">Guardar falla</button></div></div></div>';
+   fotosHtml()+'<textarea id="fnota" placeholder="'+(UI.fsel.some(esOtra)?'Explicá cuál es la falla (obligatorio)':'Observaciones (opcional)')+'" style="margin:6px 0 12px'+(UI.fsel.some(esOtra)?';border-color:var(--bad)':'')+'">'+esc(UI.fnota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+UI.fid+'">Guardar falla</button></div></div></div>';
 }
 document.addEventListener('click',function(ev){
   var t=ev.target.closest('[data-a]');
@@ -576,8 +718,19 @@ document.addEventListener('input',function(ev){
   else if(t.id==='eqq'){UI.eqq=t.value;UI.eqn=60;render()}
   else if(t.id==='edsel'){UI.ed=t.value}
   else if(t.id==='fnota'){UI.fnota=t.value}
+  else if(t.id&&t.id.indexOf('ed_')===0){UI.edv[t.id.slice(3)]=t.value;UI.sheet=sheetEdit(UI.eid)}
+  else if(t.id==='bj_mot'){UI.bmot=t.value;UI.sheet=sheetBaja(UI.eid)}
+  else if(t.id==='cr_extra'){UI.cextra=t.value;var mp=$('#mprev');if(mp)mp.textContent=mailTxt(mailPrevio());UI.sheet=sheetCerrar()}
 });
 document.addEventListener('change',function(ev){var t=ev.target;
+  var sm={eqed:'eqed',eqag:'eqag',eqkg:'eqkg',eqan:'eqan',eqpiso:'eqpiso',eqord:'eqord',rpiso:'rpiso',rord:'ord'};
+  if(t.id&&t.id.indexOf('ed_')===0){UI.edv[t.id.slice(3)]=t.value;UI.sheet=sheetEdit(UI.eid);return}
+  if(t.id&&sm[t.id]){UI[sm[t.id]]=(t.id==='eqed'&&t.value==='')?'Todos':t.value;UI.eqn=60;render();return}
+  if(t.id==='bfile'&&t.files&&t.files[0]){var bf=t.files[0];
+    if(bf.type==='application/pdf'){if(bf.size>4*1024*1024){toast('El PDF pesa más de 4 MB. Sacale una foto a la nota.','bad');return}
+      var fr=new FileReader();fr.onload=function(){UI.badj={d:String(fr.result),n:bf.name,pdf:true};UI.sheet=sheetBaja(UI.eid);render()};fr.onerror=function(){toast('No se pudo leer el archivo.','bad')};fr.readAsDataURL(bf)}
+    else reducir(bf,function(u){if(!u){toast('No se pudo leer la foto.','bad');return}UI.badj={d:u,n:'Nota de baja.jpg'};UI.sheet=sheetBaja(UI.eid);render()},1600,0.72);
+    return}
   if(t.id==='ffile'&&t.files&&t.files[0]){var fl=t.files[0];UI.fnota=($('#fnota')||{}).value||UI.fnota||'';
     reducir(fl,function(u){if(!u){toast('No se pudo leer la foto.','bad');return}UI.ffotos=UI.ffotos||[];if(UI.ffotos.length<3)UI.ffotos.push(u);UI.sheet=sheetFalla2();render()})}});
 document.addEventListener('submit',function(ev){var f=ev.target.getAttribute('data-f');if(f==='login')doLogin(ev);else if(f==='nom'){ev.preventDefault();nEntrar()}});

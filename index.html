@@ -37,7 +37,8 @@ try{if(K)localStorage.setItem('ag_lastK',K);else K=localStorage.getItem('ag_last
 var LS='ag_s_'+K, CK='ag_c_'+K, QK='ag_q_'+K, RK='ag_r_'+K+'_', box=document.getElementById('c');
 var SES='', PRE=null, fl=false, tm=null, intervalo=false;
 var est={deCache:false,cacheT:0,nuevo:false,msg:''};
-var READ={cargar:1,reclamos:1,contratosVivos:1,obligaciones:1,empresas:1,cargaListas:1};   // se guardan para verlas sin señal
+var READ={cargar:1,reclamos:1,contratosVivos:1,obligaciones:1,empresas:1,cargaListas:1,plLista:1};   // se guardan para verlas sin señal
+var LARGA={plSubir:1,plLink:1,plLeer:1};   // cargas de pliegos: tardan (leen el texto del PDF), sin reintento para no duplicar
 var COLA={guardar:1,marcarVistos:1};                                                        // se pueden hacer sin señal: quedan en cola
 
 // ---------- instalar como app + abrir sin señal ----------
@@ -161,12 +162,12 @@ function ok(h,v){if(h.s)setTimeout(function(){h.s(v)},0)}
 function ko(h,e){if(h.f)h.f(e instanceof Error?e:new Error(String(e)))}
 function go(n,a,h,t){
   var cK=RK+n+'_'+hash(JSON.stringify(a));
-  raw(n,a,SES,45000).then(function(j){
+  raw(n,a,SES,LARGA[n]?280000:45000).then(function(j){
     if(j.ok){if(READ[n])guarda(cK,{t:Date.now(),r:j.r});ok(h,n==='cargar'?overlay(j.r):j.r)}
     else if(j.e==='sesion'){setS('');location.reload()}
     else ko(h,new Error(j.e));
   },function(){
-    if(t<1&&navigator.onLine!==false){setTimeout(function(){go(n,a,h,t+1)},1500);return}
+    if(t<1&&!LARGA[n]&&navigator.onLine!==false){setTimeout(function(){go(n,a,h,t+1)},1500);return}
     var c=READ[n]&&lee(cK);
     if(c){ok(h,n==='cargar'?overlay(c.r):c.r);barra()}
     else ko(h,new Error('Sin conexión. Esto necesita internet: probá de nuevo cuando tengas señal.'));

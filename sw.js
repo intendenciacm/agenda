@@ -1,5 +1,5 @@
 // Permite abrir la agenda sin señal: guarda en el celular la página de entrada (no guarda datos: eso lo hace la página).
-var V = 'ag-v3';
+var V = 'ag-v4';
 var BASE = self.registration.scope;
 function conTiempo(p, ms) {
   return new Promise(function (ok, ko) {

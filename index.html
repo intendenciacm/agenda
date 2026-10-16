@@ -26,6 +26,7 @@ button:active{transform:scale(.97)}
 button:disabled{opacity:.55}
 a{font-weight:700}
 .e{color:var(--bad);min-height:1.3em;font-size:.92rem;font-weight:600;margin-top:10px;text-align:center}
+select{width:100%;font:inherit;font-size:1rem;font-weight:600;padding:15px 16px;border:1.5px solid var(--line);border-radius:16px;background:var(--card);color:var(--fg);outline:none}
 </style></head><body><div class="c" id="c"><p class="m">Falta tu link personal. Pedile el link a la Intendencia.</p></div>
 <script>
 (function(){
@@ -76,12 +77,56 @@ function msg(t,re){box.innerHTML='<p class="m"></p>';box.firstChild.textContent=
 function espera(b,txt){var t0=Date.now(),old=b.textContent;b.textContent=txt;var iv=setInterval(function(){b.textContent=txt+' ('+Math.round((Date.now()-t0)/1000)+' s)'},1000);return function(){clearInterval(iv);b.textContent=old}}
 function getS(){try{return localStorage.getItem(LS)||''}catch(e){return ''}}
 function setS(v){try{if(v)localStorage.setItem(LS,v);else localStorage.removeItem(LS)}catch(e){}}
-if(!K){
-  box.innerHTML='<h1>Agenda</h1><p class="m">Esta app todavía no sabe quién sos. Pegá acá tu link personal (el que te pasó la Intendencia) una sola vez.</p><form id="lf" autocomplete="off"><label for="lk">Tu link personal</label><input id="lk" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://intendenciacm.github.io/agenda/?k=…" style="font-size:1rem;letter-spacing:0;text-align:left"><div class="e" id="le" role="alert"></div><button type="submit">Guardar y entrar</button></form>';
+function pn(a){var c=new AbortController(),t=setTimeout(function(){c.abort()},45000);return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:'',s:'',fn:'porNombre',args:a}),signal:c.signal}).then(function(r){return r.json()}).then(function(j){clearTimeout(t);return j},function(e){clearTimeout(t);throw e})}
+var NN={nombres:null,nom:''};
+try{NN.nom=localStorage.getItem('ag_nom')||''}catch(e){}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function lnk(id,t){return '<a href="#" id="'+id+'" style="display:block;text-align:center;margin-top:14px;color:var(--ac);text-decoration:none">'+t+'</a>'}
+function nerr(t){var e=document.getElementById('ne');if(e)e.textContent=t}
+function nlisto(n,r){try{localStorage.setItem('ag_nom',n);localStorage.setItem('ag_lastK',r.k);localStorage.setItem('ag_s_'+r.k,r.s)}catch(e){}location.replace(location.pathname+'?k='+encodeURIComponent(r.k))}
+function nl(modo,info){
+  var h='<h1>Agenda</h1>';
+  if(modo==='cargando'){
+    box.innerHTML=h+'<p class="m" id="nm">Un momento…</p>';
+    if(!navigator.onLine){document.getElementById('nm').textContent='La primera vez necesitás conexión para entrar. Probá de nuevo cuando tengas señal.';return}
+    if(NN.nombres){nl('entrar');return}
+    pn(['nombres']).then(function(j){if(!j.ok)throw 0;NN.nombres=j.r.slice().sort(function(a,b){return a.localeCompare(b)});nl('entrar')}).catch(function(){box.innerHTML=h+'<p class="m">No se pudo conectar. Revisá tu señal.</p><button type="button" id="nr">Reintentar</button>'+lnk('nlk','Tengo mi link personal');document.getElementById('nr').onclick=function(){nl('cargando')};document.getElementById('nlk').onclick=function(e){e.preventDefault();nl('link')}});
+    return}
+  if(modo==='entrar'){
+    box.innerHTML=h+'<p class="m" style="text-align:center">Elegí tu nombre e ingresá tu clave.</p><form id="nf" autocomplete="off"><label for="ns">Tu nombre</label><select id="ns"><option value="">Elegí tu nombre</option>'+NN.nombres.map(function(n){return '<option'+(n===NN.nom?' selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select><label for="np">Tu clave</label><input id="np" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><div class="e" id="ne" role="alert"></div><button type="submit" id="nb">Entrar</button></form>'+lnk('nol','¿Olvidaste tu clave?')+lnk('nlk','Tengo mi link personal');
+    document.getElementById('nol').onclick=function(e){e.preventDefault();NN.nom=document.getElementById('ns').value;if(!NN.nom){nerr('Elegí tu nombre primero.');return}nl('olv1')};
+    document.getElementById('nlk').onclick=function(e){e.preventDefault();nl('link')};
+    document.getElementById('nf').onsubmit=function(ev){ev.preventDefault();var n=document.getElementById('ns').value,p=document.getElementById('np').value,b=document.getElementById('nb');NN.nom=n;
+      if(!n){nerr('Elegí tu nombre.');return}
+      if(!/^\d{4,6}$/.test(p)){nerr('La clave tiene que ser de 4 a 6 números.');return}
+      nerr('');b.disabled=true;b.textContent='Entrando…';
+      pn(['entrar',n,p]).then(function(j){
+        if(!j.ok){b.disabled=false;b.textContent='Entrar';nerr((j.e||'No se pudo entrar.')+(/Todav/.test(j.e||'')?' Creala abriendo una vez el link que te pasó la Intendencia.':''));return}
+        b.textContent='Listo, abriendo…';nlisto(n,j.r)
+      }).catch(function(){b.disabled=false;b.textContent='Entrar';nerr('No se pudo conectar. Intentá de nuevo.')})};
+    return}
+  if(modo==='olv1'){
+    box.innerHTML=h+'<p class="m" style="text-align:center">Hola, '+esc(NN.nom.replace(/\s*\(.*\)$/,''))+'. Te mandamos un código de 6 números a tu mail para que elijas una clave nueva.</p><div class="e" id="ne" role="alert"></div><button type="button" id="nb">Mandarme el código</button>'+lnk('nvv','Volver');
+    document.getElementById('nvv').onclick=function(e){e.preventDefault();nl('entrar')};
+    document.getElementById('nb').onclick=function(){var b=this;b.disabled=true;b.textContent='Enviando…';pn(['olvide',NN.nom]).then(function(j){if(!j.ok){b.disabled=false;b.textContent='Mandarme el código';nerr(j.e||'No se pudo enviar el código.');return}nl('olv2')}).catch(function(){b.disabled=false;b.textContent='Mandarme el código';nerr('No se pudo conectar. Intentá de nuevo.')})};
+    return}
+  if(modo==='olv2'){
+    box.innerHTML=h+'<p class="m" style="text-align:center">Ingresá el código que te llegó al mail y tu clave nueva.</p><form id="nf" autocomplete="off"><label for="nc">Código de 6 números</label><input id="nc" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><label for="n1">Clave nueva</label><input id="n1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><label for="n2">Repetí la clave</label><input id="n2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><div class="e" id="ne" role="alert"></div><button type="submit" id="nb">Cambiar mi clave</button></form>'+lnk('nvv','Volver');
+    document.getElementById('nvv').onclick=function(e){e.preventDefault();nl('entrar')};
+    document.getElementById('nf').onsubmit=function(ev){ev.preventDefault();var c=document.getElementById('nc').value,a=document.getElementById('n1').value,d=document.getElementById('n2').value,b=document.getElementById('nb');
+      if(!/^\d{6}$/.test(c)){nerr('El código tiene 6 números.');return}
+      if(!/^\d{4,6}$/.test(a)){nerr('La clave tiene que ser de 4 a 6 números.');return}
+      if(a!==d){nerr('Las dos claves no coinciden.');return}
+      nerr('');b.disabled=true;b.textContent='Cambiando…';
+      pn(['restablecer',NN.nom,c,a]).then(function(j){if(!j.ok){b.disabled=false;b.textContent='Cambiar mi clave';nerr(j.e||'No se pudo cambiar la clave.');return}nlisto(NN.nom,j.r)}).catch(function(){b.disabled=false;b.textContent='Cambiar mi clave';nerr('No se pudo conectar. Intentá de nuevo.')})};
+    return}
+  box.innerHTML=h+'<p class="m" style="text-align:center">Pegá acá tu link personal (el que te pasó la Intendencia).</p><form id="lf" autocomplete="off"><label for="lk">Tu link personal</label><input id="lk" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://intendenciacm.github.io/agenda/?k=…" style="font-size:1rem;letter-spacing:0;text-align:left"><div class="e" id="ne" role="alert"></div><button type="submit">Guardar y entrar</button></form>'+lnk('nvv','Volver');
+  document.getElementById('nvv').onclick=function(e){e.preventDefault();nl('cargando')};
   document.getElementById('lf').onsubmit=function(ev){ev.preventDefault();var v=document.getElementById('lk').value.trim(),m=v.match(/[?&]k=([^&#\s]+)/),t=m?decodeURIComponent(m[1]):v;
-    if(!/^[A-Za-z0-9_-]{16,}$/.test(t)){document.getElementById('le').textContent='No parece un link válido. Copiá el link completo que te pasó la Intendencia.';return}
-    try{localStorage.setItem('ag_lastK',t)}catch(e){}location.href=location.pathname+'?k='+encodeURIComponent(t)};
-  return}
+    if(!/^[A-Za-z0-9_-]{16,}$/.test(t)){nerr('No parece un link válido. Copiá el link completo que te pasó la Intendencia.');return}
+    try{localStorage.setItem('ag_lastK',t)}catch(e){}location.href=location.pathname+'?k='+encodeURIComponent(t)}
+}
+if(!K){nl('cargando');return}
 
 // ---------- cola de cambios sin enviar ----------
 function programar(){if(!tm)tm=setTimeout(function(){tm=null;vaciar()},20000)}

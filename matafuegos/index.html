@@ -125,13 +125,14 @@ img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
 .pisoh{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:12px 2px 6px}
 .mprev{white-space:pre-wrap;word-break:break-word;font-size:.86rem;line-height:1.45;background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:12px;max-height:260px;overflow-y:auto}
 .adj{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line);border-radius:16px;padding:10px;margin-bottom:10px}.adj img{width:72px;height:72px;object-fit:cover;border-radius:10px}.adj .pdfi{width:72px;height:72px;border-radius:10px;background:var(--badb);color:var(--bad);display:flex;align-items:center;justify-content:center;font-weight:800}
+.gtit{display:flex;justify-content:space-between;align-items:center;gap:10px}.gcl{flex:none;min-width:34px;text-align:center;padding:4px 10px;border-radius:999px;background:var(--badb);color:var(--bad);font-weight:800;font-size:.85rem}
 </style></head>
 <body><div id="app"><div class="login"><p class="mut" style="text-align:center">Abriendo…</p></div></div>
 <script>
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.13';
+var VERSION='1.14';
 var ED_COD=null;
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
@@ -145,7 +146,7 @@ var _l=document.querySelector('link[rel=manifest]');if(_l)_l.href=URL.createObje
 var SK='ag_s_'+K; // misma sesión que la agenda (mismo sitio)
 var S=ls(SK)||'';
 var DATA=jget('mf_data_'+K,null), DRAFT=jget('mf_cur_'+K,null), QUEUE=jget('mf_q_'+K,[]);
-var UI={tab:'inicio',view:'',ed:'',filtro:'faltan',q:'',eqq:'',eqed:'Todos',eqn:60,ord:'asc',rpiso:'',eqag:'',eqkg:'',eqan:'',eqpiso:'',eqord:'',eqbaja:false,edv:{},bmot:'',badj:null,cextra:'',sheet:null,toast:null,busy:false,online:navigator.onLine,sync:'',last:jget('mf_last_'+K,'')};
+var UI={tab:'inicio',view:'',ed:'',filtro:'faltan',q:'',eqq:'',eqed:'Todos',eqn:60,ord:'asc',rpiso:'',eqag:'',eqkg:'',eqan:'',eqpiso:'',eqord:'',eqbaja:false,gsec:'tipos',gq:'',edv:{},bmot:'',badj:null,cextra:'',sheet:null,toast:null,busy:false,online:navigator.onLine,sync:'',last:jget('mf_last_'+K,'')};
 var $=function(s,r){return (r||document).querySelector(s)};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function save(){var a=lsok('mf_cur_'+K,DRAFT?JSON.stringify(DRAFT):null),b=lsok('mf_q_'+K,JSON.stringify(QUEUE));return a&&b}
@@ -205,6 +206,7 @@ function sincronizar(manual){
 var toastT=null;
 function toast(t,k){UI.toast={t:t,k:k||''};render();clearTimeout(toastT);toastT=setTimeout(function(){UI.toast=null;render()},4200)}
 var IC={
+ book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/><path d="M4 19V5"/><path d="M9 8h6"/></svg>',
  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>',
@@ -224,7 +226,7 @@ function shell(title,sub,body,opts){
   h+='<main id="main">'+body+'</main>';
   if(opts.fab)h+='<div class="fab">'+opts.fab+'</div>';
   if(!opts.nonav){
-    h+='<nav class="tabs">'+[['inicio','Inicio',IC.home],['equipos','Equipos',IC.list],['fallas','Fallas',IC.warn],['yo','Yo',IC.user]].map(function(t){
+    h+='<nav class="tabs">'+[['inicio','Inicio',IC.home],['equipos','Equipos',IC.list],['fallas','Fallas',IC.warn],['guia','Guía',IC.book],['yo','Yo',IC.user]].map(function(t){
       return '<button data-a="tab:'+t[0]+'" aria-current="'+(UI.tab===t[0]&&!opts.back)+'"><i>'+t[2]+'</i>'+t[1]+(t[0]==='yo'&&pend?'<span class="bd">'+pend+'</span>':'')+'</button>'}).join('')+'</nav>';
   }
   if(UI.sheet)h+=UI.sheet;
@@ -438,7 +440,7 @@ function gruposLocal(){
 function mailPrevio(){
   var g=gruposLocal(),e=g.emp,ls=[],fo=0,eq={};eqs().forEach(function(x){eq[x.id]=x});
   Object.keys(DRAFT.items).forEach(function(id){var it=DRAFT.items[id];if(it.e!=='Falla')return;fo+=(it.fotos||[]).length;
-    it.fallas.forEach(function(f){var x=eq[id]||{};ls.push((ls.length+1)+'. Matafuego '+(x.nro&&x.nro!=='-'?'N° '+x.nro:'sin número de cilindro registrado')+' (código '+id+') · '+(x.ub&&x.ub!=='-'?x.ub:'sin ubicación cargada')+'\n   Problema: '+f.tipo+(f.nota?'\n   Observaciones: '+f.nota:''))})});
+    it.fallas.forEach(function(f){var x=eq[id]||{};ls.push((ls.length+1)+'. Matafuego '+(x.nro&&x.nro!=='-'?'N° '+x.nro:'sin número de cilindro registrado')+' (código '+id+') · '+(x.ub&&x.ub!=='-'?x.ub:'sin ubicación cargada')+'\n   Problema: '+f.tipo+(f.nota?'\n   Observaciones: '+f.nota:'')+(((DATA&&DATA.pliego)||{})[f.tipo]?'\n   Fundamento: '+DATA.pliego[f.tipo]:''))})});
   var fe=String(DRAFT.f||'').split('-').reverse().join('/'),ex=(UI.cextra||'').trim();
   return{para:e.mail||'',emp:e.n||'',asunto:'Reclamo – Matafuegos – '+DRAFT.ed+' ('+ls.length+(ls.length===1?' falla':' fallas')+')',fotos:fo,
     cuerpo:'Estimados '+(e.n||'(empresa sin definir)')+':\n\nEn la recorrida realizada el '+fe+' en '+DRAFT.ed+' se detectaron las siguientes situaciones:\n\n'+ls.join('\n\n')+(ex?'\n\n'+ex:'')+'\n\nSolicitamos su reparación o reposición y que nos confirmen la fecha de atención.\n\nSaludos,\nIntendencia de Edificios'};
@@ -591,6 +593,47 @@ function viewEquipos(){
   else if(lista.length>60)h+='<div class="mut" style="text-align:center;margin:10px 0 6px">Mostrando los '+lista.length+' equipos</div>';
   return shell('Equipos','Matafuegos',h,{});
 }
+
+/* ---------- Guía: tipos de matafuego y obligaciones de la contratista ---------- */
+var CLASES=[['A','Sólidos comunes','madera, papel, cartón, telas, plástico'],['B','Líquidos y gases inflamables','nafta, aceites, pinturas, solventes, gas'],['C','Equipos eléctricos con tensión','tableros, cables, motores, computadoras'],['D','Metales combustibles','magnesio, sodio, aluminio en polvo'],['K','Aceites y grasas de cocina','freidoras, cocinas industriales']];
+var TIPOSG=[
+ {n:'Polvo ABC',cl:'ABC',lbl:'Polvo químico seco',sirve:'Fuegos A, B y C: sirve para casi todo lo que hay en un edificio.',ojo:'Deja polvo que ensucia y puede dañar equipos electrónicos. No es para fuegos de cocina (K).',pliego:'Capacidades: 2,5 · 5 · 10 kg. Prueba hidráulica cada 5 años.'},
+ {n:'CO₂ (anhídrido carbónico)',cl:'BC',lbl:'Gas, no deja residuo',sirve:'Fuegos B y C. Ideal para tableros, salas de máquinas y equipos eléctricos o electrónicos.',ojo:'Alcance corto. No sirve para fuegos A profundos. En lugares cerrados desplaza el oxígeno. No tocar la tobera (queda helada).',pliego:'Capacidades: 2 · 3,5 · 5 · 7 · 10 kg. Prueba hidráulica cada 5 años.'},
+ {n:'HCFC 123 (agente limpio)',cl:'ABC',lbl:'Gas halogenado a baja presión',sirve:'Fuegos A, B y C. No deja residuo: sirve para equipos sensibles.',ojo:'Es el reemplazo «ecológico» del halón. Se usa donde el polvo haría daño.',pliego:'Capacidades: 2,5 · 5 · 10 kg. Prueba hidráulica cada 5 años.'},
+ {n:'Agua',cl:'A',lbl:'Agua a presión',sirve:'Solo fuegos A: papel, madera, telas, cartón.',ojo:'NUNCA en fuegos eléctricos ni en líquidos inflamables.',pliego:'Capacidad: 10 litros. Prueba hidráulica cada 2 años.'},
+ {n:'Agua con espuma AFFF',cl:'AB',lbl:'Espuma formadora de película',sirve:'Fuegos A y B.',ojo:'No usar en equipos eléctricos con tensión.',pliego:'Capacidad: 10 litros. Prueba hidráulica cada 2 años.'}
+];
+var OBLIG=[
+ {t:'Chapa baliza: falta, está rota o deteriorada',si:1,art:'Esp. Técnicas 7 c) y 5.1.1',txt:'La reposición de chapas balizas está incluida en el servicio. Debe ser de alto impacto (0,8 mm), a 1,20–1,50 m de altura, con los colores y el tipo de fuego (IRAM 10005). La contratista también debe limpiar el equipo y la chapa.',k:'baliza chapa cartel señal señalización'},
+ {t:'Soporte de pared: falta o el matafuego está apoyado en el piso',si:1,art:'Esp. Técnicas 5.1.1 y 7 c)',txt:'El montaje es con soporte metálico tipo percha, fijado con dos tarugos a 1,50 m. Los soportes de pared están incluidos en el servicio.',k:'soporte percha piso apoyado fijación'},
+ {t:'Manómetro, precinto, traba, manguera, tobera, válvula, o-ring, soporte porta manguera',si:1,art:'Esp. Técnicas 7 c)',txt:'Se reemplazan sin costo cuando la vida útil está superada o no están operativos. Los repuestos tienen que ser nuevos y de diseño original (7).',k:'manometro precinto traba manguera tobera valvula oring repuesto'},
+ {t:'Descargado, presión baja o sobrecargado',si:1,art:'Esp. Técnicas 5.4 y 5.3.3',txt:'Se retira de servicio y se somete al mantenimiento. Mientras tanto debe dejar un sustituto equivalente con la leyenda «Reposición a préstamo». Ojo: si se descargó por accionamiento (se usó), la contratista informa y la Supervisión gestiona la compra del agente con cotización (5.3.4 b).',k:'descargado presion carga recarga manometro aguja'},
+ {t:'Marbete, tarjeta de identificación o etiqueta de control',si:1,art:'Esp. Técnicas 7 a), 7 b), 5.3.2 y 5.4',txt:'Tarjeta de identificación y marbete en forma de disco (IRAM 3517-2, 9.6) en cada equipo intervenido. En cada control trimestral va una etiqueta celeste de 35 × 50 mm.',k:'marbete tarjeta etiqueta celeste vencido'},
+ {t:'Equipo golpeado, con corrosión o dañado',si:1,art:'Esp. Técnicas 5.3.1 b) y 5.4',txt:'Si el deterioro es por desgaste o mal funcionamiento, se retira y se mantiene por cuenta de la contratista. Pero si el daño fue intencional o por mala operación, la reparación la cotiza la empresa y la gestiona la Supervisión (5.4).',k:'golpeado abollado corrosion oxido dañado roto'},
+ {t:'Vidrio del gabinete roto',si:0,art:'Esp. Técnicas 5.4 d)',txt:'A CONFIRMAR: el pliego solo pide verificar que el gabinete tenga un medio que asegure la rotura del vidrio. No dice expresamente quién repone el vidrio. No se cita en los mails.',k:'vidrio gabinete caja'},
+ {t:'El matafuego no está en su lugar o falta',si:1,art:'Esp. Técnicas 5.4 a) y 5.3.3',txt:'El control trimestral comprueba la dotación y ubicación. Si se retiró para mantenimiento, debe haber sustituto con la leyenda «Reposición a préstamo», anotado en la planilla «Equipo Sustituto», y el original vuelve en un máximo de 25 días hábiles con informe.',k:'falta lugar sustituto prestamo retirado dotación'},
+ {t:'Control trimestral',si:1,art:'Esp. Técnicas 5.4 y 5.3.1 a)',txt:'Mínimo 4 veces por año, a intervalos regulares, después del mantenimiento y de las pruebas hidráulicas. Por cada visita debe entregar un informe escrito firmado por el Director Técnico.',k:'control trimestral visita informe director tecnico'},
+ {t:'Mantenimiento anual',si:1,art:'Esp. Técnicas 5.3.2',txt:'Dentro del primer trimestre desde la adjudicación. Retiro de los equipos al taller y devolución, con planilla «Mantenimiento Anual» y marbete nuevo.',k:'mantenimiento anual taller recarga'},
+ {t:'Prueba hidráulica',si:1,art:'Esp. Técnicas punto 5.2 y 5.3.4 a)',txt:'Cada 5 años (CO₂, agentes limpios, polvo) o cada 2 años (agentes acuosos), IRAM 3517-2, 9.7.2. Si no aprueba, se inutiliza y debe reemplazarse por uno equivalente; la Supervisión gestiona la compra pidiendo cotización.',k:'prueba hidraulica ph vencida'},
+ {t:'Reemplazo de matafuegos vencidos al inicio del contrato',si:1,art:'Esp. Técnicas 5.1',txt:'Los que vencen dentro del plazo del contrato se reemplazan al inicio, con remito (tipo, capacidad y N°) y registro en la planilla «Provisión de Extintor». Los reemplazados se inutilizan y quedan a disposición de la Supervisión.',k:'reemplazo vencido nuevo provisión remito'},
+ {t:'Plazo para arreglar lo observado',si:1,art:'Esp. Técnicas 5.4 (final) y Cláusulas Particulares art. 16',txt:'Las observaciones se ejecutan en los plazos que fije la Supervisión. Los reclamos van por escrito en el Libro de Novedades (o por mail oficial con copia al Libro). Con 3 reclamos acumulados hay multa del 10% de la facturación mensual; 4: 15%; 5: 20%; 6: 25%; 7: se puede rescindir.',k:'plazo reclamo multa penalidad libro novedades'},
+ {t:'Elemento defectuoso o mal instalado',si:1,art:'Cláusulas Particulares art. 11',txt:'Todo elemento defectuoso se remueve, reemplaza y ensaya por la contratista, sin cargo. Los días y horarios de trabajo se convienen con la Supervisión y no se puede empezar sin su autorización.',k:'defectuoso horario autorización supervisión'},
+ {t:'Limpieza, acceso libre y obras complementarias',si:1,art:'Esp. Técnicas, apartado 7 (limpieza y obras complementarias)',txt:'Mantener limpia la zona de trabajo, limpiar equipo y chapa baliza, y dejar libre el acceso al extintor. Repone revestimientos, cielorrasos o pintura que se afecten con los trabajos.',k:'limpieza acceso obra pintura albañilería'},
+ {t:'Instrucción al personal y manual de uso',si:1,art:'Esp. Técnicas 6',txt:'La contratista instruye al personal del edificio sobre el uso correcto de los equipos y entrega un manual de instrucciones.',k:'instrucción capacitación manual personal'}
+];
+function viewGuia(){
+  var sec=UI.gsec,h='<div class="chips"><button class="chip" data-a="gsec:tipos" aria-pressed="'+(sec==='tipos')+'">Tipos de matafuego</button><button class="chip" data-a="gsec:oblig" aria-pressed="'+(sec==='oblig')+'">Obligaciones</button></div>';
+  if(sec==='tipos'){
+    h+='<h3 class="sec">Qué fuego apaga cada uno</h3>'+TIPOSG.map(function(t){return '<div class="card"><div class="gtit"><b>'+esc(t.n)+'</b><span class="gcl">'+esc(t.cl)+'</span></div><div class="mut">'+esc(t.lbl)+'</div><p style="margin:8px 0 6px"><b>Sirve:</b> '+esc(t.sirve)+'</p><p style="margin:0 0 6px"><b>Ojo:</b> '+esc(t.ojo)+'</p><div class="mut">'+esc(t.pliego)+'</div></div>'}).join('');
+    h+='<h3 class="sec" style="margin-top:16px">Clases de fuego</h3>'+CLASES.map(function(c){return '<div class="card"><div class="gtit"><b>'+esc(c[1])+'</b><span class="gcl">'+c[0]+'</span></div><div class="mut">'+esc(c[2])+'</div></div>'}).join('');
+    h+='<div class="mut" style="margin:8px 2px 20px">Capacidades y pruebas hidráulicas según el pliego del servicio (CD 233/2025). Es una ayuda memoria: ante una duda real, consultá la norma IRAM o a la Supervisión.</div>';
+  } else {
+    var q=UI.gq.trim().toLowerCase(),l=OBLIG.filter(function(o){return!q||(o.t+' '+o.txt+' '+o.k+' '+o.art).toLowerCase().indexOf(q)>=0});
+    h+='<input type="search" id="gq" placeholder="Buscá: baliza, soporte, descargado, plazo…" value="'+esc(UI.gq)+'" style="margin-bottom:10px"><div class="mut" style="margin:0 2px 10px">Pliego del servicio de matafuegos, CD 233/2025 (Exp. 13-10726/24). «Esp. Técnicas» son las Especificaciones Técnicas; «Cláusulas Particulares», el Pliego de Bases y Condiciones.</div>';
+    h+=l.length?l.map(function(o){return '<div class="card"><b>'+esc(o.t)+'</b><div style="margin:6px 0"><span class="pill '+(o.si?'ok':'warn')+'">'+(o.si?'Le corresponde a la contratista':'A confirmar')+'</span></div><div class="mut" style="color:var(--fg);margin-bottom:6px">'+esc(o.txt)+'</div><div class="mut"><b>Dónde dice:</b> '+esc(o.art)+'</div></div>'}).join(''):'<div class="empty">No encontré nada con eso.</div>';
+  }
+  return shell('Guía','Matafuegos',h,{});
+}
 function viewFallas(){
   if(!DATA)return viewInicio();
   var ab=DATA.fallas.filter(function(f){return f.est!=='Verificado'&&f.est!=='Anulada'}).slice().reverse();
@@ -617,7 +660,7 @@ function render(){
   var sc=$('#main')?$('#main').scrollTop:0;
   var v;
   if(UI.view==='rec'&&DRAFT)v=viewRecorrida();
-  else{UI.view='';v=UI.tab==='equipos'?viewEquipos():UI.tab==='fallas'?viewFallas():UI.tab==='yo'?viewYo():viewInicio()}
+  else{UI.view='';v=UI.tab==='equipos'?viewEquipos():UI.tab==='fallas'?viewFallas():UI.tab==='guia'?viewGuia():UI.tab==='yo'?viewYo():viewInicio()}
   app.innerHTML=v;
   if($('#main')){$('#main').scrollTop=sc;if(UI.anim){$('#main').classList.add(UI.anim>0?'pgl':'pgr');UI.anim=0}}
   if(keepQ&&$('#'+keepQ)){$('#'+keepQ).focus();try{if(sel)$('#'+keepQ).setSelectionRange(sel[0],sel[1])}catch(e){}}
@@ -676,6 +719,7 @@ function act(a,ev){
   else if(k==='reintentar'){QUEUE[Number(x)].err=null;save();sincronizar(true);return}
   else if(k==='borrarq'){if(confirm('¿Descartar esta recorrida? No se va a enviar.')){QUEUE.splice(Number(x),1);save()}}
   else if(k==='eqed'){UI.eqed=x;UI.eqn=60}
+  else if(k==='gsec'){UI.gsec=x}
   else if(k==='eqbaja'){UI.eqbaja=!UI.eqbaja;UI.eqn=60}
   else if(k==='eqlimpiar'){UI.eqed='Todos';UI.eqag='';UI.eqkg='';UI.eqan='';UI.eqpiso='';UI.eqpend=false;UI.eqn=60}
   else if(k==='editar'){UI.edv={};UI.sheet=sheetEdit(UI.eid)}
@@ -718,6 +762,7 @@ document.addEventListener('input',function(ev){
   else if(t.id==='eqq'){UI.eqq=t.value;UI.eqn=60;render()}
   else if(t.id==='edsel'){UI.ed=t.value}
   else if(t.id==='fnota'){UI.fnota=t.value}
+  else if(t.id==='gq'){UI.gq=t.value;render()}
   else if(t.id&&t.id.indexOf('ed_')===0){UI.edv[t.id.slice(3)]=t.value;UI.sheet=sheetEdit(UI.eid)}
   else if(t.id==='bj_mot'){UI.bmot=t.value;UI.sheet=sheetBaja(UI.eid)}
   else if(t.id==='cr_extra'){UI.cextra=t.value;var mp=$('#mprev');if(mp)mp.textContent=mailTxt(mailPrevio());UI.sheet=sheetCerrar()}
@@ -779,7 +824,7 @@ document.addEventListener('visibilitychange',function(){
 });
 /* ---------- gestos: deslizar entre pestañas, volver y cerrar hojas ---------- */
 (function(){
-var TABS=['inicio','equipos','fallas','yo'],g=null;
+var TABS=['inicio','equipos','fallas','guia','yo'],g=null;
 function noDesliza(t){while(t&&t!==document.body){if(t.nodeType===1){var n=t.tagName;if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT')return true;var o=getComputedStyle(t).overflowX;if((o==='auto'||o==='scroll')&&t.scrollWidth>t.clientWidth+2)return true}t=t.parentNode}return false}
 function soltar(o){o.sheet.style.transition='transform .2s';o.sheet.style.transform='';if(o.sheet.parentNode)o.sheet.parentNode.style.background='';setTimeout(function(){if(o.sheet){o.sheet.style.transition='';o.sheet.style.animation=''}},230)}
 function ir(d){

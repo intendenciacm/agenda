@@ -1,5 +1,5 @@
 // Deja abrir la app sin señal: guarda en el celular la página y los íconos (los datos los guarda la propia página).
-var V = 'mf-v13';
+var V = 'mf-v14';
 var BASE = self.registration.scope;
 function conTiempo(p, ms) {
   return new Promise(function (ok, ko) {

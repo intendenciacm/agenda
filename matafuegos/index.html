@@ -2,7 +2,7 @@
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#16407a">
+<meta name="theme-color" content="#14213D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Matafuegos</title>
 <style>@font-face{font-family:"Jakarta";src:url(jakarta.woff2) format("woff2");font-weight:200 800;font-style:normal;font-display:swap}
-:root{--bg:#f3f4f7;--card:#fff;--fg:#0f1729;--mut:#667085;--ac:#1f54c8;--ac2:#163f9c;--acfg:#fff;--act:#e8efff;--line:#e4e7ec;--ok:#0f7a55;--okb:#e2f5ec;--bad:#d4332a;--badb:#fdeceb;--warn:#a15c00;--warnb:#fff2d9;--sh:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.04);--fab:0 10px 24px rgba(31,84,200,.35);--r:20px}
-@media (prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#151b2e;--fg:#eef1f8;--mut:#98a2b8;--ac:#7aa5ff;--ac2:#3b6fe0;--acfg:#0b1020;--act:#1e2a4a;--line:#263049;--ok:#4fd1a1;--okb:#11352a;--bad:#ff8c84;--badb:#3a1a1c;--warn:#f2b45a;--warnb:#392a10;--sh:none;--fab:0 10px 24px rgba(0,0,0,.5)}}
+:root{--bg:#F6F4EE;--card:#FFFDF8;--fg:#14213D;--mut:#6B6F7B;--ac:#14213D;--ac2:#233a6b;--acfg:#fff;--act:#F3E4D2;--line:#E3DDCF;--ok:#0f7a55;--okb:#e2f5ec;--bad:#d4332a;--badb:#fdeceb;--warn:#a15c00;--warnb:#fff2d9;--sh:0 1px 2px rgba(20,33,61,.05),0 1px 3px rgba(20,33,61,.04);--fab:0 10px 24px rgba(20,33,61,.35);--r:20px;--or:#F2A15F}
+@media (prefers-color-scheme:dark){:root{--bg:#0C1423;--card:#15213A;--fg:#F3EEE4;--mut:#9AA5BC;--ac:#F2A15F;--ac2:#D9822F;--acfg:#1b1206;--act:#2A2A33;--line:#26334F;--ok:#4fd1a1;--okb:#11352a;--bad:#ff8c84;--badb:#3a1a1c;--warn:#f2b45a;--warnb:#392a10;--sh:none;--fab:0 10px 24px rgba(0,0,0,.5);--or:#F2A15F}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
 body{font-family:"Jakarta",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);font-size:16px;line-height:1.4;overscroll-behavior:none;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1;word-spacing:.08em}
@@ -38,7 +38,7 @@ nav.tabs .bd{position:absolute;top:-2px;left:calc(50% + 8px);background:var(--ba
 .card h2,.card h3{margin:0 0 6px;font-size:1.05rem;font-weight:700}
 .mut{color:var(--mut);font-size:.9rem}
 h3.sec{margin:22px 4px 10px;font-size:1.05rem;font-weight:800;letter-spacing:-.01em}
-.hero{background:radial-gradient(120% 140% at 100% 0%,#3f78f0 0%,var(--ac) 45%,var(--ac2) 100%);color:#fff;border-radius:28px;padding:22px 20px 20px;margin-bottom:16px;position:relative;overflow:hidden}
+.hero{background:radial-gradient(120% 140% at 100% 0%,#F2A15F 0%,#1c2f58 38%,#14213D 100%);color:#fff;border-radius:28px;padding:22px 20px 20px;margin-bottom:16px;position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;right:-34px;top:-34px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.1)}
 .hero h2{margin:0 0 6px;font-size:1.4rem;font-weight:800;letter-spacing:-.015em;position:relative;z-index:1}.hero p{margin:0 0 16px;opacity:.9;font-size:.92rem;position:relative;z-index:1}
 .hero>*{position:relative;z-index:1}
@@ -124,7 +124,7 @@ img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.5';
+var VERSION='1.7';
 var ED_COD=null;
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
@@ -133,7 +133,7 @@ var K=new URLSearchParams(location.search).get('k')||ls('mf_k')||'';
 if(K)ls('mf_k',K);
 // manifest dinámico: el ícono instalado abre con el link personal incluido (iPhone no comparte el almacenamiento con Safari)
 if(K){try{var _b=location.origin+location.pathname.replace(/[^\/]*$/,'');var _u=_b+'?k='+encodeURIComponent(K);
-var _m={name:'Matafuegos · Intendencia',short_name:'Matafuegos',start_url:_u,scope:_b,display:'standalone',orientation:'portrait',background_color:'#eef2f7',theme_color:'#16407a',lang:'es',icons:[{src:_b+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:_b+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:_b+'icon-512-maskable.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]};
+var _m={name:'Matafuegos · Intendencia',short_name:'Matafuegos',start_url:_u,scope:_b,display:'standalone',orientation:'portrait',background_color:'#F6F4EE',theme_color:'#14213D',lang:'es',icons:[{src:_b+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:_b+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:_b+'icon-512-maskable.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]};
 var _l=document.querySelector('link[rel=manifest]');if(_l)_l.href=URL.createObjectURL(new Blob([JSON.stringify(_m)],{type:'application/manifest+json'}));}catch(e){}}
 var SK='ag_s_'+K; // misma sesión que la agenda (mismo sitio)
 var S=ls(SK)||'';
@@ -338,7 +338,7 @@ function viewInicio(){
   if(pend)h+='<div class="note">'+(QUEUE.some(function(x){return x.err})?'⚠ Hay una recorrida que no se pudo enviar. Mirala en «Yo».':'📤 '+pend+(pend===1?' recorrida guardada':' recorridas guardadas')+' en el celular, se '+(pend===1?'envía':'envían')+' apenas haya señal.')+'</div>';
   if(DRAFT){
     var r=resumenDraft();
-    h+='<div class="hero"><h2>Recorrida en curso</h2><p>'+esc(DRAFT.ed)+' · '+r.c+' de '+r.tot+' controlados'+(r.f?' · '+r.f+(r.f===1?' falla':' fallas'):'')+'</p><div class="bar"><i style="width:'+(r.tot?Math.round(r.c*100/r.tot):0)+'%"></i></div><div style="height:12px"></div><button class="btn w" data-a="seguir">Seguir recorriendo</button></div>';
+    h+='<div class="hero"><h2>Recorrida en curso</h2><p>'+esc(DRAFT.ed)+' · '+r.c+' de '+r.tot+' controlados'+(r.f?' · '+r.f+(r.f===1?' falla':' fallas'):'')+'</p><div class="bar"><i style="width:'+(r.tot?Math.round(r.c*100/r.tot):0)+'%"></i></div><div style="height:12px"></div><button class="btn w" data-a="seguir">Seguir recorriendo</button><button type="button" class="btn w" style="margin-top:8px;background:rgba(255,255,255,.16);color:#fff;box-shadow:none" data-a="cancelrec">Cancelar esta recorrida</button></div>';
   } else if(DATA.puede){
     var eds=edificios();if(!UI.ed||eds.indexOf(UI.ed)<0)UI.ed=eds[0]||'';
     h+='<div class="hero"><h2>Nueva recorrida</h2><p>Elegí el edificio y andá marcando cada matafuego. No sale ningún mail hasta que cierres la recorrida.</p><select id="edsel">'+eds.map(function(x){return '<option'+(x===UI.ed?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select><div style="height:10px"></div><button class="btn w" data-a="iniciar">Empezar recorrida</button></div>';
@@ -362,7 +362,7 @@ function viewRecorrida(){
     if(UI.filtro==='fallas'&&s!=='Falla')return false;
     if(q&&[e.nro,e.id,e.ub,e.ag].join(' ').toLowerCase().indexOf(q)<0)return false;
     return true});
-  var h='<div style="margin:-2px 0 10px"><div class="bar" style="background:var(--line)"><i style="width:'+(r.tot?Math.round(r.c*100/r.tot):0)+'%;background:var(--ok)"></i></div><div class="mut" style="margin-top:6px">'+r.c+' de '+r.tot+' controlados · '+r.ok+' en orden · '+r.f+(r.f===1?' falla':' fallas')+'</div></div>';
+  var h='<div style="margin:-2px 0 10px"><div class="bar" style="background:var(--line)"><i style="width:'+(r.tot?Math.round(r.c*100/r.tot):0)+'%;background:var(--ok)"></i></div><div class="mut" style="margin-top:6px">'+r.c+' de '+r.tot+' controlados · '+r.ok+' en orden · '+r.f+(r.f===1?' falla':' fallas')+'</div><div style="text-align:right;margin-top:2px"><button type="button" class="chip" style="padding:7px 14px;font-size:.82rem" data-a="cancelrec">Cancelar recorrida</button></div></div>';
   h+='<div class="chips">'+[['faltan','Faltan ('+(r.tot-r.c)+')'],['todos','Todos'],['fallas','Con falla ('+r.f+')']].map(function(c){return '<button class="chip" data-a="filtro:'+c[0]+'" aria-pressed="'+(UI.filtro===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>';
   h+='<input type="search" id="qq" placeholder="Buscar número o ubicación" value="'+esc(UI.q)+'" style="margin-bottom:12px">';
   h+=lista.length?lista.map(function(e){
@@ -528,7 +528,7 @@ function act(a,ev){
   else if(k==='fotosver'){verFotos(x);return}
   else if(k==='cerrarsheet'){UI.sheet=null}
   else if(k==='cerrar'){UI.sheet=sheetCerrar()}
-  else if(k==='descartar'){if(confirm('¿Descartar la recorrida? Se pierde lo que marcaste.')){DRAFT=null;save();UI.sheet=null;UI.view=''}}
+  else if(k==='descartar'||k==='cancelrec'){var nm=DRAFT?Object.keys(DRAFT.items||{}).length:0;if(!DRAFT||nm===0||confirm('¿Cancelar la recorrida? Se pierde lo que marcaste ('+nm+(nm===1?' equipo':' equipos')+'). No se envía nada.')){var hab=!!DRAFT;DRAFT=null;save();UI.sheet=null;UI.view='';UI.tab='inicio';if(hab)toast('Recorrida cancelada. No se envió nada.','ok')}}
   else if(k==='confirmar'){
     var items=[];Object.keys(DRAFT.items).forEach(function(id){var it=DRAFT.items[id];if(it.e==='OK')items.push({eq:id,e:'OK'});else it.fallas.forEach(function(f,i){var o={eq:id,e:'Falla',tipo:f.tipo,nota:f.nota};if(i===0&&it.fotos&&it.fotos.length)o.fotos=it.fotos;items.push(o)})});
     QUEUE.push({lote:{cid:DRAFT.cid,ed:DRAFT.ed,f:DRAFT.f,ini:DRAFT.ini,items:items},ts:Date.now()});

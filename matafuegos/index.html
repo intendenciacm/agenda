@@ -10,9 +10,11 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Matafuegos</title>
+<script>try{var _t=localStorage.getItem("mf_tema");if(_t==="light"||_t==="dark")document.documentElement.setAttribute("data-t",_t)}catch(e){}</script>
 <style>@font-face{font-family:"Jakarta";src:url(jakarta.woff2) format("woff2");font-weight:200 800;font-style:normal;font-display:swap}
 :root{--bg:#F6F4EE;--card:#FFFDF8;--fg:#14213D;--mut:#6B6F7B;--ac:#14213D;--ac2:#233a6b;--acfg:#fff;--act:#F3E4D2;--line:#E3DDCF;--ok:#0f7a55;--okb:#e2f5ec;--bad:#d4332a;--badb:#fdeceb;--warn:#a15c00;--warnb:#fff2d9;--sh:0 1px 2px rgba(20,33,61,.05),0 1px 3px rgba(20,33,61,.04);--fab:0 10px 24px rgba(20,33,61,.35);--r:20px;--or:#F2A15F}
-@media (prefers-color-scheme:dark){:root{--bg:#0C1423;--card:#15213A;--fg:#F3EEE4;--mut:#9AA5BC;--ac:#F2A15F;--ac2:#D9822F;--acfg:#1b1206;--act:#2A2A33;--line:#26334F;--ok:#4fd1a1;--okb:#11352a;--bad:#ff8c84;--badb:#3a1a1c;--warn:#f2b45a;--warnb:#392a10;--sh:none;--fab:0 10px 24px rgba(0,0,0,.5);--or:#F2A15F}}
+@media (prefers-color-scheme:dark){:root:not([data-t=light]){--bg:#0C1423;--card:#15213A;--fg:#F3EEE4;--mut:#9AA5BC;--ac:#F2A15F;--ac2:#D9822F;--acfg:#1b1206;--act:#2A2A33;--line:#26334F;--ok:#4fd1a1;--okb:#11352a;--bad:#ff8c84;--badb:#3a1a1c;--warn:#f2b45a;--warnb:#392a10;--sh:none;--fab:0 10px 24px rgba(0,0,0,.5);--or:#F2A15F}}
+:root[data-t=dark]{--bg:#0C1423;--card:#15213A;--fg:#F3EEE4;--mut:#9AA5BC;--ac:#F2A15F;--ac2:#D9822F;--acfg:#1b1206;--act:#2A2A33;--line:#26334F;--ok:#4fd1a1;--okb:#11352a;--bad:#ff8c84;--badb:#3a1a1c;--warn:#f2b45a;--warnb:#392a10;--sh:none;--fab:0 10px 24px rgba(0,0,0,.5);--or:#F2A15F}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
 body{font-family:"Jakarta",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);font-size:16px;line-height:1.4;overscroll-behavior:none;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1;word-spacing:.08em}
@@ -124,7 +126,7 @@ img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.7';
+var VERSION='1.10';
 var ED_COD=null;
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
@@ -471,9 +473,13 @@ function viewFallas(){
   var h=ab.length?ab.map(function(f){return '<div class="card"><b>'+esc(f.tipo)+'</b> <span class="pill '+(f.est==='Informado'?'warn':'bad')+'">'+esc(f.est)+'</span><div class="mut">Matafuego N° '+esc(f.nro)+' · '+esc(f.ed)+'<br>'+esc(f.ub&&f.ub!=='-'?f.ub:'sin ubicación cargada')+' · '+fmtF(f.f)+' · '+esc(f.por)+(f.emp?'<br>Empresa: '+esc(f.emp):'')+'</div>'+fotoBtn(f)+(DATA.puede?'<div style="margin-top:10px">'+(f.est==='Informado'?'<button class="btn sec" data-a="pend:enviar:'+esc(f.n)+'">Enviar reclamo</button>':'<button class="btn sec" data-a="pend:reiterar:'+esc(f.n)+'">Reiterar reclamo</button>')+'</div>':'')+'</div>'}).join(''):'<div class="empty">No hay fallas en trámite.</div>';
   return shell('Fallas','En trámite',h,{});
 }
+function temaGet(){var t=ls('mf_tema');return t==='light'||t==='dark'?t:'auto'}
+function temaAplicar(){var t=temaGet(),r=document.documentElement;if(t==='auto')r.removeAttribute('data-t');else r.setAttribute('data-t',t);var dk=t==='dark'||(t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches);var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',dk?'#0C1423':'#14213D')}
+function temaCard(){var t=temaGet();function b(v,l){return '<button class="btn '+(t===v?'':'sec')+'" data-a="tema:'+v+'">'+l+'</button>'}return '<div class="card"><h3>Apariencia</h3><div class="mut">Elegí cómo se ve la app. \u00abSistema\u00bb sigue el modo claro u oscuro del celular.</div><div style="height:10px"></div><div class="row">'+b('auto','Sistema')+b('light','Claro')+b('dark','Oscuro')+'</div></div>'}
 function viewYo(){
   var h='<div class="card"><h3>'+esc(DATA&&DATA.yo?DATA.yo:'Mi usuario')+'</h3><div class="mut">'+(navigator.onLine?'Con señal':'Sin señal')+' · última actualización: '+esc(UI.last||'nunca')+'</div><div style="height:10px"></div><button class="btn" data-a="sync"'+(UI.sync==='run'?' disabled':'')+'>'+(UI.sync==='run'?'Sincronizando…':'Sincronizar ahora')+'</button></div>';
   if(QUEUE.length)h+='<h3 class="sec">Para enviar</h3>'+QUEUE.map(function(q,i){return '<div class="card"><b>'+esc(q.lote.ed)+'</b> <span class="pill '+(q.err?'bad':'warn')+'">'+(q.err?'Con error':'Por enviar')+'</span><div class="mut">'+esc(q.lote.ini)+' · '+q.lote.items.length+' equipos'+(q.err?'<br>'+esc(q.err):'')+'</div>'+(q.err?'<div class="row" style="margin-top:8px"><button class="btn sec" data-a="reintentar:'+i+'">Reintentar</button><button class="btn bad" data-a="borrarq:'+i+'">Descartar</button></div>':'')+'</div>'}).join('');
+  h+=temaCard();
   h+=lkCard();
   h+='<div class="card"><div class="mut">Versión '+VERSION+'. La app guarda los equipos en el celular para poder usarla sin señal.</div><div style="height:10px"></div><button class="btn bad" data-a="salir">Cerrar sesión</button></div>';
   return shell('Yo','Mi cuenta',h,{});
@@ -481,6 +487,7 @@ function viewYo(){
 function render(){
   var app=$('#app');if(!app)return;
   if(!S){return}
+  if(DATA&&BIO&&!LK&&!LKS.mode&&!LKS.offered&&!ls('mf_bio_no')){LKS.offered=true;LKS.mode='offer';LKS.msg='';LKS.bad=false;lkDraw()}
   var keepQ=document.activeElement&&document.activeElement.id,sel=null;
   try{if(keepQ&&document.activeElement.selectionStart!=null)sel=[document.activeElement.selectionStart,document.activeElement.selectionEnd]}catch(e){}
   var sc=$('#main')?$('#main').scrollTop:0;
@@ -494,7 +501,7 @@ function render(){
 /* ---------- acciones ---------- */
 function act(a,ev){
   var p=a.split(':'),k=p[0],x=a.slice(k.length+1);
-  if(k==='lk'){if(x.length>1&&['cancel','forgot','bio','del'].indexOf(x)<0)lkAcc(x);else lkKey(x);return}
+  if(k==='lk'){lkKey(x);return}
   if(nAct(k))return;
   if(k==='tab'){UI.tab=x;UI.view='';}
   else if(k==='iniciar'){
@@ -538,6 +545,7 @@ function act(a,ev){
     render();sincronizar(false);return;
   }
   else if(k==='sync'){sincronizar(true);return}
+  else if(k==='tema'){ls('mf_tema',x==='auto'?null:x);temaAplicar();toast('Apariencia: '+(x==='light'?'claro':x==='dark'?'oscuro':'según el sistema'),'ok')}
   else if(k==='reintentar'){QUEUE[Number(x)].err=null;save();sincronizar(true);return}
   else if(k==='borrarq'){if(confirm('¿Descartar esta recorrida? No se va a enviar.')){QUEUE.splice(Number(x),1);save()}}
   else if(k==='eqed'){UI.eqed=x}
@@ -573,64 +581,42 @@ document.addEventListener('submit',function(ev){var f=ev.target.getAttribute('da
 window.addEventListener('online',function(){render();sincronizar(false)});
 window.addEventListener('offline',function(){render()});
 /* ---------- bloqueo de la app (PIN de 4 números y huella / rostro del celular) ---------- */
-var LK=jget('mf_lock',null),LKS={locked:false,buf:'',mode:'',first:'',msg:'',bad:false,fails:0,until:0,away:0,after:null,setup:false},BIO=false;
-try{if(window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(function(v){BIO=!!v;if(UI.tab==='yo')render()}).catch(function(){})}catch(e){}
-function lkHash(pin,salt){var s=salt+':'+pin;
-  if(window.crypto&&crypto.subtle&&window.TextEncoder)return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return('0'+x.toString(16)).slice(-2)}).join('')});
-  var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return Promise.resolve('x'+h)}
+var LK=jget('mf_lock',null),LKS={locked:false,mode:'',msg:'',bad:false,away:0},BIO=false;
+if(LK&&!LK.bio){LK=null;ls('mf_lock',null)}
+try{if(window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(function(v){BIO=!!v;if(S&&!LKS.mode)render()}).catch(function(){})}catch(e){}
 function lkRand(n){var a=new Uint8Array(n);if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(a);else for(var i=0;i<n;i++)a[i]=Math.floor(Math.random()*256);return a}
 function b64u(a){var s='';for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s)}
 function ub64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
-function lkTitulo(){return LKS.mode==='unlock'?'Ingresá tu PIN':LKS.mode==='chk'?'Ingresá tu PIN actual':LKS.mode==='new1'?'Elegí un PIN de 4 números':'Repetí el PIN'}
 function lkDraw(){
   var el=document.getElementById('lock');
   if(!LKS.mode){if(el)el.parentNode.removeChild(el);return}
   if(!el){el=document.createElement('div');el.id='lock';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el)}
-  var d='';for(var i=0;i<4;i++)d+='<i'+(i<LKS.buf.length?' class="on"':'')+'></i>';
-  var bio=(LK&&LK.bio&&(LKS.mode==='unlock'||LKS.mode==='chk'))?'<button type="button" class="nb" data-a="lk:bio" aria-label="Usar huella o rostro">'+IC.fp+'</button>':'<button type="button" class="nb" disabled tabindex="-1"></button>';
-  var pad='';for(var n=1;n<=9;n++)pad+='<button type="button" data-a="lk:'+n+'">'+n+'</button>';
-  pad+=bio+'<button type="button" data-a="lk:0">0</button><button type="button" class="nb" data-a="lk:del" aria-label="Borrar">'+IC.dl+'</button>';
-  el.innerHTML='<div class="lkbox"><div class="lkic">'+IC.lk+'</div><h2>'+lkTitulo()+'</h2><div class="lkmsg'+(LKS.bad?' bad':'')+'" aria-live="polite">'+esc(LKS.msg||(LKS.mode==='unlock'?'Matafuegos · Intendencia':''))+'</div><div class="dots">'+d+'</div><div class="pad">'+pad+'</div>'+
-   (LKS.mode==='unlock'?'<button type="button" class="lkl" data-a="lk:forgot">¿Olvidaste el PIN?</button>':'<button type="button" class="lkl" data-a="lk:cancel">Cancelar</button>')+'</div>'}
-function lkShow(mode,after){LKS.mode=mode;LKS.buf='';LKS.first='';LKS.msg='';LKS.bad=false;LKS.after=after||null;LKS.setup=mode!=='unlock';lkDraw()}
-function lkClose(){LKS.mode='';LKS.buf='';LKS.after=null;lkDraw()}
-function lkMal(m){LKS.fails++;LKS.buf='';LKS.bad=true;LKS.msg=m;if(LKS.fails>=5){LKS.until=Date.now()+30000;LKS.fails=0;LKS.msg='Demasiados intentos. Esperá 30 segundos.'}try{if(navigator.vibrate)navigator.vibrate(120)}catch(e){}lkDraw()}
-function lkKey(x){
-  if(x==='cancel'){lkClose();return}
-  if(x==='forgot'){if(confirm('Para entrar sin el PIN tenés que cerrar sesión y volver a entrar con tu nombre y tu PIN de la agenda. ¿Seguimos?')){ls('mf_lock',null);LK=null;ls(SK,null);S='';location.reload()}return}
-  if(x==='bio'){lkBio();return}
-  if(Date.now()<LKS.until){LKS.bad=true;LKS.msg='Esperá unos segundos antes de probar de nuevo.';lkDraw();return}
-  if(x==='del'){LKS.buf=LKS.buf.slice(0,-1);LKS.bad=false;LKS.msg='';lkDraw();return}
-  if(!/^\d$/.test(x)||LKS.buf.length>=4)return;
-  LKS.buf+=x;LKS.bad=false;LKS.msg='';lkDraw();
-  if(LKS.buf.length<4)return;
-  var pin=LKS.buf,mode=LKS.mode;
-  if(mode==='unlock'||mode==='chk'){lkHash(pin,LK.s).then(function(h){
-    if(h!==LK.h){lkMal('PIN incorrecto');return}
-    LKS.fails=0;var af=LKS.after;LKS.locked=false;lkClose();if(af)af();else render()})}
-  else if(mode==='new1'){LKS.first=pin;LKS.buf='';LKS.mode='new2';lkDraw()}
-  else if(mode==='new2'){
-    if(pin!==LKS.first){LKS.first='';LKS.buf='';LKS.mode='new1';LKS.bad=true;LKS.msg='No coinciden. Probá de nuevo.';lkDraw();return}
-    var salt=b64u(lkRand(12));lkHash(pin,salt).then(function(h){LK={h:h,s:salt,bio:(LK&&LK.bio)||null};ls('mf_lock',JSON.stringify(LK));LKS.locked=false;lkClose();toast(BIO?'Bloqueo activado. Ahora confirmá con tu huella o rostro para entrar sin escribir el PIN.':'Bloqueo activado. Se pide el PIN al abrir la app.','ok');if(BIO&&!LK.bio)setTimeout(lkBioSet,350)})}
-}
+  if(LKS.mode==='offer'){el.innerHTML='<div class="lkbox"><div class="lkic">'+IC.fp+'</div><h2>Listo, ya entraste</h2><div class="lkmsg'+(LKS.bad?' bad':'')+'" aria-live="polite">'+esc(LKS.msg||'La próxima vez que abras la app, entrá con tu huella o rostro en lugar de escribir la clave. Si el celular lo pide, también sirve su código de bloqueo.')+'</div><button type="button" class="btn" data-a="lk:bioon">Usar huella o rostro la próxima vez</button><button type="button" class="lkl" data-a="lk:bioNo">Ahora no, sigo con la clave</button></div>';return}
+  el.innerHTML='<div class="lkbox"><div class="lkic">'+IC.fp+'</div><h2>Desbloqueá la app</h2><div class="lkmsg'+(LKS.bad?' bad':'')+'" aria-live="polite">'+esc(LKS.msg||'Usá tu huella o tu rostro. Si el celular lo pide, también sirve el código de bloqueo de pantalla.')+'</div><button type="button" class="btn" data-a="lk:bio">Desbloquear</button><button type="button" class="lkl" data-a="lk:forgot">Entrar con mi clave de la agenda</button></div>'}
+function lkShow(mode){LKS.mode=mode;LKS.msg='';LKS.bad=false;lkDraw()}
+function lkClose(){LKS.mode='';lkDraw()}
 function lkBio(){
   if(!LK||!LK.bio||!navigator.credentials)return;
   navigator.credentials.get({publicKey:{challenge:lkRand(32),allowCredentials:[{type:'public-key',id:ub64(LK.bio),transports:['internal']}],userVerification:'required',timeout:60000}}).then(function(c){
-    if(!c)return;var af=LKS.after;LKS.locked=false;LKS.fails=0;lkClose();if(af)af();else render()}).catch(function(){LKS.bad=true;LKS.msg='No se pudo con la huella. Usá el PIN.';lkDraw()})}
+    if(!c)return;LKS.locked=false;lkClose();render()}).catch(function(){LKS.bad=true;LKS.msg='No se pudo. Tocá Desbloquear para reintentar, o entrá con tu clave de la agenda.';lkDraw()})}
 function lkBioSet(){
   if(!BIO||!navigator.credentials)return;
   navigator.credentials.create({publicKey:{challenge:lkRand(32),rp:{name:'Matafuegos · Intendencia'},user:{id:lkRand(16),name:'matafuegos',displayName:'Matafuegos'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}}).then(function(c){
-    if(!c||!LK)return;LK.bio=b64u(new Uint8Array(c.rawId));ls('mf_lock',JSON.stringify(LK));toast('Listo: ahora podés entrar con la huella o el rostro.','ok')}).catch(function(){toast('No se pudo activar la huella o el rostro en este celular.','bad')})}
-function lkAcc(x){
-  if(x==='setup'){lkShow('new1');return}
-  if(x==='change'){lkShow('chk',function(){lkShow('new1')});return}
-  if(x==='off'){lkShow('chk',function(){LK=null;ls('mf_lock',null);toast('Bloqueo desactivado.','ok')});return}
-  if(x==='bioon'){lkShow('chk',function(){lkBioSet()});return}
-  if(x==='biooff'){LK.bio=null;ls('mf_lock',JSON.stringify(LK));toast('Ya no se usa la huella o el rostro. Queda el PIN.','ok');render()}
+    if(!c)return;LK={bio:b64u(new Uint8Array(c.rawId))};ls('mf_lock',JSON.stringify(LK));LKS.mode='';lkDraw();toast('Listo: la próxima vez la app se abre con tu huella o rostro.','ok')}).catch(function(){if(LKS.mode==='offer'){LKS.bad=true;LKS.msg='No se pudo activar. Podés probar de nuevo o seguir con la clave.';lkDraw()}else toast('No se pudo activar el acceso con biometría en este celular.','bad')})}
+function lkKey(x){
+  if(x==='bio'){lkBio();return}
+  if(x==='forgot'){if(confirm('Para entrar con tu clave tenés que cerrar sesión y volver a entrar con tu nombre y tu clave de la agenda. ¿Seguimos?')){ls('mf_lock',null);LK=null;ls(SK,null);S='';location.reload()}return}
+  if(x==='bioon'){lkBioSet();return}
+  if(x==='bioNo'){ls('mf_bio_no','1');if(LKS.mode==='offer'){LKS.mode='';lkDraw()}render();return}
+  if(x==='biooff'){if(confirm('¿Dejar de usar huella o rostro? La app se abrirá sin pedir nada.')){LK=null;ls('mf_lock',null);toast('Acceso con biometría desactivado.','ok')}return}
 }
+function bioBanner(){
+  if(!BIO||LK||ls('mf_bio_no'))return '';
+  return '<div class="card"><h3>Entrá sin escribir la clave</h3><div class="mut">Activá el acceso con huella o rostro (o con el código de bloqueo de tu celular). Es opcional y lo podés cambiar después en «Yo».</div><div class="lkrow"><button class="btn" data-a="lk:bioon">Activar acceso con biometría</button><button class="btn sec" data-a="lk:bioNo">Ahora no</button></div></div>'}
 function lkCard(){
-  if(!LK)return '<div class="card"><h3>Bloqueo de la app</h3><div class="mut">Pide un PIN de 4 números al abrir la app y, si tu celular tiene huella o rostro, también podés entrar solo con eso, como en el banco. Tu usuario queda recordado en este celular.</div><div style="height:10px"></div><button class="btn sec" data-a="lk:setup">'+IC.lk+'Activar bloqueo</button></div>';
-  return '<div class="card"><h3>Bloqueo de la app <span class="pill ok">Activado</span></h3><div class="mut">Se pide la huella, el rostro o el PIN al abrir la app y cuando volvés a ella después de un minuto. Tu usuario queda recordado en este celular.</div><div class="lkrow"><button class="btn sec" data-a="lk:change">Cambiar PIN</button>'+(BIO?(LK.bio?'<button class="btn sec" data-a="lk:biooff">Quitar huella o rostro</button>':'<button class="btn sec" data-a="lk:bioon">Usar huella o rostro</button>'):'')+'<button class="btn sec" data-a="lk:off">Desactivar</button></div></div>'}
+  if(!BIO)return '<div class="card"><h3>Acceso con biometría</h3><div class="mut">Este celular no permite usar huella o rostro desde la app. Tu usuario queda recordado y la sesión se mantiene 30 días.</div></div>';
+  if(!LK)return '<div class="card"><h3>Acceso con biometría</h3><div class="mut">Abrí la app con tu huella o rostro, como en el banco, en lugar de escribir la clave. Tu usuario queda recordado en este celular.</div><div style="height:10px"></div><button class="btn sec" data-a="lk:bioon">'+IC.fp+'Activar acceso con biometría</button></div>';
+  return '<div class="card"><h3>Acceso con biometría <span class="pill ok">Activado</span></h3><div class="mut">Se pide la huella o el rostro (o el código de tu celular) al abrir la app y cuando volvés a ella después de un minuto.</div><div class="lkrow"><button class="btn sec" data-a="lk:biooff">Desactivar</button></div></div>'}
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){LKS.away=Date.now();return}
   if(LK&&S&&!LKS.locked&&!LKS.mode&&LKS.away&&Date.now()-LKS.away>60000){LKS.locked=true;lkShow('unlock');if(LK.bio){try{lkBio()}catch(e){}}}
@@ -670,6 +656,7 @@ document.addEventListener('touchend',function(ev){
 document.addEventListener('touchcancel',function(){if(g&&g.mode==='sheet')soltar(g);g=null},{passive:true});
 })();
 /* ---------- arranque ---------- */
+temaAplicar();try{matchMedia("(prefers-color-scheme:dark)").addEventListener("change",temaAplicar)}catch(e){}
 function arrancar(){
   if(!S){pedirLogin();return}
   if(DRAFT&&UI.view===''&&false)UI.view='rec';

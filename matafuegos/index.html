@@ -133,7 +133,7 @@ img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.16';
+var VERSION='1.17';
 var ED_COD=null;
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
@@ -425,14 +425,13 @@ function verFotos(n){var f=DATA.fallas.filter(function(z){return z.n===n})[0];if
   UI.sheet='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Fotos de la falla</h3><div class="mut">Abriendo…</div></div></div>';render();
   var out=[];(function sig(i){if(i>=f.fo.length){UI.sheet=sheetFotos(f,out);render();return}
     post('verAdjunto',[K,f.fo[i]]).then(function(j){if(j&&j.ok&&j.r)out.push('data:'+j.r.type+';base64,'+j.r.b64);sig(i+1)}).catch(function(){UI.sheet=null;toast('No se pudieron abrir las fotos.','bad')})})(0)}
-function optCorregir(id){return DATA.puede?'<div class="opt" role="button" data-a="corregir:'+esc(id)+'"><i>✎</i>El equipo tiene un dato mal cargado (corregirlo)</div>':''}
 function esOtra(t){return /^Otra/.test(String(t))}
 function sheetFalla(id){
   var e=eqs().filter(function(x){return x.id===id})[0],it=DRAFT.items[id],sel=it&&it.e==='Falla'?it.fallas.map(function(f){return f.tipo}):[],nota=it&&it.fallas[0]?it.fallas[0].nota:'';
   UI.fsel=sel.slice();UI.fnota=nota||'';UI.ffotos=((it&&it.fotos)||[]).slice();
   return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>¿Qué falla encontraste?</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(ubT(e))+'</div>'+
    (DATA.tipos||[]).map(function(t,i){return '<div class="opt" role="button" data-a="ftipo:'+i+'" aria-pressed="'+(sel.indexOf(t)>=0)+'"><i>'+(sel.indexOf(t)>=0?'✓':'')+'</i>'+esc(t)+'</div>'}).join('')+
-   optCorregir(id)+fotosHtml()+'<textarea id="fnota" placeholder="'+(sel.some(esOtra)?'Explicá cuál es la falla (obligatorio)':'Observaciones (opcional)')+'" style="margin:6px 0 12px'+(sel.some(esOtra)?';border-color:var(--bad)':'')+'">'+esc(nota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+id+'">Guardar falla</button></div></div></div>';
+   fotosHtml()+'<textarea id="fnota" placeholder="'+(sel.some(esOtra)?'Explicá cuál es la falla (obligatorio)':'Observaciones (opcional)')+'" style="margin:6px 0 12px'+(sel.some(esOtra)?';border-color:var(--bad)':'')+'">'+esc(nota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+id+'">Guardar falla</button></div></div></div>';
 }
 function gruposLocal(){
   var emp=(DATA.emp&&DATA.emp[DRAFT.ed])||{n:'',mail:''},n=0;
@@ -514,7 +513,7 @@ function sheetEq(id){
   }
   if(!pe.length&&!otras.length)h+='<div class="note info">Todo en orden. No tiene pendientes ni fallas en trámite.</div>';
   var enRec=UI.view==='rec'&&!!DRAFT;
-  if(puede&&enRec){var itr=DRAFT.items[id];h+='<h3 class="sec" style="margin-top:14px">En esta recorrida</h3>'+(itr?'<div class="mut" style="margin-bottom:8px">Ya lo marcaste: '+(itr.e==='OK'?'en orden':itr.fallas.map(function(f){return f.tipo}).join(', '))+'.</div>':'')+'<div class="row"><button class="btn ok" data-a="recok:'+esc(id)+'">'+IC.chk+'En orden</button><button class="btn bad" data-a="recfalla:'+esc(id)+'">'+IC.warn+'Falla</button></div><div class="mut" style="margin:8px 0 0">Si algo de la ficha no coincide con lo que ves (número, ubicación, vencimiento), corregilo con «Editar datos»: el cambio queda registrado con tu nombre.</div>';}
+  if(puede&&enRec){var itr=DRAFT.items[id];h+='<h3 class="sec" style="margin-top:14px">En esta recorrida</h3>'+(itr?'<div class="mut" style="margin-bottom:8px">Ya lo marcaste: '+(itr.e==='OK'?'en orden':itr.fallas.map(function(f){return f.tipo}).join(', '))+'.</div>':'')+'<div class="row"><button class="btn ok" data-a="recok:'+esc(id)+'">'+IC.chk+'En orden</button><button class="btn bad" data-a="recfalla:'+esc(id)+'">'+IC.warn+'Falla</button></div><div class="mut" style="margin:8px 0 0">Si algo de la ficha no coincide con lo que ves (número, ubicación, vencimiento), corregilo con «Editar datos». No hace falta cargarlo como falla: el cambio queda registrado solo (fecha, quién lo hizo y valor anterior → nuevo) y se ve en «Ver cambios del equipo».</div>';}
   else if(puede)h+='<button class="btn bad" style="margin-top:14px" data-a="fallaficha">'+IC.warn+'Registrar una falla</button>';
   h+='<div style="margin-top:12px"><button class="btn sec" data-a="cambios:'+esc(id)+'">Ver cambios del equipo</button></div>';
   if(UI.camb&&UI.camb[id]){var cb=UI.camb[id];h+=cb.length?'<ul class="mut" style="margin:8px 0 0;padding-left:18px">'+cb.slice().reverse().map(function(x){return '<li>'+esc(x[0])+' · '+esc(x[1])+' · '+esc(x[2])+': «'+esc(x[3])+'» → «'+esc(x[4])+'»'+(x[5]?' ('+esc(x[5])+')':'')+'</li>'}).join('')+'</ul>':'<div class="mut" style="margin-top:8px">Este equipo no tiene cambios registrados.</div>'}
@@ -528,7 +527,7 @@ function valIni(e,c){var v=e[c];return(v==null||v==='-')?'':String(v)}
 function sheetEdit(id){
   var e=eqs().filter(function(x){return x.id===id})[0];if(!e)return null;
   if(!UI.edv||UI.edv._id!==id){UI.edv={_id:id};CAMPOS.forEach(function(c){UI.edv[c[0]]=valIni(e,c[0])})}
-  var h='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Editar equipo</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(e.id)+'</div>';
+  var h='<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Editar equipo</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(e.id)+'</div>'+'<div class="note info" style="margin-bottom:10px">Cada cambio queda registrado: fecha, quién lo hizo y valor anterior → nuevo.</div>';
   var ags={};eqs().forEach(function(x){if(x.ag&&x.ag!=='-')ags[x.ag]=1});
   CAMPOS.forEach(function(c){var k=c[0],v=UI.edv[k];h+='<label class="fl" style="margin-bottom:10px"><span>'+c[1]+'</span>';
     if(c[2]==='sel')h+='<select id="ed_'+k+'">'+edificios().map(function(x){return '<option'+(x===v?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select>';
@@ -536,7 +535,7 @@ function sheetEdit(id){
     else if(c[2]==='area')h+='<textarea id="ed_'+k+'" style="min-height:64px">'+esc(v)+'</textarea>';
     else h+='<input type="text" id="ed_'+k+'" value="'+esc(v)+'"'+(c[2]==='ag'?' list="agl"':'')+(k==='kg'?' inputmode="decimal"':k==='anio'?' inputmode="numeric"':'')+' autocomplete="off">'+(c[2]==='ag'?'<datalist id="agl">'+Object.keys(ags).map(function(a){return '<option value="'+esc(a)+'">'}).join('')+'</datalist>':'');
     h+='</label>'});
-  return h+'<div class="row"><button class="btn sec" data-a="'+(UI.edfalla?'cerrarsheet':'eqver:'+esc(id))+'">Cancelar</button><button class="btn" data-a="guardaredit">Guardar cambios</button></div></div></div>';
+  return h+'<div class="row"><button class="btn sec" data-a="eqver:'+esc(id)+'">Cancelar</button><button class="btn" data-a="guardaredit">Guardar cambios</button></div></div></div>';
 }
 function sheetBaja(id){
   var e=eqs().filter(function(x){return x.id===id})[0];if(!e)return null;
@@ -761,8 +760,7 @@ function act(a,ev){
   else if(k==='gsec'){UI.gsec=x}
   else if(k==='eqbaja'){UI.eqbaja=!UI.eqbaja;UI.eqn=60}
   else if(k==='eqlimpiar'){UI.eqed='Todos';UI.eqag='';UI.eqkg='';UI.eqan='';UI.eqpiso='';UI.eqpend=false;UI.eqn=60}
-  else if(k==='editar'){UI.edfalla=false;UI.edv={};UI.sheet=sheetEdit(UI.eid)}
-  else if(k==='corregir'){UI.eid=x;UI.edfalla=true;UI.edv={};UI.sheet=sheetEdit(x)}
+  else if(k==='editar'){UI.edv={};UI.sheet=sheetEdit(UI.eid)}
   else if(k==='cambios'){
     if(!navigator.onLine){toast('Necesitás señal para ver los cambios.','bad');render();return}
     UI.eid=x;UI.camb=UI.camb||{};
@@ -793,13 +791,13 @@ function sheetFallaFicha(){ // falla suelta, sin recorrida
   var e=eqs().filter(function(x){return x.id===UI.fid})[0];if(!e)return null;
   return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>Registrar una falla</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(ubT(e))+'</div>'+
    (DATA.tipos||[]).map(function(t,i){return '<div class="opt" role="button" data-a="ftipo:'+i+'" aria-pressed="'+(UI.fsel.indexOf(t)>=0)+'"><i>'+(UI.fsel.indexOf(t)>=0?'✓':'')+'</i>'+esc(t)+'</div>'}).join('')+
-   optCorregir(UI.fid)+'<textarea id="fnota" placeholder="'+(UI.fsel.some(esOtra)?'Explicá cuál es la falla (obligatorio)':'Observaciones (opcional)')+'" style="margin:6px 0 8px'+(UI.fsel.some(esOtra)?';border-color:var(--bad)':'')+'">'+esc(UI.fnota||'')+'</textarea><div class="mut" style="margin-bottom:12px">Queda anotada como «Informado» y todavía no sale ningún mail: después podés enviar el reclamo desde la ficha del equipo.</div><div class="row"><button class="btn sec" data-a="eqver:'+esc(e.id)+'">Cancelar</button><button class="btn" data-a="guardarficha">Registrar falla</button></div></div></div>';
+   '<textarea id="fnota" placeholder="'+(UI.fsel.some(esOtra)?'Explicá cuál es la falla (obligatorio)':'Observaciones (opcional)')+'" style="margin:6px 0 8px'+(UI.fsel.some(esOtra)?';border-color:var(--bad)':'')+'">'+esc(UI.fnota||'')+'</textarea><div class="mut" style="margin-bottom:12px">Queda anotada como «Informado» y todavía no sale ningún mail: después podés enviar el reclamo desde la ficha del equipo.</div><div class="row"><button class="btn sec" data-a="eqver:'+esc(e.id)+'">Cancelar</button><button class="btn" data-a="guardarficha">Registrar falla</button></div></div></div>';
 }
 function sheetFalla2(){ // vuelve a dibujar la hoja de falla manteniendo la selección
   var e=eqs().filter(function(x){return x.id===UI.fid})[0];
   return '<div class="sheet-bg" data-a="cerrarsheet"><div class="sheet" data-stop="1"><h3>¿Qué falla encontraste?</h3><div class="mut" style="margin-bottom:10px">'+esc(nroT(e))+' · '+esc(ubT(e))+'</div>'+
    (DATA.tipos||[]).map(function(t,i){return '<div class="opt" role="button" data-a="ftipo:'+i+'" aria-pressed="'+(UI.fsel.indexOf(t)>=0)+'"><i>'+(UI.fsel.indexOf(t)>=0?'✓':'')+'</i>'+esc(t)+'</div>'}).join('')+
-   optCorregir(UI.fid)+fotosHtml()+'<textarea id="fnota" placeholder="'+(UI.fsel.some(esOtra)?'Explicá cuál es la falla (obligatorio)':'Observaciones (opcional)')+'" style="margin:6px 0 12px'+(UI.fsel.some(esOtra)?';border-color:var(--bad)':'')+'">'+esc(UI.fnota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+UI.fid+'">Guardar falla</button></div></div></div>';
+   fotosHtml()+'<textarea id="fnota" placeholder="'+(UI.fsel.some(esOtra)?'Explicá cuál es la falla (obligatorio)':'Observaciones (opcional)')+'" style="margin:6px 0 12px'+(UI.fsel.some(esOtra)?';border-color:var(--bad)':'')+'">'+esc(UI.fnota||'')+'</textarea><div class="row"><button class="btn sec" data-a="cerrarsheet">Cancelar</button><button class="btn" data-a="guardarfalla:'+UI.fid+'">Guardar falla</button></div></div></div>';
 }
 document.addEventListener('click',function(ev){
   var t=ev.target.closest('[data-a]');

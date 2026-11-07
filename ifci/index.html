@@ -93,6 +93,7 @@ textarea{min-height:84px;resize:vertical}
 .toast.ok{background:var(--ok);color:#fff}.toast.bad{background:var(--bad);color:#fff}
 .note{border-radius:16px;padding:12px 14px;font-size:.92rem;margin:8px 0;background:var(--warnb);color:var(--warn);font-weight:500}
 .note.info{background:var(--okb);color:var(--ok)}.note.bad{background:var(--badb);color:var(--bad)}
+.note.ok{background:var(--okb);color:var(--ok)}
 .empty{text-align:center;color:var(--mut);padding:32px 12px;font-weight:500}
 .login{max-width:380px;margin:9vh auto 0;padding:0 22px}
 .login .logo{width:84px;height:84px;border-radius:24px;margin:0 auto 18px;display:block;box-shadow:0 10px 24px rgba(22,63,156,.28)}
@@ -200,7 +201,7 @@ function nroT(x){return x.nro?'BIE N° '+x.nro:'BIE sin número'}
 function bie(id,ed,piso,ub,nro,ph,ctl){return{id:id,ed:ed,piso:piso,ub:ub,nro:nro,obs:'',ph:ph,mang:'titular',ctl:ctl||'',fallas:[],h:[]}}
 
 /* ---------- estado ---------- */
-var ST={tab:'eq',ed:'L731',recEd:'L731',n:15,toast:null,filtro:'faltan',
+var ST={tab:'ini',ed:'L731',recEd:'L731',n:15,toast:null,filtro:'faltan',
  list:[]};
 var UI={gc:'A',gsec:'partes',gq:'',rec:{},sync:'',last:'nunca'};
 var F=null,FA=null,REC=jget('if_cur_'+K,null),CL=false,CX=false;
@@ -285,6 +286,50 @@ function sheetCierre(){
 function sheetCancel(){return '<div class="sheet-bg" data-a="cxno"><div class="sheet" data-stop="1"><h3>¿Cancelar la recorrida?</h3><div class="mut" style="margin-bottom:12px">Se pierde lo que marcaste. No se guarda nada.</div><div class="row"><button class="btn sec" data-a="cxno">Seguir</button><button class="btn bad" data-a="cxsi">Cancelar recorrida</button></div></div></div>'}
 
 /* ---------- vistas ---------- */
+function dParse(s){var m=/^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(s||''));return m?new Date(+m[3],+m[2]-1,+m[1]):null}
+function diasDesde(s){var d=dParse(s);return d?Math.floor((new Date()-d)/864e5):null}
+function fAbierta(f){return f.estado!=='Resuelta'&&f.estado!=='Verificada'}
+function fCritica(f){return /volante|bomba|sin servicio|p[eé]rdida/i.test((f.tipo||'')+' '+(f.detalle||''))}
+function viewInicio(){
+  var h='',list=ST.list,fs=(DATA&&DATA.fallas)||[],ab=fs.filter(fAbierta),recs=((DATA&&DATA.recs)||[]).slice().reverse();
+  var ahoraIdx=HOY.getFullYear()*12+HOY.getMonth();
+  if(DATA&&!DATA.puede)h+='<div class="note">Tu usuario es de consulta: podés ver todo, pero no cargar ni controlar.</div>';
+  if(!list.length){
+    return h+'<div class="hero"><h2>IFCI</h2><p>Todavía no hay BIE cargadas.'+((!DATA||DATA.puede)?' Cargá la primera desde Equipos.':'')+'</p></div>'+
+      (QUEUE.length?'<div class="note">Hay '+QUEUE.length+' cosa'+(QUEUE.length>1?'s':'')+' esperando señal para enviarse.</div>':'');
+  }
+  var crit=ab.filter(fCritica),phV=list.filter(function(x){return x.ph&&phVencida(x.ph)}),
+      phP=list.filter(function(x){var i=mesIdx(x.ph);return i!==null&&i>=ahoraIdx&&i<=ahoraIdx+3}),
+      sinCtl=list.filter(function(x){var d=diasDesde(x.ctl);return d===null||d>60});
+  var al='';
+  if(crit.length)al+='<div class="note bad">'+crit.length+' falla'+(crit.length>1?'s críticas':' crítica')+' sin resolver (válvula, bomba o pérdida).</div>';
+  if(phV.length)al+='<div class="note bad">'+phV.length+' BIE con la prueba hidráulica vencida.</div>';
+  if(phP.length)al+='<div class="note">'+phP.length+' BIE con la prueba hidráulica por vencer en los próximos 3 meses.</div>';
+  if(sinCtl.length)al+='<div class="note">'+sinCtl.length+' BIE sin control hace más de 60 días o sin ningún control registrado.</div>';
+  if(QUEUE.length)al+='<div class="note">Hay '+QUEUE.length+' cosa'+(QUEUE.length>1?'s':'')+' esperando señal para enviarse.</div>';
+  h+='<div class="hero"><h2>Resumen</h2><p>'+list.length+' BIE cargadas · '+ab.length+' falla'+(ab.length===1?'':'s')+' en trámite</p></div>';
+  h+=al||'<div class="note ok">Todo al día: sin fallas críticas ni pruebas hidráulicas vencidas.</div>';
+  h+='<h3 class="sec">Por edificio</h3>';
+  B.forEach(function(b){
+    var l=list.filter(function(x){return x.ed===b.id});if(!l.length)return;
+    var rec30=l.filter(function(x){var d=diasDesde(x.ctl);return d!==null&&d<=30}).length,
+        fb=ab.filter(function(f){return edId(f.ed)===b.id}).length,
+        pv=l.filter(function(x){return x.ph&&phVencida(x.ph)}).length,
+        e=(EMP[b.id]&&EMP[b.id].n)||'';
+    h+='<div class="card"><b>'+esc(b.n)+'</b><div class="mut">'+esc(e)+'</div><div style="height:8px"></div>'+
+      '<span class="pill">'+l.length+' BIE</span> <span class="pill '+(rec30===l.length?'ok':'warn')+'">'+rec30+' controlada'+(rec30===1?'':'s')+' en 30 días</span> '+
+      (fb?'<span class="pill bad">'+fb+' falla'+(fb>1?'s':'')+'</span> ':'')+(pv?'<span class="pill bad">'+pv+' PH vencida'+(pv>1?'s':'')+'</span>':'')+'</div>';
+  });
+  h+='<h3 class="sec">Últimas recorridas</h3>';
+  h+=recs.length?recs.slice(0,5).map(function(r){
+    return '<div class="card"><b>'+esc(r.ed)+'</b> <span class="pill '+(r.estado==='Cerrada'?'ok':'warn')+'">'+esc(r.estado)+'</span><div class="mut">'+esc(r.fecha)+' · '+esc(r.quien||'')+'<br>'+r.controlados+' controladas · '+r.ok+' en orden · '+r.obs+' con observaciones · '+r.fallas+' falla'+(r.fallas===1?'':'s')+'</div></div>'}).join(''):'<div class="empty">Todavía no hay recorridas registradas.</div>';
+  if(ab.length){
+    h+='<h3 class="sec">Fallas en trámite</h3>'+ab.slice().reverse().slice(0,4).map(function(f){
+      var x=byId(f.nicho);return '<div class="card"><b>'+esc(x?nroT(x):('BIE '+f.nicho))+'</b> <span class="pill '+(f.estado==='Informada'?'warn':'bad')+'">'+esc(f.estado)+'</span><div class="mut">'+esc(f.ed)+' · '+esc(f.tipo)+'</div></div>'}).join('')+
+      (ab.length>4?'<button class="btn sec" data-a="tab:fal">Ver las '+ab.length+' fallas</button>':'');
+  }
+  return h+'<div style="height:12px"></div>';
+}
 function viewEquipos(){
   var b=bld(ST.ed),lista=ST.list.filter(function(x){return x.ed===ST.ed}),h='';
   if(DATA&&!DATA.puede)h+='<div class="note">Tu usuario es de consulta: podés ver las BIE, pero no cargar ni controlar.</div>';
@@ -438,11 +483,11 @@ function viewYo(){
 function render(){
   var m0=$('main'),s0=$('.sheet'),mt=m0?m0.scrollTop:0,st=s0?s0.scrollTop:0,h='';
   var enRec=!!REC;
-  h+='<header class="top">'+(enRec?'<button class="back" data-a="cancelrec" aria-label="Volver">'+IC.back+'</button>':'')+'<div style="flex:1;min-width:0"><h1>'+(enRec?'Recorrida':({eq:'IFCI',rec:'Recorrida',fal:'Fallas',guia:'Guía',yo:'Yo'}[ST.tab]))+'</h1><div class="sub">Instalación fija contra incendio · bocas (BIE)</div></div><span class="st'+(navigator.onLine?'':' off')+'"><i class="dot"></i>'+(navigator.onLine?'Con señal':'Sin señal')+'</span></header><main>';
-  h+=enRec?viewRecorrida():({eq:viewEquipos,rec:viewRecInicio,fal:viewFallas,guia:viewGuia,yo:viewYo}[ST.tab])();
+  h+='<header class="top">'+(enRec?'<button class="back" data-a="cancelrec" aria-label="Volver">'+IC.back+'</button>':'')+'<div style="flex:1;min-width:0"><h1>'+(enRec?'Recorrida':({ini:'Inicio',eq:'IFCI',rec:'Recorrida',fal:'Fallas',guia:'Guía',yo:'Yo'}[ST.tab]))+'</h1><div class="sub">Instalación fija contra incendio · bocas (BIE)</div></div><span class="st'+(navigator.onLine?'':' off')+'"><i class="dot"></i>'+(navigator.onLine?'Con señal':'Sin señal')+'</span></header><main>';
+  h+=enRec?viewRecorrida():({ini:viewInicio,eq:viewEquipos,rec:viewRecInicio,fal:viewFallas,guia:viewGuia,yo:viewYo}[ST.tab])();
   h+='</main>';
   if(enRec)h+='<div class="fab"><button class="btn" data-a="cerrarrec">Cerrar recorrida</button></div>';
-  else h+='<nav class="tabs">'+[['eq','Equipos',IC.list],['rec','Recorrida',IC.route],['fal','Fallas',IC.warn],['guia','Guía',IC.book],['yo','Yo',IC.user]].map(function(q){return '<button data-a="tab:'+q[0]+'" aria-current="'+(ST.tab===q[0])+'"><i>'+q[2]+'</i>'+q[1]+'</button>'}).join('')+'</nav>';
+  else h+='<nav class="tabs">'+[['ini','Inicio','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>'],['eq','Equipos',IC.list],['rec','Recorrida',IC.route],['fal','Fallas',IC.warn],['guia','Guía',IC.book],['yo','Yo',IC.user]].map(function(q){return '<button data-a="tab:'+q[0]+'" aria-current="'+(ST.tab===q[0])+'"><i>'+q[2]+'</i>'+q[1]+'</button>'}).join('')+'</nav>';
   if(F)h+=sheetForm();else if(FA)h+=sheetFalla();else if(CL)h+=sheetCierre();else if(CX)h+=sheetCancel();
   if(ST.toast)h+='<div class="toast '+ST.toast.k+'">'+esc(ST.toast.t)+'</div>';
   lsok('if_cur_'+K,REC?JSON.stringify(REC):null);
@@ -455,7 +500,7 @@ function toast(t,k){ST.toast={t:t,k:k||'ok'};clearTimeout(tt);tt=setTimeout(func
 
 /* ---------- conexión, sesión y datos ---------- */
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.0';
+var VERSION='1.1';
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -749,7 +794,7 @@ document.addEventListener('visibilitychange',function(){
 
 /* ---------- gestos: deslizar entre pestañas ---------- */
 (function(){
-var TABS=['eq','rec','fal','guia','yo'],g=null;
+var TABS=['ini','eq','rec','fal','guia','yo'],g=null;
 function noDesliza(t){while(t&&t!==document.body){if(t.nodeType===1){var n=t.tagName;if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT')return true;var o=getComputedStyle(t).overflowX;if((o==='auto'||o==='scroll')&&t.scrollWidth>t.clientWidth+2)return true}t=t.parentNode}return false}
 document.addEventListener('touchstart',function(ev){g=null;if(ev.touches.length!==1||!S||LKS.locked||LKS.mode||REC||F||FA||CL||CX)return;var te=ev.touches[0];g={x:te.clientX,y:te.clientY,t:Date.now(),sob:noDesliza(ev.target)}},{passive:true});
 document.addEventListener('touchend',function(ev){if(!g)return;var o=g;g=null;var te=ev.changedTouches[0],dx=te.clientX-o.x,dy=te.clientY-o.y,dt=Math.max(Date.now()-o.t,1);

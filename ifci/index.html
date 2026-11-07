@@ -401,7 +401,7 @@ function viewInicio(){
 function viewEquipos(){
   var b=bld(ST.ed),lista=ST.list.filter(function(x){return x.ed===ST.ed}),h='';
   if(DATA&&!DATA.puede)h+='<div class="note">Tu usuario es de consulta: podés ver las BIE, pero no cargar ni controlar.</div>';
-  h+='<div class="hero"><h2>Bocas de incendio</h2><p>Elegí el edificio para ver y cargar sus BIE.</p><select id="edsel">'+B.map(function(x){return '<option value="'+x.id+'"'+(x.id===ST.ed?' selected':'')+'>'+esc(x.n)+'</option>'}).join('')+'</select><button class="btn w" data-a="nueva">'+IC.mas+'Agregar BIE</button>'+(lista.length?'<button class="btn sec w" style="margin-top:8px" data-a="qrimp">Imprimir etiquetas QR</button>':'')+'</div>';
+  h+='<div class="hero"><h2>Bocas de incendio</h2><p>Elegí el edificio para ver y cargar sus BIE.</p><select id="edsel">'+B.map(function(x){return '<option value="'+x.id+'"'+(x.id===ST.ed?' selected':'')+'>'+esc(x.n)+'</option>'}).join('')+'</select><button class="btn w" data-a="nueva">'+IC.mas+'Agregar BIE</button>'+(lista.length?'<div class="mut" style="margin-top:10px">Las etiquetas QR se imprimen desde la agenda, en la compu: Equipos → IFCI → Etiquetas QR.</div>':'')+'</div>';
   h+='<h3 class="sec" style="margin-top:6px">'+esc(b.n)+' · '+lista.length+' cargadas</h3>';
   if(!lista.length)h+='<div class="empty">Todavía no hay BIE cargadas en este edificio.</div>';
   grupos(lista,function(x){return '<div class="eq tap" data-a="edit:'+x.id+'"><div class="eqh tap"><div class="av">'+IC.bie+'</div><div style="flex:1;min-width:0"><div class="t">'+esc(nroT(x))+'</div><div class="u">'+esc(x.ub||'Sin ubicación específica')+'</div><div class="m2">'+(x.ctl?'Último control: '+esc(x.ctl):'Sin control registrado')+'</div></div><div style="text-align:right"><span class="pill">'+esc(x.id)+'</span>'+(x.fallas.length?'<div style="margin-top:4px"><span class="pill bad">'+x.fallas.length+(x.fallas.length>1?' fallas':' falla')+'</span></div>':'')+'</div></div></div>'},function(t){h+='<div class="pisoh">'+esc(t)+'</div>'},function(s){h+=s});
@@ -568,7 +568,7 @@ function toast(t,k){ST.toast={t:t,k:k||'ok'};clearTimeout(tt);tt=setTimeout(func
 
 /* ---------- conexión, sesión y datos ---------- */
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.6';
+var VERSION='1.7';
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}

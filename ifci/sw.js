@@ -1,5 +1,5 @@
 // Permite abrir la app sin señal: guarda en el celular la página de entrada de la app IFCI (no guarda datos: eso lo hace la página).
-var V = 'if-v7';
+var V = 'if-v8';
 var BASE = self.registration.scope;
 function conTiempo(p, ms) {
   return new Promise(function (ok, ko) {

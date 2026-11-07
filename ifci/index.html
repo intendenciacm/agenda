@@ -204,8 +204,8 @@ function bie(id,ed,piso,ub,nro,ph,ctl){return{id:id,ed:ed,piso:piso,ub:ub,nro:nr
 /* ---------- estado ---------- */
 var ST={tab:'ini',ed:'L731',recEd:'L731',n:15,toast:null,filtro:'faltan',
  list:[]};
-var UI={gc:'A',gsec:'partes',gq:'',rec:{},sync:'',last:'nunca'};
-var F=null,FA=null,REC=jget('if_cur_'+K,null),CL=false,CX=false;
+var UI={cextra:'',gc:'A',gsec:'partes',gq:'',rec:{},sync:'',last:'nunca'};
+var RS=null,RSB=false,F=null,FA=null,REC=jget('if_cur_'+K,null),CL=false,CX=false;
 var LAB={ed:'Edificio',piso:'Piso',ub:'Ubicación',nro:'N° de BIE',obs:'Observaciones'};
 var IC={bie:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.2 6 10.5A6 6 0 0 1 6 13.5C6 9.2 12 3 12 3z"/></svg>',
  mas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
@@ -265,24 +265,62 @@ function sheetFalla(){
   h+='<div class="row"><button class="btn sec" data-a="fgcancel">Cancelar</button><button class="btn bad" data-a="fgsave">Guardar falla</button></div>';
   return h+'</div></div>';
 }
+function pliegoDe(t){return (DATA&&DATA.pliego&&DATA.pliego[t])||''}
+function lineasFallas(its){
+  return its.map(function(o,i){return (i+1)+'. '+(o.nro?'BIE N° '+o.nro:'BIE sin número')+' (código '+o.cod+') · '+o.ub+'\n   Problema: '+o.f.tipo+(o.f.detalle?'\n   Observaciones: '+o.f.detalle:'')+(pliegoDe(o.f.tipo)?'\n   Fundamento: '+pliegoDe(o.f.tipo):'')}).join('\n\n');
+}
+function cuerpoMail(e,fecha,ed,its,ex){
+  return {n:its.length,emp:e,asunto:'Reclamo – Instalación fija contra incendio – '+ed+' ('+its.length+(its.length===1?' falla':' fallas')+')',
+    cuerpo:'Estimados '+(e.ok?e.n:'(empresa sin definir)')+':\n\nEn la recorrida realizada el '+fecha+' en '+ed+' se detectaron las siguientes situaciones:\n\n'+lineasFallas(its)+(ex?'\n\n'+ex:'')+'\n\nSolicitamos su reparación o reposición y que nos confirmen la fecha de atención.\n\nSaludos,\nIntendencia de Edificios'};
+}
+function mailTxt(m){return 'Asunto: '+m.asunto+'\n\n'+m.cuerpo}
 function mailRec(){
-  var e=EMP[REC.ed],ls=[],n=0;
-  listaRec().forEach(function(x){var it=REC.items[x.id];if(!it||it.e!=='F'||!it.list.length)return;
-    n++;ls.push(n+'. '+nroT(x)+' (código '+x.id+') · '+ubTxt(x)+'\n   Problema: '+it.list.join('; ')+(it.nota?'\n   Observaciones: '+it.nota:''))});
-  return{n:n,txt:'Estimados '+e.n+':\n\nEn la recorrida realizada el '+hoyTxt()+' en '+bld(REC.ed).n+' se detectaron las siguientes situaciones:\n\n'+ls.join('\n\n')+'\n\nSolicitamos su reparación o reposición y que nos confirmen la fecha de atención.\n\nSaludos,\nIntendencia de Edificios'};
+  var e=EMP[REC.ed]||{n:'',mail:'',ok:false},its=[],ab={};
+  ((DATA&&DATA.fallas)||[]).forEach(function(f){if(fAbierta(f))ab[f.nicho+'|'+f.tipo]=1});
+  listaRec().forEach(function(x){var it=REC.items[x.id];if(!it||it.e!=='F')return;
+    fallasDe(it).forEach(function(f){if(ab[aId(x.id)+'|'+f.tipo])return;its.push({nro:x.nro,cod:aId(x.id),ub:ubTxt(x),f:f})})});
+  return cuerpoMail(e,hoyTxt(),bld(REC.ed).n,its,(UI.cextra||'').trim().slice(0,1500));
+}
+function mailFalla(){
+  var f=((DATA&&DATA.fallas)||[]).filter(function(q){return q.id===RS})[0]||{},x=byId(f.nicho)||{},b=B.filter(function(q){return q.n===f.ed})[0],e=(b&&EMP[b.id])||{n:'',mail:'',ok:false};
+  if(f.emp)e={n:f.emp,mail:e.mail,ok:true};
+  return cuerpoMail(e,String(f.fecha||'').slice(0,10),f.ed||'',[{nro:x.nro,cod:f.nicho,ub:f.ub||'sin ubicación cargada',f:{tipo:f.tipo,detalle:f.detalle}}],(UI.cextra||'').trim().slice(0,1500));
+}
+function bloqueMail(m){
+  var e=m.emp,h='<div class="card" style="box-shadow:none;border:1.5px solid var(--line)"><b>Va a salir 1 mail</b><div class="mut">Para: '+esc(e.ok?e.n:'(sin empresa asignada)')+(e.mail?' · '+esc(e.mail):'')+'<br>Con '+m.n+(m.n===1?' falla':' fallas')+' juntas.</div></div>';
+  if(!e.ok)h+='<div class="note bad">Este edificio no tiene empresa de instalación fija contra incendio cargada: el mail no va a tener destinatario.</div>';
+  else if(!e.mail)h+='<div class="note bad">'+esc(e.n)+' no tiene mail cargado.</div>';
+  h+='<h3 class="sec" style="margin-top:12px">Así va a salir</h3><div id="mprev" class="mprev">'+esc(mailTxt(m))+'</div>';
+  h+='<textarea id="cr_extra" placeholder="Agregar un texto al mail (opcional)" style="margin:10px 0 8px">'+esc(UI.cextra||'')+'</textarea>';
+  h+='<div class="mut" style="margin-bottom:8px">El texto que escribas se agrega antes de «Solicitamos su reparación…». Por ahora los mails salen a las direcciones de prueba, con «[Prueba]» en el asunto.</div>';
+  return h;
 }
 function sheetCierre(){
-  var r=resumenRec(),m=mailRec(),e=EMP[REC.ed],crit=listaRec().filter(function(x){var it=REC.items[x.id];return it&&it.mang==='sinsust'}),
-  h='<div class="sheet-bg" data-a="seguir"><div class="sheet" data-stop="1"><h3>Cerrar recorrida</h3><div class="mut" style="margin-bottom:10px">'+esc(bld(REC.ed).n)+' · '+hoyTxt()+'</div>';
+  var r=resumenRec(),m=mailRec(),crit=listaRec().filter(function(x){var it=REC.items[x.id];return it&&it.mang==='sinsust'}),
+  h='<div class="sheet-bg" data-a="seguir"><div class="sheet" data-stop="1"><h3>Cerrar la recorrida</h3><div class="mut" style="margin-bottom:10px">'+esc(bld(REC.ed).n)+' · '+hoyTxt()+'</div>';
   h+='<div class="kpi"><div><b>'+r.ok+'</b><span>En orden</span></div><div><b>'+r.f+'</b><span>Con falla</span></div><div><b>'+r.pend+'</b><span>Sin controlar</span></div></div>';
-  if(r.pend)h+='<div class="note">Hay '+r.pend+' BIE sin controlar: quedan sin fecha de último control.</div>';
+  if(r.pend)h+='<div class="note">Hay '+r.pend+' BIE sin controlar: quedan sin fecha de último control. Podés cerrar igual o seguir.</div>';
   crit.forEach(function(x){h+='<div class="alerta">INFRACCIÓN CONTRACTUAL GRAVE: NICHO DESPROTEGIDO · '+esc(nroT(x))+' · '+esc(ubTxt(x))+'</div>'});
-  if(m.n){
-    h+='<div class="lbl">Fallas que se registran (empresa: '+esc(e.n)+')</div>';
-    h+='<div class="mprev">'+esc(m.txt)+'</div><div class="mut" style="margin:8px 2px">Las fallas quedan registradas en la agenda con su estado. El reclamo por mail a la empresa todavía se hace desde la agenda.</div>';
-  }else h+='<div class="note info">Sin fallas: no se manda reclamo. La recorrida queda registrada igual.</div>';
-  h+='<div class="row" style="margin-top:10px"><button class="btn sec" data-a="seguir">Seguir controlando</button><button class="btn" data-a="cierreok">'+(m.n?'Cerrar y guardar fallas':'Cerrar recorrida')+'</button></div>';
-  return h+'</div></div>';
+  if(m.n)h+=bloqueMail(m);
+  else h+='<div class="note info">No hay fallas nuevas para reclamar: no sale ningún mail. La recorrida queda registrada.</div>';
+  if(!navigator.onLine)h+='<div class="note">Estás sin señal: la recorrida se guarda en el celular y se envía sola apenas haya conexión.</div>';
+  h+='<div class="row" style="margin-top:6px"><button class="btn sec" data-a="seguir">Seguir</button><button class="btn" data-a="cierreok">'+(m.n?'Cerrar y enviar':'Cerrar recorrida')+'</button></div><button class="btn bad" style="margin-top:8px" data-a="descartarrec">Descartar recorrida</button></div></div>';
+  return h;
+}
+function sheetReclamo(){
+  var m=mailFalla(),h='<div class="sheet-bg" data-a="rfalx"><div class="sheet" data-stop="1"><h3>Enviar reclamo</h3><div class="mut" style="margin-bottom:10px">Una falla sola, sin esperar otra recorrida.</div>';
+  h+=bloqueMail(m);
+  if(!navigator.onLine)h+='<div class="note bad">Para enviar el reclamo hace falta señal.</div>';
+  h+='<div class="row" style="margin-top:6px"><button class="btn sec" data-a="rfalx">Cancelar</button><button class="btn" data-a="rfalok"'+((RSB||!navigator.onLine)?' disabled':'')+'>'+(RSB?'Enviando…':'Enviar')+'</button></div></div></div>';
+  return h;
+}
+function enviarReclamoFalla(){
+  if(RSB||!RS)return;RSB=true;render();
+  post('bieFallaReclamar',[K,RS,(UI.cextra||'').trim().slice(0,1500)]).then(function(j){
+    RSB=false;
+    if(!j.ok){if(j.e==='sesion'){RS=null;sesionCaida();return}render();toast(j.e||'No se pudo enviar el reclamo.','bad');return}
+    RS=null;UI.cextra='';refrescar(true).then(function(){toast('Reclamo enviado a la empresa.','ok')});
+  }).catch(function(){RSB=false;render();toast('No se pudo conectar. No se envió nada.','bad')});
 }
 function sheetCancel(){return '<div class="sheet-bg" data-a="cxno"><div class="sheet" data-stop="1"><h3>¿Cancelar la recorrida?</h3><div class="mut" style="margin-bottom:12px">Se pierde lo que marcaste. No se guarda nada.</div><div class="row"><button class="btn sec" data-a="cxno">Seguir</button><button class="btn bad" data-a="cxsi">Cancelar recorrida</button></div></div></div>'}
 
@@ -457,11 +495,11 @@ function viewFallas(){
   function card(f){
     var x=byId(f.nicho),nom=x?nroT(x):('BIE '+f.nicho),pc=f.estado==='Informada'?'warn':(f.estado==='Resuelta'||f.estado==='Verificada'?'ok':'bad');
     return '<div class="card"><b>'+esc(nom)+'</b> <span class="pill '+pc+'">'+esc(f.estado)+'</span><div class="mut">'+esc(f.ed)+' · '+esc(f.ub)+'<br>Empresa: '+esc(f.emp||'sin empresa vigente')+'<br>Informada el '+esc(f.fecha)+' por '+esc(f.por)+'</div><div class="note bad" style="margin:6px 0 0">'+esc(f.tipo)+(f.detalle?': '+esc(f.detalle):'')+'</div>'
-     +(puede?'<div class="chips" style="margin-top:10px;flex-wrap:wrap">'+ESTS.filter(function(e){return e!==f.estado}).map(function(e){return '<button class="chip" data-a="fest:'+esc(f.id)+':'+esc(e)+'">'+esc(e)+'</button>'}).join('')+'</div>':'')+'</div>';
+     +(puede?'<div class="chips" style="margin-top:10px;flex-wrap:wrap">'+(f.estado==='Informada'?'<button class="chip" style="background:var(--ac);color:var(--acfg)" data-a="rfal:'+esc(f.id)+'">Enviar reclamo</button>':'')+ESTS.filter(function(e){return e!==f.estado}).map(function(e){return '<button class="chip" data-a="fest:'+esc(f.id)+':'+esc(e)+'">'+esc(e)+'</button>'}).join('')+'</div>':'')+'</div>';
   }
   h+=ab.length?'<h3 class="sec">En trámite ('+ab.length+')</h3>'+ab.map(card).join(''):'<div class="empty">No hay fallas en trámite.</div>';
   if(cer.length)h+='<h3 class="sec">Resueltas hace poco</h3>'+cer.map(card).join('');
-  h+='<div class="mut" style="margin:8px 2px 20px">El reclamo por mail a la empresa se hace desde la agenda. Acá se sigue el estado de cada falla.</div>';
+  h+='<div class="mut" style="margin:8px 2px 20px">Las fallas nuevas se reclaman solas por mail al cerrar la recorrida. Si alguna quedó sin reclamar, usá «Enviar reclamo».</div>';
   return h;
 }
 /* ---------- yo ---------- */
@@ -489,7 +527,7 @@ function render(){
   h+='</main>';
   if(enRec)h+='<div class="fab"><button class="btn" data-a="cerrarrec">Cerrar recorrida</button></div>';
   else h+='<nav class="tabs">'+[['ini','Inicio','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>'],['eq','Equipos',IC.list],['rec','Recorrida',IC.route],['fal','Fallas',IC.warn],['guia','Guía',IC.book],['yo','Yo',IC.user]].map(function(q){return '<button data-a="tab:'+q[0]+'" aria-current="'+(ST.tab===q[0])+'"><i>'+q[2]+'</i>'+q[1]+'</button>'}).join('')+'</nav>';
-  if(F)h+=sheetForm();else if(FA)h+=sheetFalla();else if(CL)h+=sheetCierre();else if(CX)h+=sheetCancel();
+  if(F)h+=sheetForm();else if(FA)h+=sheetFalla();else if(RS)h+=sheetReclamo();else if(CL)h+=sheetCierre();else if(CX)h+=sheetCancel();
   if(ST.toast)h+='<div class="toast '+ST.toast.k+'">'+esc(ST.toast.t)+'</div>';
   lsok('if_cur_'+K,REC?JSON.stringify(REC):null);
   $('#app').innerHTML=h;
@@ -501,7 +539,7 @@ function toast(t,k){ST.toast={t:t,k:k||'ok'};clearTimeout(tt);tt=setTimeout(func
 
 /* ---------- conexión, sesión y datos ---------- */
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.2';
+var VERSION='1.3';
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -539,7 +577,7 @@ function aplicarDatos(){
       x.fallas=(abiertas[n.id]||[]).map(function(f){return f.tipo});
       list.push(x);
     });
-    B.forEach(function(b){EMP[b.id]={n:(DATA.emp&&DATA.emp[b.n])||'(sin empresa vigente)'}});
+    B.forEach(function(b){EMP[b.id]={n:(DATA.emp&&DATA.emp[b.n])||'(sin empresa vigente)',mail:(DATA.empMail&&DATA.empMail[b.n])||'',ok:!!(DATA.emp&&DATA.emp[b.n])}});
   }
   var per={};list.forEach(function(x){per[x.id]=x});
   QUEUE.forEach(function(op){
@@ -610,7 +648,7 @@ function enviarRec(it){
       });
     }).then(function(){
       if(err)return err;
-      return post('bieRecCerrar',[K,it.rid]).then(function(c){
+      return post('bieRecCerrar',[K,it.rid,it.extra||'']).then(function(c){
         if(!c.ok&&!/ya está cerrada/.test(c.e||''))return falloOp(it,c);
         return {ok:true};
       });
@@ -849,10 +887,10 @@ function enOrden(id){
   REC.items[id]={e:'OK',list:[],keys:[],mang:x.mang,ph:x.ph,nota:'',fotos:0};render();
 }
 function cierreOk(){
-  var m=mailRec(),f=ahora(),r=resumenRec(),ed=bld(REC.ed).n,op={t:'rec',ed:ed,fecha:hoyTxt(),items:[]};
+  var m=mailRec(),f=ahora(),r=resumenRec(),ed=bld(REC.ed).n,op={t:'rec',ed:ed,fecha:hoyTxt(),extra:(UI.cextra||'').trim().slice(0,1500),items:[]};
   listaRec().forEach(function(x){var it=REC.items[x.id];if(!it)return;
     op.items.push({id:x.id,e:it.e,list:it.list.slice(),keys:(it.keys||[]).slice(),mang:it.mang,ph:it.ph||'',nota:it.nota||''})});
-  ST.ed=REC.ed;ST.tab='eq';REC=null;CL=false;
+  ST.ed=REC.ed;ST.tab='eq';REC=null;CL=false;UI.cextra='';
   if(op.items.length){QUEUE.push(op);saveQ();aplicarDatos()}
   render();
   toast(m.n?'Recorrida cerrada en '+ed+': '+r.f+' con falla. '+(navigator.onLine?'Enviando…':'Se envía cuando haya señal.'):'Recorrida cerrada en '+ed+': todo en orden.','ok');
@@ -894,6 +932,10 @@ document.addEventListener('click',function(e){
    case 'fgsave':guardarFalla();break;
    case 'corregir':var id=FA.id;FA=null;abrirEdit(id);break;
    case 'cerrarrec':CL=true;render();break;
+   case 'descartarrec':CL=false;CX=true;render();break;
+   case 'rfal':RS=p[1];UI.cextra='';render();break;
+   case 'rfalx':RS=null;UI.cextra='';render();break;
+   case 'rfalok':enviarReclamoFalla();break;
    case 'seguir':CL=false;render();break;
    case 'cierreok':cierreOk();break;
    case 'cancelrec':CX=true;render();break;
@@ -919,6 +961,7 @@ document.addEventListener('input',function(e){
   else if(id==='nu')F.nu=v;
   else if(id==='fa_ph'){FA.ph=v;FA.err='';var w2=$('#phW');if(w2)w2.innerHTML=(v.trim()&&phVencida(v.trim()))?'<div class="note bad">Esa fecha ya pasó: se agrega «prueba hidráulica vencida» como falla.</div>':''}
   else if(id==='fa_nota')FA.nota=v;
+  else if(id==='cr_extra'){UI.cextra=v;var mp=$('#mprev');if(mp)mp.textContent=mailTxt(RS?mailFalla():mailRec())}
 });
 document.addEventListener('submit',function(ev){var f=ev.target.getAttribute('data-f');if(f==='login')doLogin(ev);else if(f==='nom'){ev.preventDefault();nEntrar()}});
 window.addEventListener('online',function(){if(S){render();sincronizar(false)}});

@@ -122,7 +122,8 @@ img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
 #lock .lkl{margin-top:20px;background:none;border:0;color:var(--ac);font-weight:700;font-size:.95rem;padding:10px}
 .lkrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.lkrow .btn{flex:1 1 140px}
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fl{display:block;min-width:0}.fl>span{display:block;font-size:.74rem;font-weight:700;color:var(--mut);margin:0 2px 4px}
-.fl select,.fl input[type=text]{padding:12px 34px 12px 12px;font-size:.92rem;border-radius:14px}.fl input[type=text]{padding-right:12px}.fl textarea{border-radius:14px}
+.fl select,.fl input[type=text]{padding:12px 34px 12px 12px;font-size:16px;border-radius:14px}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}.fl input[type=text]{padding-right:12px}.fl textarea{border-radius:14px}
 .pisoh{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:12px 2px 6px}
 .mprev{white-space:pre-wrap;word-break:break-word;font-size:.86rem;line-height:1.45;background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:12px;max-height:260px;overflow-y:auto}
 .adj{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line);border-radius:16px;padding:10px;margin-bottom:10px}.adj img{width:72px;height:72px;object-fit:cover;border-radius:10px}.adj .pdfi{width:72px;height:72px;border-radius:10px;background:var(--badb);color:var(--bad);display:flex;align-items:center;justify-content:center;font-weight:800}
@@ -133,7 +134,7 @@ img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
 (function(){
 'use strict';
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.17';
+var VERSION='1.18';
 var ED_COD=null;
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}

@@ -267,7 +267,10 @@ function sheetBIE(){
   var x=byId(QB);if(!x){return ''}
   var h='<div class="sheet-bg" data-a="qbx"><div class="sheet" data-stop="1"><h3>'+esc(nroT(x))+'</h3><div class="mut" style="margin-bottom:6px">'+esc(bld(x.ed).n)+' · '+esc(ubTxt(x))+'</div>'+fichaHtml(x);
   var e=EMP[x.ed];if(e)h+='<div class="mut" style="margin:4px 2px 10px">Empresa: '+esc(e.n)+'</div>';
-  h+='<div class="row">'+((!DATA||DATA.puede)?'<button class="btn sec" data-a="qbedit">Editar datos</button>':'')+'<button class="btn" data-a="qbx">Cerrar</button></div></div></div>';
+  var pu=(!DATA||DATA.puede);
+  h+='<button class="btn sec" style="margin-top:12px" data-a="qbcamb">Ver cambios de la BIE</button>';
+  if(pu)h+='<button class="btn bad" style="margin-top:10px" data-a="qbfalla">Registrar una falla</button><div class="row" style="margin-top:10px"><button class="btn sec" data-a="qbedit">Editar datos</button><button class="btn bad" data-a="qbbaja">Dar de baja</button></div>';
+  h+='<button class="btn" style="margin-top:10px" data-a="qbx">Cerrar</button></div></div>';
   return h;
 }
 function qrPagina(){
@@ -277,6 +280,23 @@ function qrPagina(){
   document.body.appendChild(d);QP=true;
 }
 function qrCerrar(){var d=document.getElementById('qrprint');if(d)d.remove();QP=false}
+var QFF=[],QFT='',QFD='',QFI='';
+function sheetSimple(t,sub,cuerpo){return '<div class="sheet-bg" data-a="fotosx"><div class="sheet" data-stop="1"><h3>'+t+'</h3>'+(sub?'<div class="mut" style="margin-bottom:10px">'+sub+'</div>':'')+cuerpo+'</div></div>'}
+function qbBajaSheet(id){var x=byId(id);return sheetSimple('Dar de baja',esc(nroT(x))+' · '+esc(ubTxt(x)),'<div class="note">La BIE sale de las recorridas y de la lista, pero queda guardada con su historial. Se puede reactivar desde la agenda.</div><label class="fl"><span>Motivo de la baja</span><textarea id="bj_mot" placeholder="Por qué se da de baja" style="margin:4px 0 10px"></textarea></label><div class="row"><button class="btn sec" data-a="fotosx">Cancelar</button><button class="btn bad" data-a="qbbajaok:'+esc(id)+'">Dar de baja</button></div>')}
+function qbBaja(id){var m=((document.getElementById('bj_mot')||{}).value||'').trim();if(!m){toast('Contá el motivo de la baja.','bad');return}if(!navigator.onLine){toast('Necesitás señal para dar de baja una BIE.','bad');return}
+  post('bieNichoBaja',[K,id,m]).then(function(j){if(!j||!j.ok){toast((j&&j.e)||'No se pudo dar de baja.','bad');return}VFo=null;refrescar(true).then(function(){render();toast('BIE dada de baja.','ok')})}).catch(function(){toast('No se pudo dar de baja. Revisá la señal.','bad')})}
+function qbCamb(id){if(!navigator.onLine){toast('Necesitás señal para ver los cambios.','bad');return}var x=byId(id);QB='';
+  VFo=sheetSimple('Cambios de la BIE','','<div class="mut">Abriendo…</div>');render();
+  post('bieCambios',[K,id]).then(function(j){if(!j||!j.ok)throw new Error('x');var r=(j.r||[]).slice().reverse();
+    VFo=sheetSimple('Cambios de la BIE',esc(x?nroT(x):id),(r.length?r.map(function(c){return '<div class="note" style="margin:4px 0"><b>'+esc(c[0])+'</b> · '+esc(c[4])+'<br>'+esc(c[1])+': '+(c[2]?esc(c[2])+' → ':'')+esc(c[3])+(c[5]?'<br><span class="mut">'+esc(c[5])+'</span>':'')+'</div>'}).join(''):'<div class="empty">Todavía no hay cambios registrados.</div>')+'<button class="btn" style="margin-top:6px" data-a="fotosx">Cerrar</button>');render()
+  }).catch(function(){VFo=null;render();toast('No se pudieron leer los cambios. Revisá la señal.','bad')})}
+function qfLeer(){var t=document.getElementById('qf_tipo'),d=document.getElementById('qf_det');if(t)QFT=t.value;if(d)QFD=d.value}
+function qfHtml(err){var x=byId(QFI),tipos=(DATA&&DATA.tipos)||[];
+  return sheetSimple('Registrar una falla',esc(nroT(x))+' · '+esc(ubTxt(x)),'<label class="fl"><span>Qué pasa</span><select id="qf_tipo">'+tipos.map(function(t){return '<option'+(t===QFT?' selected':'')+'>'+esc(t)+'</option>'}).join('')+'</select></label><label class="fl"><span>Detalle (obligatorio si elegís «Otra»)</span><textarea id="qf_det" style="margin:4px 0 10px">'+esc(QFD)+'</textarea></label><div class="fotos">'+QFF.map(function(u,i){return '<div class="th"><img src="'+u+'" alt="Foto '+(i+1)+'"><button class="x" data-a="qfq:'+i+'" aria-label="Quitar la foto">×</button></div>'}).join('')+(QFF.length<3?'<label class="add" for="qffile">'+IC.cam+'<span>Foto</span></label><input type="file" id="qffile" accept="image/*" capture="environment" hidden>':'')+'</div>'+(err?'<div class="note bad">'+esc(err)+'</div>':'')+'<div class="row"><button class="btn sec" data-a="fotosx">Cancelar</button><button class="btn bad" data-a="qfok">Informar la falla</button></div>')}
+function qfAbrir(id){QFI=id;QFF=[];QFD='';QFT=((DATA&&DATA.tipos)||[])[0]||'';VFo=qfHtml();render()}
+function qfEnviar(){qfLeer();if(!navigator.onLine){VFo=qfHtml('Necesitás señal para informar una falla desde acá.');render();return}
+  post('bieFallaInformar',[K,{nicho:QFI,tipo:QFT,detalle:QFD,fotos:QFF}]).then(function(j){if(!j||!j.ok){VFo=qfHtml((j&&j.e)||'No se pudo informar la falla.');render();return}VFo=null;refrescar(true).then(function(){render();toast('Falla informada. El reclamo se manda desde la pestaña Fallas.','ok')})}).catch(function(){VFo=qfHtml('No se pudo informar. Revisá la señal.');render()})}
+document.addEventListener('change',function(e){var t=e.target;if(!t||t.id!=='qffile'||!t.files||!t.files[0])return;qfLeer();reducir(t.files[0],function(u){if(u)QFF.push(u);VFo=qfHtml();render()},1000,0.6)});
 function sheetFalla(){
   var x=byId(FA.id),h='<div class="sheet-bg" data-a="fgcancel"><div class="sheet" data-stop="1"><h3>Falla · '+esc(nroT(x))+'</h3><div class="mut" style="margin-bottom:6px">'+esc(ubTxt(x))+' · '+esc(x.id)+'</div>';
   h+='<div class="lbl">Qué pasa</div>'+FL.map(function(f){var on=!!FA.fallas[f[0]];return '<div class="opt" role="button" aria-pressed="'+on+'" data-a="fl:'+f[0]+'"><i>'+(on?'✓':'')+'</i>'+esc(f[1])+'</div>'}).join('');
@@ -404,7 +424,7 @@ function viewEquipos(){
   h+='<div class="hero"><h2>Bocas de incendio</h2><p>Elegí el edificio para ver y cargar sus BIE.</p><select id="edsel">'+B.map(function(x){return '<option value="'+x.id+'"'+(x.id===ST.ed?' selected':'')+'>'+esc(x.n)+'</option>'}).join('')+'</select><button class="btn w" data-a="nueva">'+IC.mas+'Agregar BIE</button>'+(lista.length?'<div class="mut" style="margin-top:10px">Las etiquetas QR se imprimen desde la agenda, en la compu: Equipos → IFCI → Etiquetas QR.</div>':'')+'</div>';
   h+='<h3 class="sec" style="margin-top:6px">'+esc(b.n)+' · '+lista.length+' cargadas</h3>';
   if(!lista.length)h+='<div class="empty">Todavía no hay BIE cargadas en este edificio.</div>';
-  grupos(lista,function(x){return '<div class="eq tap" data-a="edit:'+x.id+'"><div class="eqh tap"><div class="av">'+IC.bie+'</div><div style="flex:1;min-width:0"><div class="t">'+esc(nroT(x))+'</div><div class="u">'+esc(x.ub||'Sin ubicación específica')+'</div><div class="m2">'+(x.ctl?'Último control: '+esc(x.ctl):'Sin control registrado')+'</div></div><div style="text-align:right"><span class="pill">'+esc(x.id)+'</span>'+(x.fallas.length?'<div style="margin-top:4px"><span class="pill bad">'+x.fallas.length+(x.fallas.length>1?' fallas':' falla')+'</span></div>':'')+'</div></div></div>'},function(t){h+='<div class="pisoh">'+esc(t)+'</div>'},function(s){h+=s});
+  grupos(lista,function(x){return '<div class="eq tap" data-a="qb:'+x.id+'"><div class="eqh tap"><div class="av">'+IC.bie+'</div><div style="flex:1;min-width:0"><div class="t">'+esc(nroT(x))+'</div><div class="u">'+esc(x.ub||'Sin ubicación específica')+'</div><div class="m2">'+(x.ctl?'Último control: '+esc(x.ctl):'Sin control registrado')+'</div></div><div style="text-align:right"><span class="pill">'+esc(x.id)+'</span>'+(x.fallas.length?'<div style="margin-top:4px"><span class="pill bad">'+x.fallas.length+(x.fallas.length>1?' fallas':' falla')+'</span></div>':'')+'</div></div></div>'},function(t){h+='<div class="pisoh">'+esc(t)+'</div>'},function(s){h+=s});
   return h;
 }
 function grupos(lista,card,head,add){
@@ -568,7 +588,7 @@ function toast(t,k){ST.toast={t:t,k:k||'ok'};clearTimeout(tt);tt=setTimeout(func
 
 /* ---------- conexión, sesión y datos ---------- */
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.7';
+var VERSION='1.8';
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -942,6 +962,7 @@ document.addEventListener('click',function(e){
    case 'qreint':if(QUEUE[+p[1]]){delete QUEUE[+p[1]].err;saveQ();sincronizar(true)}break;
    case 'nueva':abrirNueva();break;
    case 'edit':abrirEdit(p[1]);break;
+   case 'qb':QB=p[1];render();break;
    case 'cerrar':F=null;render();break;
    case 'addp':agregar('p');break;
    case 'addu':agregar('u');break;
@@ -964,6 +985,12 @@ document.addEventListener('click',function(e){
    case 'fotosx':VFo=null;render();break;
    case 'qbx':QB='';render();break;
    case 'qbedit':var qi=QB;QB='';abrirEdit(qi);break;
+   case 'qbcamb':qbCamb(QB);break;
+   case 'qbfalla':var qf=QB;QB='';qfAbrir(qf);break;
+   case 'qbbaja':var qj=QB;QB='';VFo=qbBajaSheet(qj);render();break;
+   case 'qbbajaok':qbBaja(p[1]);break;
+   case 'qfok':qfEnviar();break;
+   case 'qfq':qfLeer();QFF.splice(+p[1],1);VFo=qfHtml();render();break;
    case 'qrimp':qrPagina();break;
    case 'qrx':qrCerrar();break;
    case 'qrdo':window.print();break;

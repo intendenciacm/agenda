@@ -260,7 +260,7 @@ function verFotos(id){var f=((DATA&&DATA.fallas)||[]).filter(function(z){return 
   VFo='<div class="sheet-bg" data-a="fotosx"><div class="sheet" data-stop="1"><h3>Fotos de la falla</h3><div class="mut">Abriendo…</div></div></div>';render();
   var out=[];(function sig(i){if(i>=f.fo.length){VFo=sheetFotos(f,out);render();return}
     post('verAdjunto',[K,f.fo[i]]).then(function(j){if(j&&j.ok&&j.r)out.push('data:'+j.r.type+';base64,'+j.r.b64);sig(i+1)}).catch(function(){VFo=null;render();toast('No se pudieron abrir las fotos.','bad')})})(0)}
-function urlBIE(id){return location.origin+location.pathname+'?b='+encodeURIComponent(id)}
+function urlBIE(id){return location.origin+location.pathname+'f/?b='+encodeURIComponent(id)}
 function qrSvg(txt,celda){var q=qrcode(0,'M');q.addData(txt);q.make();return q.createSvgTag(celda||4,2,'QR','QR')}
 function abrirQR(id){var x=byId(id);if(!x){toast('No encontré esa BIE. Puede que todavía no se haya cargado.','bad');return}ST.tab='eq';ST.ed=x.ed;QB=id;render()}
 function sheetBIE(){
@@ -273,7 +273,7 @@ function sheetBIE(){
 function qrPagina(){
   var b=bld(ST.ed),lista=ST.list.filter(function(x){return x.ed===ST.ed&&String(x.id).indexOf('T-')!==0}).sort(function(a,c){var p=pisoDe(a.piso).k-pisoDe(c.piso).k;return p||String(a.nro).localeCompare(String(c.nro),'es',{numeric:true})});
   var d=document.createElement('div');d.id='qrprint';
-  d.innerHTML='<div class="qrbar"><b>Etiquetas QR · '+esc(b.n)+'</b><span>'+lista.length+' BIE</span><button class="btn sec" data-a="qrx">Cerrar</button><button class="btn" data-a="qrdo">Imprimir</button></div><div class="qrgrid">'+lista.map(function(x){return '<div class="qrt">'+qrSvg(urlBIE(x.id),5)+'<b>'+esc(nroT(x))+'</b><span>'+esc(ubTxt(x))+'</span><i>'+esc(b.n)+'</i></div>'}).join('')+'</div><div class="qrnote">Cada QR abre la ficha de su BIE en la app. No lleva ningún código personal: quien lo escanea entra con su propio acceso.</div>';
+  d.innerHTML='<div class="qrbar"><b>Etiquetas QR · '+esc(b.n)+'</b><span>'+lista.length+' BIE</span><button class="btn sec" data-a="qrx">Cerrar</button><button class="btn" data-a="qrdo">Imprimir</button></div><div class="qrgrid">'+lista.map(function(x){return '<div class="qrt">'+qrSvg(urlBIE(x.id),5)+'<b>'+esc(nroT(x))+'</b><span>'+esc(ubTxt(x))+'</span><i>'+esc(b.n)+'</i></div>'}).join('')+'</div><div class="qrnote">Cada QR abre la ficha de su BIE. No lleva ningún código personal: quien tiene la app entra con su acceso y quien no la tiene pide acceso una vez con su mail institucional.</div>';
   document.body.appendChild(d);QP=true;
 }
 function qrCerrar(){var d=document.getElementById('qrprint');if(d)d.remove();QP=false}
@@ -568,7 +568,7 @@ function toast(t,k){ST.toast={t:t,k:k||'ok'};clearTimeout(tt);tt=setTimeout(func
 
 /* ---------- conexión, sesión y datos ---------- */
 var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
-var VERSION='1.5';
+var VERSION='1.6';
 function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}

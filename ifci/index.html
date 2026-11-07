@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#14213D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>IFCI · Intendencia</title>
+<script>try{var _t=localStorage.getItem("ifci_tema");if(_t==="light"||_t==="dark")document.documentElement.setAttribute("data-t",_t)}catch(e){}</script>
+<style>@font-face{font-family:"Jakarta";src:url(jakarta.woff2) format("woff2");font-weight:200 800;font-style:normal;font-display:swap}
+:root{--bg:#F6F4EE;--card:#FFFDF8;--fg:#14213D;--mut:#6B6F7B;--ac:#14213D;--ac2:#233a6b;--acfg:#fff;--act:#F3E4D2;--line:#E3DDCF;--ok:#0f7a55;--okb:#e2f5ec;--bad:#d4332a;--badb:#fdeceb;--warn:#a15c00;--warnb:#fff2d9;--sh:0 1px 2px rgba(20,33,61,.05),0 1px 3px rgba(20,33,61,.04);--fab:0 10px 24px rgba(20,33,61,.35);--r:20px;--or:#F2A15F}
+@media (prefers-color-scheme:dark){:root:not([data-t=light]){--bg:#0C1423;--card:#15213A;--fg:#F3EEE4;--mut:#9AA5BC;--ac:#F2A15F;--ac2:#D9822F;--acfg:#1b1206;--act:#2A2A33;--line:#26334F;--ok:#4fd1a1;--okb:#11352a;--bad:#ff8c84;--badb:#3a1a1c;--warn:#f2b45a;--warnb:#392a10;--sh:none;--fab:0 10px 24px rgba(0,0,0,.5);--or:#F2A15F}}
+:root[data-t=dark]{--bg:#0C1423;--card:#15213A;--fg:#F3EEE4;--mut:#9AA5BC;--ac:#F2A15F;--ac2:#D9822F;--acfg:#1b1206;--act:#2A2A33;--line:#26334F;--ok:#4fd1a1;--okb:#11352a;--bad:#ff8c84;--badb:#3a1a1c;--warn:#f2b45a;--warnb:#392a10;--sh:none;--fab:0 10px 24px rgba(0,0,0,.5);--or:#F2A15F}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:"Jakarta",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);font-size:16px;line-height:1.4;overscroll-behavior:none;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1;word-spacing:.08em}
+button,input,select,textarea{font-family:inherit}
+#app{display:flex;flex-direction:column;height:100%;max-width:640px;margin:0 auto;position:relative;background:var(--bg)}
+header.top{background:var(--bg);color:var(--fg);padding:calc(env(safe-area-inset-top) + 14px) 20px 6px;display:flex;align-items:center;gap:12px;flex:none}
+header.top h1{font-size:1.75rem;line-height:1.1;margin:0;flex:1;font-weight:800;letter-spacing:-.02em;min-width:0}
+header.top .sub{font-size:.85rem;color:var(--mut);font-weight:500;letter-spacing:0;margin-top:4px}
+.st{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--ok);background:var(--okb);border-radius:999px;padding:6px 10px;flex:none}
+.st.off{color:var(--warn);background:var(--warnb)}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.back{background:var(--card);border:1px solid var(--line);color:var(--fg);border-radius:50%;width:42px;height:42px;flex:none;display:flex;align-items:center;justify-content:center;padding:0}
+.back svg{width:22px;height:22px}
+main{overscroll-behavior-y:contain;flex:1;overflow-y:auto;padding:12px 16px 110px;-webkit-overflow-scrolling:touch}
+nav.tabs{position:absolute;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:8px 8px calc(env(safe-area-inset-bottom) + 8px);z-index:5}
+nav.tabs button{flex:1;background:none;border:0;color:var(--mut);padding:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.72rem;font-weight:600;position:relative}
+nav.tabs button i{display:flex;align-items:center;justify-content:center;width:60px;height:32px;border-radius:999px;transition:background .2s}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current=true]{color:var(--ac)}
+nav.tabs button[aria-current=true] i{background:var(--act)}
+nav.tabs .bd{position:absolute;top:-2px;left:calc(50% + 8px);background:var(--bad);color:#fff;border-radius:10px;min-width:18px;height:18px;font-size:.7rem;display:flex;align-items:center;justify-content:center;padding:0 5px;font-weight:700}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--line);padding:16px;margin-bottom:12px}
+.card h2,.card h3{margin:0 0 6px;font-size:1.05rem;font-weight:700}
+.mut{color:var(--mut);font-size:.9rem}
+h3.sec{margin:22px 4px 10px;font-size:1.05rem;font-weight:800;letter-spacing:-.01em}
+.hero{background:radial-gradient(120% 140% at 100% 0%,#F2A15F 0%,#1c2f58 38%,#14213D 100%);color:#fff;border-radius:28px;padding:22px 20px 20px;margin-bottom:16px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-34px;top:-34px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.1)}
+.hero h2{margin:0 0 6px;font-size:1.4rem;font-weight:800;letter-spacing:-.015em;position:relative;z-index:1}.hero p{margin:0 0 16px;opacity:.9;font-size:.92rem;position:relative;z-index:1}
+.hero>*{position:relative;z-index:1}
+select,input[type=search],input[type=text],textarea,input[type=password],input[type=number]{width:100%;font-size:16px;font-weight:500;padding:15px 16px;border:1.5px solid transparent;border-radius:16px;background:var(--bg);color:var(--fg);outline:none;transition:border-color .15s,background .15s}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat!important;background-position:right 14px center!important;background-size:20px 20px!important;padding-right:44px;transition:none;-webkit-text-fill-color:currentColor}
+select:focus,input:focus,textarea:focus{border-color:var(--ac);background:var(--card)}
+.hero select{background-color:rgba(255,255,255,.16);color:#fff;font-weight:600;margin-bottom:12px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat!important;background-position:right 14px center!important;background-size:20px 20px!important}
+.hero select option{color:#0f1729}
+input[type=search]{padding-left:44px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-3.5-3.5'/></svg>");background-repeat:no-repeat;background-position:15px center}
+textarea{min-height:84px;resize:vertical}
+.btn{border:0;border-radius:999px;padding:14px 20px;font-size:1rem;font-weight:700;background:var(--ac);color:var(--acfg);min-height:52px;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s,opacity .12s;letter-spacing:-.005em}
+.btn:active{transform:scale(.97)}
+.btn svg{width:20px;height:20px;flex:none}
+.btn.w{background:#fff;color:var(--ac2)}
+.btn.sec{background:var(--act);color:var(--ac)}
+.btn.ok{background:var(--okb);color:var(--ok)}.btn.bad{background:var(--badb);color:var(--bad)}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:700;background:var(--bg);color:var(--mut)}
+.pill.ok{background:var(--okb);color:var(--ok)}.pill.bad{background:var(--badb);color:var(--bad)}.pill.warn{background:var(--warnb);color:var(--warn)}
+.eq{background:var(--card);border-radius:var(--r);border:1px solid var(--line);box-shadow:var(--sh);padding:14px;margin-bottom:10px}
+.eq.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}.eq.bad{border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.eq.tap:active,.card.tap:active{transform:scale(.99)}
+.pend{background:var(--bg);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.ficha{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:12px 0}.ficha div span{display:block;font-size:.75rem;color:var(--mut);font-weight:600}.ficha div b{font-weight:700;font-size:.95rem}
+.eqh.tap{cursor:pointer}
+.eqh{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.av{width:44px;height:44px;border-radius:14px;background:var(--badb);color:var(--bad);display:flex;align-items:center;justify-content:center;flex:none}
+.av svg{width:24px;height:24px}
+.eq.ok .av{background:var(--okb);color:var(--ok)}
+.eq .t{font-weight:800;font-size:1.08rem;letter-spacing:-.01em}.eq .u{color:var(--mut);font-size:.88rem;margin-top:1px}
+.eq .btns{display:flex;gap:8px}.eq .btns .btn{padding:12px 8px;min-height:48px;font-size:.95rem}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:9px 16px;font-size:.9rem;font-weight:600;transition:background .15s}
+.chip[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:var(--acfg)}
+.bar{height:8px;border-radius:6px;background:rgba(255,255,255,.28);overflow:hidden;margin-top:8px}.bar>i{display:block;height:100%;background:#7be3a5;border-radius:6px;transition:width .3s}
+.fab{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 16px);z-index:6}
+.fab .btn{box-shadow:var(--fab);min-height:56px;font-size:1.02rem}
+.sheet-bg{position:absolute;inset:0;background:rgba(10,16,32,.5);z-index:20;display:flex;align-items:flex-end;animation:fade .2s}
+.sheet{background:var(--card);border-radius:28px 28px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 18px);width:100%;max-height:90%;overflow-y:auto;animation:up .26s cubic-bezier(.2,.8,.2,1)}
+.sheet{overscroll-behavior:contain;touch-action:pan-y}.sheet::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+@keyframes pgl{from{transform:translateX(34px);opacity:.25}to{transform:none;opacity:1}}@keyframes pgr{from{transform:translateX(-34px);opacity:.25}to{transform:none;opacity:1}}.pgl{animation:pgl .22s ease-out}.pgr{animation:pgr .22s ease-out}@media (prefers-reduced-motion:reduce){.pgl,.pgr{animation:none}}@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet,.sheet-bg{animation:none}.btn{transition:none}}
+.sheet h3{margin:0 0 4px;font-size:1.25rem;font-weight:800;letter-spacing:-.015em}
+.opt{display:flex;gap:12px;align-items:center;padding:14px;border:1.5px solid var(--line);border-radius:16px;margin-bottom:8px;font-size:.98rem;font-weight:500}
+.opt[aria-pressed=true]{border-color:var(--bad);background:var(--badb);font-weight:700}
+.opt i{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.8rem}
+.opt[aria-pressed=true] i{background:var(--bad);border-color:var(--bad);color:#fff}
+.toast{position:absolute;left:16px;right:16px;top:calc(env(safe-area-inset-top) + 74px);background:#0f1729;color:#fff;border-radius:16px;padding:14px 16px;z-index:30;box-shadow:0 12px 28px rgba(0,0,0,.35);font-size:.95rem;font-weight:600;animation:up .25s}
+.toast.ok{background:var(--ok);color:#fff}.toast.bad{background:var(--bad);color:#fff}
+.note{border-radius:16px;padding:12px 14px;font-size:.92rem;margin:8px 0;background:var(--warnb);color:var(--warn);font-weight:500}
+.note.info{background:var(--okb);color:var(--ok)}.note.bad{background:var(--badb);color:var(--bad)}
+.empty{text-align:center;color:var(--mut);padding:32px 12px;font-weight:500}
+.login{max-width:380px;margin:9vh auto 0;padding:0 22px}
+.login .logo{width:84px;height:84px;border-radius:24px;margin:0 auto 18px;display:block;box-shadow:0 10px 24px rgba(22,63,156,.28)}
+.login h2{font-size:1.7rem;font-weight:800;letter-spacing:-.02em}
+.login input{font-size:1.4rem;letter-spacing:.35em;text-align:center;margin:6px 0 12px}
+.login input::placeholder{letter-spacing:0;font-size:1rem;font-weight:500}
+.login select,.login input{background-color:var(--card);border-color:var(--line)}
+.login select{margin:6px 0}
+.login .btn{margin-top:4px}
+.login input.pl{font-size:16px;letter-spacing:0;text-align:left}
+.tl{background:none;border:0;color:var(--ac);font-size:.95rem;font-weight:600;padding:12px;width:100%}
+.big{font-size:2rem;font-weight:800}
+.kpi{display:flex;gap:10px;margin-bottom:6px}.kpi>div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 8px;text-align:center}.kpi b{display:block;font-size:1.5rem;font-weight:800;letter-spacing:-.02em}.kpi span{font-size:.74rem;color:var(--mut);font-weight:600}
+.list{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.li{display:flex;gap:12px;align-items:center;padding:14px 16px}.li+.li{border-top:1px solid var(--line)}
+.li .av{width:40px;height:40px;border-radius:50%}
+.li .m{flex:1;min-width:0}.li .m b{display:block;font-weight:700}
+a.lk{color:var(--ac)}
+.fotos{display:flex;gap:10px;margin:2px 0 12px;flex-wrap:wrap}.fotos .th{position:relative;width:76px;height:76px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}.fotos .th img{width:100%;height:100%;object-fit:cover;display:block}.fotos .x{position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(10,16,32,.7);color:#fff;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
+.fotos .add{width:76px;height:76px;border-radius:14px;border:1.5px dashed var(--ac);color:var(--ac);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.78rem;font-weight:700;cursor:pointer;background:var(--act)}.fotos .add svg{width:26px;height:26px}
+img.big{width:100%;border-radius:14px;margin-bottom:10px;display:block}
+#lock{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .18s}
+#lock .lkbox{width:100%;max-width:340px;text-align:center}#lock .lkic{width:64px;height:64px;border-radius:50%;background:var(--act);color:var(--ac);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}#lock .lkic svg{width:30px;height:30px}
+#lock h2{margin:0 0 4px;font-size:1.3rem}#lock .lkmsg{min-height:22px;color:var(--mut);font-size:.92rem;margin-bottom:14px}#lock .lkmsg.bad{color:var(--bad);font-weight:600}
+#lock .dots{display:flex;gap:16px;justify-content:center;margin-bottom:22px}#lock .dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ac);display:block}#lock .dots i.on{background:var(--ac)}
+#lock .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;justify-items:center}#lock .pad button{width:74px;height:74px;border-radius:50%;border:0;background:var(--card);color:var(--fg);font-size:1.6rem;font-weight:600;box-shadow:var(--sh);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0}#lock .pad button:active{background:var(--act)}#lock .pad button.nb{background:transparent;border-color:transparent;box-shadow:none;font-size:1rem;color:var(--ac)}#lock .pad button svg{width:30px;height:30px}
+#lock .lkl{margin-top:20px;background:none;border:0;color:var(--ac);font-weight:700;font-size:.95rem;padding:10px}
+.lkrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.lkrow .btn{flex:1 1 140px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fl{display:block;min-width:0}.fl>span{display:block;font-size:.74rem;font-weight:700;color:var(--mut);margin:0 2px 4px}
+.fl select,.fl input[type=text]{padding:12px 34px 12px 12px;font-size:.92rem;border-radius:14px}.fl input[type=text]{padding-right:12px}.fl textarea{border-radius:14px}
+.pisoh{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:12px 2px 6px}
+.mprev{white-space:pre-wrap;word-break:break-word;font-size:.86rem;line-height:1.45;background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:12px;max-height:260px;overflow-y:auto}
+.adj{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line);border-radius:16px;padding:10px;margin-bottom:10px}.adj img{width:72px;height:72px;object-fit:cover;border-radius:10px}.adj .pdfi{width:72px;height:72px;border-radius:10px;background:var(--badb);color:var(--bad);display:flex;align-items:center;justify-content:center;font-weight:800}
+.gtit{display:flex;justify-content:space-between;align-items:center;gap:10px}.gcl{flex:none;min-width:34px;text-align:center;padding:4px 10px;border-radius:999px;background:var(--badb);color:var(--bad);font-weight:800;font-size:.85rem}
+.eq .eqh{margin-bottom:0}
+.eq .m2{color:var(--mut);font-size:.8rem;margin-top:2px}
+.hist{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.hist div{font-size:.84rem;color:var(--mut);padding:4px 0}
+.hist b{color:var(--fg);font-weight:700}
+.opt.sel{border-color:var(--ac);background:var(--act);font-weight:700}
+.opt.sel i{background:var(--ac);border-color:var(--ac);color:var(--acfg)}
+.lbl{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:14px 2px 8px}
+.alerta{background:var(--bad);color:#fff;border-radius:16px;padding:12px 14px;font-weight:800;margin:8px 0;font-size:.92rem}
+.eq.crit{border-color:var(--bad);background:var(--badb)}
+.fotos .th{background:var(--act);display:flex;align-items:center;justify-content:center;color:var(--ac);font-size:.78rem;font-weight:700}
+.tools{display:flex;gap:8px}
+.eq .alerta{margin:10px 0 0}
+.eq .fl2{color:var(--mut);font-size:.88rem;margin-top:8px}
+</style></head>
+<body><div id="app"></div>
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return(r||document).querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function two(n){return(n<10?'0':'')+n}
+var HOY=new Date();
+function hoyTxt(){var d=new Date();return two(d.getDate())+'/'+two(d.getMonth()+1)+'/'+d.getFullYear()}
+function ahora(){var d=new Date();return hoyTxt()+' '+two(d.getHours())+':'+two(d.getMinutes())}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim()}
+function rango(a,b,pre){var o=[];for(var i=a;i<=b;i++)o.push(pre+i);return o}
+function mesIdx(s){var m=/^(\d{2})\/(\d{4})$/.exec(String(s||'').trim());if(!m)return null;var mo=+m[1];if(mo<1||mo>12)return null;return(+m[2])*12+mo-1}
+function phVencida(s){var i=mesIdx(s);return i!==null&&i<HOY.getFullYear()*12+HOY.getMonth()}
+
+/* ---------- catálogo por edificio (especificación técnica de Gastón) ---------- */
+var B=[
+ {id:'L731',n:'Libertad 731',pisos:['Subsuelo 2','Subsuelo 1','Planta baja'].concat(rango(1,10,'Piso ')).concat(['Terraza']),ubs:[]},
+ {id:'RSP',n:'Roque Sáenz Peña 1190',pisos:['Subsuelo','Planta baja'].concat(rango(1,6,'Piso ')).concat(['Sala de máquinas']),ubs:['Electrobombas principales','Tanques']},
+ {id:'LAV',n:'Lavalle 1240',pisos:['Subsuelo','Planta baja'].concat(rango(1,5,'Piso ')).concat(['Azotea']),ubs:['Equipo hidroneumático']},
+ {id:'SAR',n:'Sarmiento 877',pisos:['Subsuelo','Planta baja'].concat(rango(1,13,'Piso ')),ubs:['Sala de bombas (P13)','Equipo de presurización (P13)']}
+];
+var SUG=['Palier de ascensores','Pasillo','Escalera','Hall de acceso','Cochera','Oficina'];
+/* empresa vigente: la informa el servidor según el expediente vigente de cada edificio */
+var EMP={L731:{n:'(sin empresa vigente)'},RSP:{n:'(sin empresa vigente)'},LAV:{n:'(sin empresa vigente)'},SAR:{n:'(sin empresa vigente)'}};
+var MG={titular:'Titular presente y conforme',sust:'Sustituta instalada (titular en taller)',sinsust:'En taller SIN sustituta'};
+var FL=[
+ ['vidrio','Gabinete: vidrio roto o faltante','Vidrio del gabinete roto o faltante'],
+ ['puerta','Gabinete: puerta, cerradura o señalética','Puerta, cerradura o señalética del gabinete en mal estado'],
+ ['volante','Válvula: falta el volante (crítica)','Falta el volante de la válvula (la válvula queda inoperable)'],
+ ['perdida','Válvula: pierde agua o falta el tapón','La válvula pierde agua o falta el tapón con cadenilla'],
+ ['manguera','Manguera: dañada, faltante o mal adujada','Manguera dañada, faltante o mal adujada'],
+ ['lanza','Falta la lanza o está dañada','Falta la lanza o está dañada'],
+ ['llave','Falta la llave de ajuste','Falta la llave de ajuste'],
+ ['canasto','Devanadera o canasto dañado','Devanadera o canasto soporte dañado']
+];
+var EXTRA={};
+function bld(id){return B.filter(function(b){return b.id===id})[0]}
+function ex(id){if(!EXTRA[id])EXTRA[id]={pisos:[],ubs:[]};return EXTRA[id]}
+function todosPisos(id){return bld(id).pisos.concat(ex(id).pisos)}
+function todasUbs(id){return bld(id).ubs.concat(SUG).concat(ex(id).ubs)}
+function pisoDe(ub){
+  var s=String(ub||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim(),m;
+  if(!s||s==='-')return{k:999,t:'Sin piso'};
+  if((m=/(\d+)\s*°?\s*(SS|SUBSUELO|SOTANO)\b/.exec(s)))return{k:-Number(m[1]),t:'Subsuelo '+Number(m[1])};
+  if((m=/(?:^|\s)(?:SUBSUELO|SOTANO)\s*(\d+)?/.exec(s))){var n=m[1]?Number(m[1]):1;return{k:-n,t:'Subsuelo '+n}}
+  if((m=/(\d+)\s*°?\s*PIS(?:O)?\b/.exec(s))||(m=/\bPISO\s*(\d+)/.exec(s))){var p=Number(m[1]);return{k:p,t:'Piso '+p}}
+  if(/\b(PB|PLANTA BAJA)\b/.test(s))return{k:0,t:'Planta baja'};
+  if(/\b(EP|ENTREPISO)\b/.test(s))return{k:0.5,t:'Entrepiso'};
+  if(/\b(TERRAZA|AZOTEA)\b/.test(s))return{k:1000,t:'Terraza'};
+  if(/SALA DE MAQUINAS/.test(s))return{k:1001,t:'Sala de máquinas'};
+  return{k:999,t:'Sin piso'};
+}
+function ubTxt(x){return x.piso+(x.ub?' · '+x.ub:'')}
+function nroT(x){return x.nro?'BIE N° '+x.nro:'BIE sin número'}
+function bie(id,ed,piso,ub,nro,ph,ctl){return{id:id,ed:ed,piso:piso,ub:ub,nro:nro,obs:'',ph:ph,mang:'titular',ctl:ctl||'',fallas:[],h:[]}}
+
+/* ---------- estado ---------- */
+var ST={tab:'eq',ed:'L731',recEd:'L731',n:15,toast:null,filtro:'faltan',
+ list:[]};
+var UI={gc:'A',gsec:'partes',gq:'',rec:{},sync:'',last:'nunca'};
+var F=null,FA=null,REC=jget('if_cur_'+K,null),CL=false,CX=false;
+var LAB={ed:'Edificio',piso:'Piso',ub:'Ubicación',nro:'N° de BIE',obs:'Observaciones'};
+var IC={bie:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.2 6 10.5A6 6 0 0 1 6 13.5C6 9.2 12 3 12 3z"/></svg>',
+ mas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+ chk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>',
+ warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.5v.01"/></svg>',
+ back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
+ list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+ book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/></svg>',
+ user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+ route:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8"/></svg>'};
+
+function dup(){if(!F||!F.nro.trim())return null;return ST.list.filter(function(x){return x.ed===F.ed&&x.id!==F.id&&norm(x.nro)===norm(F.nro)})[0]||null}
+function dupHtml(){var d=dup();return d?'<div class="note">Ya hay una BIE N° '+esc(d.nro)+' en '+esc(bld(d.ed).n)+' ('+esc(ubTxt(d))+'). Puede ser correcto si la empresa renumeró: revisalo.</div>':''}
+function byId(id){return ST.list.filter(function(q){return q.id===id})[0]}
+
+/* ---------- formulario alta / edición ---------- */
+function opts(arr,cur){return arr.map(function(v){return '<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>'}).join('')}
+function selPiso(){var b=bld(F.ed),e=ex(F.ed).pisos;return '<select id="f_piso"><option value="">Elegí el piso</option>'+opts(b.pisos,F.piso)+(e.length?'<optgroup label="Agregados a mano">'+opts(e,F.piso)+'</optgroup>':'')+'<option value="__new">+ Agregar otro piso…</option></select>'}
+function selUb(){var b=bld(F.ed),e=ex(F.ed).ubs;return '<select id="f_ub"><option value="">Sin ubicación específica</option>'+(b.ubs.length?'<optgroup label="De la especificación">'+opts(b.ubs,F.ub)+'</optgroup>':'')+'<optgroup label="Sugeridas (confirmar)">'+opts(SUG,F.ub)+'</optgroup>'+(e.length?'<optgroup label="Agregadas a mano">'+opts(e,F.ub)+'</optgroup>':'')+'<option value="__new">+ Agregar otra ubicación…</option></select>'}
+function addRow(tipo){var isP=tipo==='p',err=isP?F.errP:F.errU,val=isP?F.np:F.nu;
+  return '<div class="row" style="margin:8px 0 2px"><input type="text" id="'+(isP?'np':'nu')+'" autocomplete="off" placeholder="'+(isP?'Ej.: Piso 11, Entrepiso':'Ej.: Sector archivo')+'" value="'+esc(val)+'"><button class="btn sec" data-a="'+(isP?'addp':'addu')+'" style="flex:none;width:auto;min-height:48px">Agregar</button></div>'+(err?'<div class="note bad">'+esc(err)+'</div>':'')+(isP?'<div class="mut" style="margin:2px 2px 6px">Para que ordene bien, escribilo como «Piso 3», «Subsuelo 1» o «Planta baja».</div>':'')}
+function fichaHtml(x){
+  var ph=x.ph?(phVencida(x.ph)?x.ph+' (vencida)':x.ph):'Sin cargar';
+  return '<div class="ficha"><div><span>Último control</span><b>'+esc(x.ctl||'Sin control registrado')+'</b></div><div><span>Prueba hidráulica</span><b>'+esc(ph)+'</b></div><div><span>Manguera</span><b>'+esc(MG[x.mang])+'</b></div><div><span>Fallas abiertas</span><b>'+x.fallas.length+'</b></div></div>'+
+   x.fallas.map(function(t){return '<div class="note bad" style="margin:4px 0">'+esc(t)+'</div>'}).join('');
+}
+function sheetForm(){
+  var nuevo=!F.id,x=nuevo?null:byId(F.id),h='<div class="sheet-bg" data-a="cerrar"><div class="sheet" data-stop="1"><h3>'+(nuevo?'Agregar BIE':'Editar BIE')+'</h3><div class="mut" style="margin-bottom:12px">'+(nuevo?'Al elegir el edificio se cargan sus pisos y ubicaciones.':esc(F.id)+' · cada cambio queda registrado con fecha y valor anterior.')+'</div>';
+  if(x)h+=fichaHtml(x);
+  h+='<label class="fl" style="margin-bottom:10px"><span>Edificio</span><select id="f_ed">'+B.map(function(b){return '<option value="'+b.id+'"'+(b.id===F.ed?' selected':'')+'>'+esc(b.n)+'</option>'}).join('')+'</select></label>';
+  h+='<label class="fl" style="margin-bottom:10px"><span>Piso</span>'+selPiso()+'</label>'+(F.addP?addRow('p'):'');
+  h+='<label class="fl" style="margin:10px 0"><span>Ubicación</span>'+selUb()+'</label>'+(F.addU?addRow('u'):'');
+  h+='<label class="fl" style="margin-bottom:6px"><span>N° de BIE (el que le puso la empresa)</span><input type="text" id="f_nro" autocomplete="off" placeholder="Ej.: 14" value="'+esc(F.nro)+'"></label>';
+  h+='<div class="mut" style="margin:0 2px 8px">Lo escribís a mano y se puede cambiar cuando la empresa renumere. Si todavía no tiene, dejalo vacío.</div><div id="nroW">'+dupHtml()+'</div>';
+  h+='<label class="fl" style="margin-bottom:10px"><span>Observaciones</span><textarea id="f_obs" style="min-height:64px">'+esc(F.obs)+'</textarea></label>';
+  h+=F.err?'<div class="note bad">'+esc(F.err)+'</div>':'';
+  h+='<div class="note info">Se guarda como: <b>'+esc(F.piso?ubTxt(F):'(elegí un piso)')+'</b></div>';
+  h+='<div class="row"><button class="btn sec" data-a="cerrar">Cancelar</button><button class="btn" data-a="guardar">'+(nuevo?'Agregar':'Guardar cambios')+'</button></div>';
+  if(x&&x.h.length)h+='<div class="hist"><b style="font-size:.8rem">HISTORIAL</b>'+x.h.slice().reverse().map(function(c){return '<div>'+esc(c.f)+' · '+(c.c==='Recorrida'?'<b>Recorrida:</b> '+esc(c.d):'<b>'+esc(c.c)+':</b> '+esc(c.a||'(vacío)')+' → '+esc(c.d||'(vacío)'))+'</div>'}).join('')+'</div>';
+  return h+'</div></div>';
+}
+
+/* ---------- recorrida ---------- */
+function listaRec(){return ST.list.filter(function(x){return x.ed===REC.ed})}
+function resumenRec(){var l=listaRec(),c=0,f=0;l.forEach(function(x){var it=REC.items[x.id];if(it){c++;if(it.e==='F')f++}});return{tot:l.length,c:c,f:f,ok:c-f,pend:l.length-c}}
+function sheetFalla(){
+  var x=byId(FA.id),h='<div class="sheet-bg" data-a="fgcancel"><div class="sheet" data-stop="1"><h3>Falla · '+esc(nroT(x))+'</h3><div class="mut" style="margin-bottom:6px">'+esc(ubTxt(x))+' · '+esc(x.id)+'</div>';
+  h+='<div class="lbl">Qué pasa</div>'+FL.map(function(f){var on=!!FA.fallas[f[0]];return '<div class="opt" role="button" aria-pressed="'+on+'" data-a="fl:'+f[0]+'"><i>'+(on?'✓':'')+'</i>'+esc(f[1])+'</div>'}).join('');
+  h+='<div class="lbl">Manguera</div>'+Object.keys(MG).map(function(k){return '<div class="opt'+(FA.mang===k?' sel':'')+'" role="button" data-a="mg:'+k+'"><i>'+(FA.mang===k?'✓':'')+'</i>'+esc(MG[k])+'</div>'}).join('');
+  if(FA.mang==='sinsust')h+='<div class="alerta">INFRACCIÓN CONTRACTUAL GRAVE: NICHO DESPROTEGIDO. Se avisa a jefatura y el reclamo sale como urgente.</div>';
+  h+='<label class="fl" style="margin-top:12px"><span>Vence la prueba hidráulica (MM/AAAA)</span><input type="text" id="fa_ph" inputmode="numeric" autocomplete="off" placeholder="Ej.: 10/2027" value="'+esc(FA.ph)+'"></label>';
+  h+='<div id="phW">'+(FA.ph&&phVencida(FA.ph)?'<div class="note bad">Esa fecha ya pasó: se agrega «prueba hidráulica vencida» como falla.</div>':'')+'</div>';
+  h+='<label class="fl" style="margin-top:10px"><span>Observaciones</span><textarea id="fa_nota" style="min-height:64px" placeholder="Opcional">'+esc(FA.nota)+'</textarea></label>';
+  h+='<div class="lbl">Fotos</div><div class="fotos">'+Array(FA.fotos+1).join('<div class="th">Foto</div>')+(FA.fotos<3?'<div class="add" role="button" data-a="foto">'+IC.mas+'Foto</div>':'')+'</div>';
+  h+=FA.err?'<div class="note bad">'+esc(FA.err)+'</div>':'';
+  h+='<button class="chip" data-a="corregir" style="margin-bottom:12px">Corregir datos de esta BIE (N°, piso, ubicación)</button>';
+  h+='<div class="row"><button class="btn sec" data-a="fgcancel">Cancelar</button><button class="btn bad" data-a="fgsave">Guardar falla</button></div>';
+  return h+'</div></div>';
+}
+function mailRec(){
+  var e=EMP[REC.ed],ls=[],n=0;
+  listaRec().forEach(function(x){var it=REC.items[x.id];if(!it||it.e!=='F'||!it.list.length)return;
+    n++;ls.push(n+'. '+nroT(x)+' (código '+x.id+') · '+ubTxt(x)+'\n   Problema: '+it.list.join('; ')+(it.nota?'\n   Observaciones: '+it.nota:''))});
+  return{n:n,txt:'Estimados '+e.n+':\n\nEn la recorrida realizada el '+hoyTxt()+' en '+bld(REC.ed).n+' se detectaron las siguientes situaciones:\n\n'+ls.join('\n\n')+'\n\nSolicitamos su reparación o reposición y que nos confirmen la fecha de atención.\n\nSaludos,\nIntendencia de Edificios'};
+}
+function sheetCierre(){
+  var r=resumenRec(),m=mailRec(),e=EMP[REC.ed],crit=listaRec().filter(function(x){var it=REC.items[x.id];return it&&it.mang==='sinsust'}),
+  h='<div class="sheet-bg" data-a="seguir"><div class="sheet" data-stop="1"><h3>Cerrar recorrida</h3><div class="mut" style="margin-bottom:10px">'+esc(bld(REC.ed).n)+' · '+hoyTxt()+'</div>';
+  h+='<div class="kpi"><div><b>'+r.ok+'</b><span>En orden</span></div><div><b>'+r.f+'</b><span>Con falla</span></div><div><b>'+r.pend+'</b><span>Sin controlar</span></div></div>';
+  if(r.pend)h+='<div class="note">Hay '+r.pend+' BIE sin controlar: quedan sin fecha de último control.</div>';
+  crit.forEach(function(x){h+='<div class="alerta">INFRACCIÓN CONTRACTUAL GRAVE: NICHO DESPROTEGIDO · '+esc(nroT(x))+' · '+esc(ubTxt(x))+'</div>'});
+  if(m.n){
+    h+='<div class="lbl">Fallas que se registran (empresa: '+esc(e.n)+')</div>';
+    h+='<div class="mprev">'+esc(m.txt)+'</div><div class="mut" style="margin:8px 2px">Las fallas quedan registradas en la agenda con su estado. El reclamo por mail a la empresa todavía se hace desde la agenda.</div>';
+  }else h+='<div class="note info">Sin fallas: no se manda reclamo. La recorrida queda registrada igual.</div>';
+  h+='<div class="row" style="margin-top:10px"><button class="btn sec" data-a="seguir">Seguir controlando</button><button class="btn" data-a="cierreok">'+(m.n?'Cerrar y guardar fallas':'Cerrar recorrida')+'</button></div>';
+  return h+'</div></div>';
+}
+function sheetCancel(){return '<div class="sheet-bg" data-a="cxno"><div class="sheet" data-stop="1"><h3>¿Cancelar la recorrida?</h3><div class="mut" style="margin-bottom:12px">Se pierde lo que marcaste. No se guarda nada.</div><div class="row"><button class="btn sec" data-a="cxno">Seguir</button><button class="btn bad" data-a="cxsi">Cancelar recorrida</button></div></div></div>'}
+
+/* ---------- vistas ---------- */
+function viewEquipos(){
+  var b=bld(ST.ed),lista=ST.list.filter(function(x){return x.ed===ST.ed}),h='';
+  if(DATA&&!DATA.puede)h+='<div class="note">Tu usuario es de consulta: podés ver las BIE, pero no cargar ni controlar.</div>';
+  h+='<div class="hero"><h2>Bocas de incendio</h2><p>Elegí el edificio para ver y cargar sus BIE.</p><select id="edsel">'+B.map(function(x){return '<option value="'+x.id+'"'+(x.id===ST.ed?' selected':'')+'>'+esc(x.n)+'</option>'}).join('')+'</select><button class="btn w" data-a="nueva">'+IC.mas+'Agregar BIE</button></div>';
+  h+='<h3 class="sec" style="margin-top:6px">'+esc(b.n)+' · '+lista.length+' cargadas</h3>';
+  if(!lista.length)h+='<div class="empty">Todavía no hay BIE cargadas en este edificio.</div>';
+  grupos(lista,function(x){return '<div class="eq tap" data-a="edit:'+x.id+'"><div class="eqh tap"><div class="av">'+IC.bie+'</div><div style="flex:1;min-width:0"><div class="t">'+esc(nroT(x))+'</div><div class="u">'+esc(x.ub||'Sin ubicación específica')+'</div><div class="m2">'+(x.ctl?'Último control: '+esc(x.ctl):'Sin control registrado')+'</div></div><div style="text-align:right"><span class="pill">'+esc(x.id)+'</span>'+(x.fallas.length?'<div style="margin-top:4px"><span class="pill bad">'+x.fallas.length+(x.fallas.length>1?' fallas':' falla')+'</span></div>':'')+'</div></div></div>'},function(t){h+='<div class="pisoh">'+esc(t)+'</div>'},function(s){h+=s});
+  return h;
+}
+function grupos(lista,card,head,add){
+  var pisos={},ord=[];lista.forEach(function(x){var p=pisoDe(x.piso);if(!pisos[p.k]){pisos[p.k]={k:p.k,t:x.piso,l:[]};ord.push(pisos[p.k])}pisos[p.k].l.push(x)});
+  ord.sort(function(a,c){return a.k-c.k});
+  ord.forEach(function(g){head(g.t);g.l.sort(function(a,c){return String(a.nro).localeCompare(String(c.nro),'es',{numeric:true})}).forEach(function(x){add(card(x))})});
+}
+function viewRecInicio(){
+  var e=EMP[ST.recEd],l=ST.list.filter(function(x){return x.ed===ST.recEd}),h='';
+  h+='<div class="hero"><h2>Nueva recorrida</h2><p>Elegí el edificio y andá marcando cada BIE. No sale ningún mail hasta que cierres la recorrida.</p><select id="recsel">'+B.map(function(x){return '<option value="'+x.id+'"'+(x.id===ST.recEd?' selected':'')+'>'+esc(x.n)+'</option>'}).join('')+'</select><button class="btn w" data-a="iniciar">Empezar recorrida</button></div>';
+  h+='<div class="card"><div class="mut">Empresa que atiende</div><div class="t" style="font-weight:800;font-size:1.05rem">'+esc(e.n)+'</div><div class="mut">Según la agenda · '+l.length+' BIE cargadas</div></div>';
+  h+='<div class="mut" style="padding:0 4px">La empresa sale sola del expediente vigente de cada edificio en la agenda.</div>';
+  return h;
+}
+function viewRecorrida(){
+  var r=resumenRec(),all=listaRec(),h='';
+  var f=ST.filtro,lista=all.filter(function(x){var it=REC.items[x.id];if(f==='faltan')return!it;if(f==='fallas')return it&&it.e==='F';return true});
+  h+='<div class="hero"><h2>'+esc(bld(REC.ed).n)+'</h2><p>Controlaste '+r.c+' de '+r.tot+' · '+r.f+' con falla</p><div class="bar"><i style="width:'+(r.tot?Math.round(r.c*100/r.tot):0)+'%"></i></div></div>';
+  h+='<div class="chips">'+[['faltan','Faltan ('+r.pend+')'],['todos','Todas'],['fallas','Con falla ('+r.f+')']].map(function(c){return '<button class="chip" data-a="filtro:'+c[0]+'" aria-pressed="'+(f===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>';
+  if(!lista.length)h+='<div class="empty">'+(f==='faltan'?'¡Controlaste todas las BIE! Cerrá la recorrida.':'No hay BIE con ese filtro.')+'</div>';
+  grupos(lista,function(x){
+    var it=REC.items[x.id],cl=it?(it.e==='OK'?' ok':(it.mang==='sinsust'?' crit':' bad')):'';
+    return '<div class="eq'+cl+'"><div class="eqh"><div class="av">'+IC.bie+'</div><div style="flex:1;min-width:0"><div class="t">'+esc(nroT(x))+'</div><div class="u">'+esc(x.ub||'Sin ubicación específica')+'</div></div>'+(it?'<span class="pill '+(it.e==='OK'?'ok':'bad')+'">'+(it.e==='OK'?'En orden':(it.list.length+(it.list.length>1?' fallas':' falla')))+'</span>':'')+'</div>'+
+     (it&&it.mang==='sinsust'?'<div class="alerta">NICHO DESPROTEGIDO</div>':'')+
+     (it&&it.e==='F'?'<div class="fl2">'+esc(it.list.join(' · '))+'</div>':'')+
+     '<div class="btns" style="margin-top:12px">'+(it?'<button class="btn bad" data-a="deshacer:'+x.id+'">Deshacer</button><button class="btn sec" data-a="falla:'+x.id+'">Editar falla</button>':'<button class="btn ok" data-a="ok:'+x.id+'">'+IC.chk+'En orden</button><button class="btn bad" data-a="falla:'+x.id+'">'+IC.warn+'Falla</button>')+'</div></div>'},
+   function(t){h+='<div class="pisoh">'+esc(t)+'</div>'},function(s){h+=s});
+  return h;
+}
+
+/* ---------- guía ---------- */
+var PARTES=[
+ ['Gabinete y puerta','Pintura bermellón en buen estado; vidrio o acrílico sano (si está roto, alerta por bordes cortantes); manija, cerradura o aldaba que funcione; cartel «HIDRANTE» o «B.I.E.» visible.','Es lo primero que se ve: si no se abre rápido o no se reconoce, la boca no sirve.'],
+ ['Válvula teatro','Salida de 1½" (38 mm) o 2½" (63,5 mm). Sin pérdidas ni óxido en el vástago. Tiene que tener volante y tuerca de fijación, y el tapón con cadenilla.','Sin volante la válvula no se puede abrir: se informa como falla crítica.'],
+ ['Manguera titular','Diámetro 1½" o 2½" y largo de 15, 20 o 25 m. Uniones mandriladas en ambos extremos, bien adujada (zigzag o devanadera). Lleva estampillada la prueba hidráulica (IRAM 3594) con su vencimiento.','En la app se carga como MM/AAAA. Si está vencida no se puede marcar «En orden».'],
+ ['Manguera sustituta','Si la empresa se lleva la titular a taller para la prueba hidráulica, tiene que dejar en el acto una sustituta operativa de iguales características.','Nicho sin manguera = «INFRACCIÓN CONTRACTUAL GRAVE: NICHO DESPROTEGIDO». La app lo marca en rojo.'],
+ ['Lanza o boquilla','De chorro pleno, niebla regulable o chorro directo; de bronce o aleación liviana/policarbonato. Presente y bien acoplada.','Se informa si falta o está dañada.'],
+ ['Llave de ajuste','Tiene que estar dentro del gabinete, en su soporte, para apretar rápido las uniones.','Se informa si falta.'],
+ ['Devanadera o canasto','Soporte giratorio o canasto en buen estado, que deje desplegar la manguera sin trabarse.','Se informa si está dañado.']
+];
+/* Obligaciones: sacadas del pliego de la TS 181/2026 (OC 504/2026, Exp. 13-08905/2025). Aplica a Roque Sáenz Peña 1190 y Lavalle 1240. */
+var OBLIG=[
+ {t:'Visita mensual e informe del Director Técnico',si:1,art:'Especificaciones Técnicas 5.2.1 y 13',txt:'Una visita por mes con informe escrito, firmado por el Director Técnico o Responsable Técnico, sobre el estado de la red y los trabajos que hagan falta. Cada mes la empresa también entrega un cronograma de trabajos y el listado del personal.',k:'visita mensual informe director tecnico cronograma personal'},
+ {t:'Mensual: arranque de electrobombas',si:1,art:'Especificaciones Técnicas 5.2.4.1',txt:'Arranque automático de las electrobombas, que tienen que funcionar al menos 10 minutos. Incluye ajustes, limpieza de las bombas y su entorno, y planillas IRAM 3546 (12A a 12F) por duplicado, con copia para la Supervisión.',k:'mensual electrobomba bomba arranque presurizacion planilla'},
+ {t:'Trimestral: control completo de hidrantes',si:1,art:'Especificaciones Técnicas 5.2.4.2',txt:'Al menos 4 veces al año, a intervalos regulares. En cada BIE se inspecciona y registra lo que tiene adentro, se revisa la señalización (IRAM 10005), se registra la presión estática y se deja el cartel «B.I.E.» con fecha de control y estado. Se engrasan las bisagras y se pintan los gabinetes si hace falta. Planillas 14A, 14B y 14C.',k:'trimestral bie hidrante cartel presion senalizacion pintura planilla'},
+ {t:'Semestral: inspección conjunta con la Supervisión',si:1,art:'Especificaciones Técnicas 5.2.4.3',txt:'La empresa inspecciona junto con quien supervisa. Lo que se observe se arregla en los plazos que fije la Supervisión, con un cronograma de reparaciones para el mes siguiente.',k:'semestral inspeccion supervision cronograma'},
+ {t:'Prueba hidráulica de todas las mangueras',si:1,art:'Especificaciones Técnicas 5.2.3 y 5.2.4.4 (IRAM 3594)',txt:'Se hace sobre todas las mangueras dentro del primer mes del contrato y se deja constancia en las planillas. La prueba es en taller, por una empresa certificada IRAM. Las reparaciones se registran en una planilla de mantenimiento, y la operatividad de la manguera se garantiza por 12 meses.',k:'prueba hidraulica ph manguera taller iram 3594 garantia'},
+ {t:'Manguera que sale de servicio',si:1,art:'Especificaciones Técnicas 5.2.3',txt:'La manguera retirada lleva una tarjeta con la fecha y presión del ensayo, las reparaciones, la nueva longitud, el motivo, la empresa y la firma. Solo se reutiliza en el mismo puesto si el acortamiento no supera el 2% del largo original. Si la rechazan, se marca con una cruz roja de 5 cm.',k:'manguera tarjeta retirada rechazada acortamiento fuera de servicio'},
+ {t:'Manguera sustituta mientras la titular está en taller',si:0,art:'No figura en este pliego (revisé las Especificaciones Técnicas y las Cláusulas Particulares). Viene de la especificación técnica de Gastón.',txt:'La regla «sin sustituta = nicho desprotegido» figura en los pliegos de Libertad y Sarmiento, pero este pliego no la dice. Según Mariano, en la práctica las empresas igual ponen sustituta. Conviene confirmar con Gastón en qué se apoya antes de reclamarla como incumplimiento.',k:'sustituta manguera taller desprotegido'},
+ {t:'Arreglos: plazo para presentarse',si:1,art:'Especificaciones Técnicas 5.2.2',txt:'Lo que se detecta se repara en el momento. Si hace falta, la Supervisión puede exigir que el técnico se presente dentro de las 12 horas de la notificación fehaciente. Si el arreglo requiere un elemento fuera del listado de repuestos, la empresa presenta diagnóstico, propuesta y presupuesto.',k:'correctivo reparacion 12 horas plazo tecnico presupuesto'},
+ {t:'Emergencia las 24 horas',si:1,art:'Especificaciones Técnicas 15',txt:'Servicio permanente con teléfono habilitado, que la empresa informa dentro de las 48 horas de iniciado el contrato. Llega a la emergencia en menos de 2 horas. Queda un informe en el Libro de Novedades. Si no cumple, no se firma la recepción definitiva de ese mes.',k:'emergencia 24 horas telefono 2 horas guardia'},
+ {t:'Bomba en reparación: no puede quedar sin servicio',si:1,art:'Especificaciones Técnicas 16',txt:'Si hay que retirar una electrobomba, la de reserva tiene que quedar funcionando. Si no hay reserva, la empresa pone una equivalente. La bomba reparada vuelve dentro de los 20 días hábiles con informe y remito de los repuestos. Sin esa documentación no se conforman las facturas.',k:'bomba reserva reemplazo transitorio 20 dias remito'},
+ {t:'Libro de Novedades',si:1,art:'Especificaciones Técnicas 13 y Cláusulas Particulares art. 17',txt:'Libro triplicado que queda en el edificio. Ahí la empresa comunica novedades y la Supervisión deja sus reclamos. También valen los mails oficiales, siempre que se copien en el Libro.',k:'libro novedades reclamo mail copia'},
+ {t:'Libro Digital de Inspección (IFCI)',si:1,art:'Especificaciones Técnicas 14',txt:'Es obligatorio y lo administra la empresa. Ahí se registran todas las inspecciones, rutinas, provisiones y tareas de las visitas mensuales, con informes inicial, periódico y eventual. Es la única herramienta de control ante una inspección de la autoridad.',k:'libro digital ldi informe inicial periodico eventual agc'},
+ {t:'Pruebas finales e informe final',si:1,art:'Especificaciones Técnicas 5.2.4.4 y 17',txt:'Las pruebas finales (vaciado, llenado, caudales, certificado de operatividad, plano actualizado) se hacen antes de los 30 días del fin del contrato. El informe final se entrega 10 días corridos antes del fin.',k:'pruebas finales informe final certificado operatividad plano cierre'},
+ {t:'Inscripción vigente de la empresa y del Director Técnico',si:1,art:'Especificaciones Técnicas 4',txt:'Ambos tienen que estar inscriptos en el Registro de Instaladores de IFCI de la Ciudad. La empresa avisa 30 días antes del vencimiento que inició la renovación y informa la renovación en 48 horas hábiles. Si vence la del Director Técnico y pasan 15 días hábiles sin renovar, se rescinde el contrato.',k:'inscripcion registro director tecnico renovacion agc rescision'},
+ {t:'Repuestos, limpieza y obras complementarias',si:1,art:'Especificaciones Técnicas 8, 9, 10 y 12',txt:'Repuestos nuevos y originales, con remito o factura y conformidad de la Supervisión antes de colocarlos. Los elementos retirados salen con remito firmado. La empresa limpia las zonas de trabajo y repone pisos, revestimientos y pintura que afecte.',k:'repuestos remito limpieza pintura albañileria retiro'},
+ {t:'Provisión inicial en cada edificio',si:1,art:'Cláusulas Particulares, Anexo, art. 1',txt:'Roque Sáenz Peña 1190: una lanza chorro pleno niebla y un volante con tuerca para válvula teatro de 63,5 mm. Lavalle 1240: una luz piloto roja de 22 mm. Plazo: hasta 30 días corridos desde la notificación de la OC.',k:'provision lanza volante luz piloto 30 dias'},
+ {t:'Reclamos y multas',si:1,art:'Cláusulas Particulares art. 17',txt:'Cada observación de la Supervisión es un reclamo y se acumula (no prescribe a fin de mes). Con 3 reclamos hay multa del 10% de la facturación mensual; con 4, 15%; con 5, 20%; con 6, 25%; con 7 se puede rescindir.',k:'reclamo multa penalidad 10 15 20 25 rescision'}
+];
+/* Obligaciones de la LP 434/2026 (OC 508/2026): Libertad 731 y Sarmiento 877. La manguera sustituta también figura en la TS 223/2026 (Libertad). */
+var OBLIGB=[
+ {t:"Presentar folletos y muestras de la adecuación",si:1,art:"LP 434/26 Especificaciones Técnicas (adecuación)",txt:"Dentro de los 10 días hábiles desde la notificación de la OC. Sin conformidad escrita de la Supervisión de Obra no se puede presentar el remito para la recepción definitiva.",k:"folletos muestras materiales adecuacion conformidad"},
+ {t:"Planos y plan de trabajos",si:1,art:"LP 434/26 Esp. Técnicas A) 1)",txt:"Antes de empezar, la empresa releva y presenta planos de proyecto ejecutivo y un plan gráfico pormenorizado, aprobados por la Supervisión de Obra, evitando cortes prolongados de agua y electricidad.",k:"planos proyecto ejecutivo plan trabajos corte agua"},
+ {t:"Adecuación: 2 electrobombas nuevas",si:1,art:"LP 434/26 Cl. Part. Anexo art. 1; Esp. Técnicas A) y B)",txt:"Plazo de 30 días hábiles desde el día hábil siguiente a la OC (aprox. 12/11/2026). Dos electrobombas nuevas (principal y reserva, igual capacidad), cañerías, accesorios, tablero eléctrico y cableado. Equipo del piso 13 (azotea) de Sarmiento 877. Pruebas y ensayos finales. Garantía escrita de las bombas, 12 meses como mínimo.",k:"adecuacion electrobomba bomba tablero cableado garantia 30 dias"},
+ {t:"Prueba hidráulica de todas las mangueras",si:1,art:"LP 434/26 Esp. Técnicas C) 2)",txt:"Después de la recepción definitiva de la adecuación. En taller, con sello IRAM 3594. Se retiran mangas y lanzas de cada nicho, se reponen en su lugar y se garantiza la operatividad por 12 meses.",k:"prueba hidraulica manguera taller iram 3594 garantia"},
+ {t:"Manguera sustituta: el nicho nunca queda sin manguera",si:1,art:"LP 434/26 Esp. Técnicas C)",txt:"Mientras se retiran mangueras para el mantenimiento, la empresa coloca mangueras sustitutas y repone las titulares en su posición original. Un nicho sin sustituta es incumplimiento.",k:"sustituta manguera taller desprotegido nicho"},
+ {t:"Mantenimiento en garantía (12 meses)",si:1,art:"LP 434/26 Cl. Part. Anexo art. 1",txt:"Empieza el día hábil siguiente a la recepción definitiva de la adecuación. Es el plazo de la planilla de cotización. Anotar esa fecha en la agenda.",k:"mantenimiento garantia recepcion definitiva inicio"},
+ {t:"Mensual: visita e informe",si:1,art:"LP 434/26 Esp. Técnicas 15 y 16",txt:"Visita con informe escrito firmado por el matriculado responsable. Libro de Novedades triplicado y Libro Digital de Inspección (IFCI) obligatorio.",k:"mensual visita informe libro novedades digital"},
+ {t:"Trimestral: control completo",si:1,art:"LP 434/26 Esp. Técnicas C)",txt:"Abastecimiento de agua, bombeo y presurización, BIE (elementos y señalización IRAM 10005), boca de impulsión, válvulas, presión estática por boca, cartel B.I.E. con fecha y estado, pintura y engrase de bisagras. Planillas por duplicado y Certificado de Operatividad.",k:"trimestral control bie presion cartel planilla certificado"},
+ {t:"Semestral: vaciado total y ensayo de mangueras",si:1,art:"LP 434/26 Esp. Técnicas C)",txt:"Como máximo 30 días antes de terminar el contrato de mantenimiento: vaciado total de la red, retiro de mangas y lanzas con ensayo hidráulico IRAM 3594 (con sustitutas), desarme y engrase de válvulas, ultrasonido de cañerías, llenado, estanqueidad, caudal, presión residual y memoria descriptiva.",k:"semestral vaciado total ultrasonido caudal memoria"},
+ {t:"Bomba retirada: reserva funcionando",si:1,art:"LP 434/26 Esp. Técnicas 9",txt:"El edificio no puede quedar sin servicio. Se provee una bomba nueva y sin uso dentro de los 20 días hábiles desde el retiro. Sin la documentación de compra no se conforman las facturas.",k:"bomba reserva retiro 20 dias remito"},
+ {t:"Emergencia las 24 horas",si:1,art:"LP 434/26 Esp. Técnicas 13 y C) 2)",txt:"Concurrencia en menos de 2 horas, teléfono informado dentro de las 48 h. Correctivo con técnico en 12 hs si la Supervisión lo exige. Si falla, no se firma la recepción definitiva del mes.",k:"emergencia 24 horas telefono guardia 12 horas"},
+ {t:"Inscripción vigente de la empresa y del Director Técnico",si:1,art:"LP 434/26 Esp. Técnicas 4",txt:"Registro de Instalaciones Fijas (CABA). La renovación se informa en 48 horas hábiles. Director Técnico sin renovar 15 días hábiles: rescisión.",k:"inscripcion registro director tecnico renovacion"},
+ {t:"Reclamos y multas",si:1,art:"LP 434/26 Cl. Part. art. 17",txt:"Reclamos por escrito en el Libro de Novedades (valen los mails oficiales copiados). Con 3 reclamos acumulados multa del 10% de la facturación mensual; 4: 15%; 5: 20%; 6: 25%; 7: se puede rescindir.",k:"reclamo multa penalidad rescision"},
+ {t:"Informe final y garantía de los trabajos",si:1,art:"LP 434/26 Esp. Técnicas 17 y 18; Cl. Part. arts. 18 y 20",txt:"Informe final 10 días corridos antes de finalizar, con pruebas, resultados, reparaciones, estado de operatividad, recomendaciones y planos conformes a obra. Garantía de trabajos y elementos: 12 meses desde la recepción definitiva.",k:"informe final garantia planos conforme obra"}
+];
+/* Obligaciones de la TS 223/2026 (Libertad 731, prórroga OC 532/2026 hasta 31/12/2026). */
+var OBLIGL=[
+ {t:"Aviso de la prórroga",si:1,art:"TS 223/26 p.1 y p.7",txt:"Notificar por escrito al contratista la prórroga, única condición para ejercerla (hasta 3 meses, mismos términos). Tenía que hacerse antes del 30/9/2026.",k:"prorroga notificacion 30 septiembre"},
+ {t:"Seguro de Responsabilidad Civil",si:1,art:"TS 223/26 Art. 13.1",txt:"Verificar que la póliza de Responsabilidad Civil siga vigente hasta extinguir las obligaciones y que los recibos de cuotas estén al día. Póliza o endoso vigente al 31/12/2026.",k:"seguro poliza responsabilidad civil recibos cuota"},
+ {t:"Inscripción vigente de la empresa y del Director Técnico",si:1,art:"TS 223/26 Esp. 4",txt:"Registro de Instalaciones Fijas (CABA). La renovación se informa en 48 horas hábiles. Si vence sin renovar, la Supervisión avisa en 24 hs; Director Técnico sin renovación 15 días hábiles: rescisión.",k:"inscripcion registro director tecnico renovacion"},
+ {t:"Visita mensual e informe",si:1,art:"TS 223/26 Esp. 5.2",txt:"Una visita por mes con informe escrito firmado por el matriculado responsable sobre el estado de la IFCI y los trabajos a planificar. Fecha y horario convenidos con la Supervisión.",k:"mensual visita informe matriculado"},
+ {t:"Cronograma e informe mensual con personal",si:1,art:"TS 223/26 Esp. 5.4.1",txt:"Cada mes la empresa entrega cronograma e informe mensual con el listado del personal asignado.",k:"cronograma informe mensual personal listado"},
+ {t:"Mensual: arranque de bombas e inspección",si:1,art:"TS 223/26 Esp. 5.4.1",txt:"Arranque automático de bombas sin flujo (electrobombas 10 min, motobombas 30 min), registro de presiones, RPM, tensión y corriente, e inspección visual de BIE, válvulas, rociadores y boca de impulsión. Etiqueta mensual en cada BIE. Planillas IRAM 3546 por duplicado, con copia a la Supervisión.",k:"mensual bomba arranque etiqueta planilla iram 3546"},
+ {t:"Trimestral: control integral (una sola vez)",si:1,art:"TS 223/26 Esp. 5.4.2 y nota p.37",txt:"Control integral de hidrantes, bombas, tableros y rociadores, con presión estática en cada boca y cartel B.I.E. con fecha. Por ser contrato corto, las rutinas trimestrales se hacen una sola vez. No consta si la prórroga suma otra.",k:"trimestral hidrante presion cartel planilla"},
+ {t:"Correctivos y emergencia las 24 horas",si:1,art:"TS 223/26 Esp. 5.3 y Esp. 13",txt:"Atender correctivos y servicio de emergencia 24 h con concurrencia en 2 horas (técnico hasta 12 hs ante falla). Queda asentado en el Libro de Novedades firmado por ambas partes. Teléfono 24 h informado.",k:"correctivo emergencia 24 horas 2 horas telefono libro novedades"},
+ {t:"Repuestos: remito y constatación",si:1,art:"TS 223/26 Esp. 8",txt:"Presentar copia de remito o factura de repuestos y dejar que la Supervisión constate tipo y calidad antes de colocarlos. Sin constatación no se coloca.",k:"repuestos remito factura constatacion"},
+ {t:"Recepción definitiva parcial mensual",si:1,art:"TS 223/26 Art. 15.1 y Esp. 12",txt:"La Supervisión otorga la recepción parcial dentro de los 5 días hábiles desde el primer día hábil del mes siguiente. No se firma si el sistema estuvo fuera de servicio un día hábil, y esos días no se pagan.",k:"recepcion definitiva parcial mensual fuera de servicio"},
+ {t:"Factura mensual",si:1,art:"TS 223/26 Art. 16 y Anexo art. 15",txt:"Presentar la factura en Mesa de Entradas de la Intendencia (piso 10, Roque Sáenz Peña 1190, L a V 7:30 a 13:30) con la conformidad de la Supervisión. Pago a 30 días corridos; se interrumpe si falta documentación (informe mensual, planillas).",k:"factura mesa entradas pago 30 dias conformidad"},
+ {t:"Reclamos y multas",si:1,art:"TS 223/26 Art. 17",txt:"Reclamos por escrito en el Libro de Novedades (los correos valen solo si se copian en el Libro). Desde 3 reclamos acumulados hay multas de 10%, 15%, 20% y 25% de la facturación mensual; el 7º es facultativo para rescindir.",k:"reclamo multa penalidad rescision"},
+ {t:"Prueba hidráulica de todas las mangueras",si:1,art:"TS 223/26 Esp. 5.1",txt:"En taller, con sello IRAM 3594. Se retiran mangas y lanzas de cada nicho, se repara y se repite el ensayo hasta resultado satisfactorio, y se garantiza la operatividad 12 meses con certificación IRAM. El pliego la ubica después de la recepción definitiva de las adecuaciones. La de Libertad no se adjudicó, así que hoy no tiene fecha: confirmar con Gastón.",k:"prueba hidraulica manguera taller iram 3594 garantia"},
+ {t:"Manguera sustituta: el nicho nunca queda sin manguera",si:1,art:"TS 223/26 Esp. 5.1",txt:"Mientras se retiran mangueras para el mantenimiento, la empresa pone mangueras sustitutas y repone las titulares en su posición original. La manguera que queda fuera de servicio lleva tarjeta con fecha y presión del ensayo, reparaciones, motivo, empresa y firma, y cruz roja de 5 cm.",k:"sustituta manguera tarjeta nicho desprotegido"},
+ {t:"Pruebas finales",si:1,art:"TS 223/26 Esp. 5.4.3",txt:"Caudal en hidrantes más desfavorables, presión residual, curva de rendimiento de bombas, ultrasonido de cañerías y memoria descriptiva, antes de los 30 días del fin del contrato (aprox. 1/12/2026; fecha deducida de la prórroga).",k:"pruebas finales caudal presion ultrasonido memoria"},
+ {t:"Informe final",si:1,art:"TS 223/26 Esp. 17 y Esp. 5.6",txt:"Informe final con pruebas, resultados, reparaciones, estado de operatividad, recomendaciones y planos conformes a obra, más informe de fin de período con fotos, 10 días corridos antes de finalizar (aprox. 21/12/2026; fecha deducida).",k:"informe final planos fotos cierre"},
+ {t:"Acta de traspaso",si:1,art:"TS 223/26 Art. 18",txt:"Al finalizar la prórroga (31/12/2026) se firma el Acta de Traspaso con la empresa entrante y la Intendencia, dejando constancia de observaciones. Con observaciones no se firma la recepción definitiva del último mes. La entrante prevista es el TS 596/26 desde el 1/1/2027, todavía sin adjudicar.",k:"acta traspaso empresa entrante cierre"}
+];
+function viewGuia(){
+  var sec=UI.gsec,h='<div class="chips"><button class="chip" data-a="gsec:partes" aria-pressed="'+(sec==='partes')+'">Partes del nicho</button><button class="chip" data-a="gsec:oblig" aria-pressed="'+(sec==='oblig')+'">Obligaciones</button></div>';
+  if(sec==='partes'){
+    h+='<div class="note info">No hay «tipos» de nicho con funciones distintas: todos se controlan con los mismos 7 puntos. Lo que cambia es el diámetro (1½" o 2½"), el largo de la manguera (15, 20 o 25 m) y el tipo de lanza.</div>';
+    h+='<h3 class="sec">Qué se controla en cada boca</h3>'+PARTES.map(function(p,i){return '<div class="card"><div class="gtit"><b>'+esc(p[0])+'</b><span class="gcl">'+(i+1)+'</span></div><div class="mut" style="color:var(--fg);margin:6px 0">'+esc(p[1])+'</div><div class="mut">'+esc(p[2])+'</div></div>'}).join('');
+    h+='<div class="mut" style="margin:8px 2px 20px">Según la especificación técnica de Gastón Oddi. Es una ayuda memoria: ante una duda, consultá la norma IRAM o a la Supervisión.</div>';
+  } else {
+    var LS=UI.gc==='B'?OBLIGB:(UI.gc==='L'?OBLIGL:OBLIG),q=UI.gq.trim().toLowerCase(),l=LS.filter(function(o){return!q||(o.t+' '+o.txt+' '+o.k+' '+o.art).toLowerCase().indexOf(q)>=0});
+    h+='<div class="chips"><button class="chip" data-a="gc:A" aria-pressed="'+(UI.gc==='A')+'">Peña y Lavalle</button><button class="chip" data-a="gc:B" aria-pressed="'+(UI.gc==='B')+'">Sarmiento</button><button class="chip" data-a="gc:L" aria-pressed="'+(UI.gc==='L')+'">Libertad</button></div>';
+    h+='<input type="search" enterkeyhint="search" autocomplete="off" id="gq" placeholder="Buscá: trimestral, bomba, multa…" value="'+esc(UI.gq)+'" style="margin-bottom:10px">';
+    h+=UI.gc==='B'?'<div class="mut" style="margin:0 2px 10px">Licitación Privada N° 434/2026 (OC 508/2026, Iturraspe 970 SRL), solo Sarmiento 877: adecuación de las electrobombas del piso 13 y 12 meses de mantenimiento en garantía desde la recepción definitiva. Los renglones de Libertad quedaron fracasados.</div>':(UI.gc==='L'?'<div class="mut" style="margin:0 2px 10px">Trámite Simplificado N° 223/2026 (OC 532/2026, Inelar S.R.L.): prórroga hasta el 31/12/2026. Desde el 1/1/2027 sigue el TS 596/2026, todavía sin adjudicar y sin cargar acá. La obra de Libertad no se adjudicó.</div>':'<div class="mut" style="margin:0 2px 10px">Trámite Simplificado N° 181/2026 (OC 504/2026, Exp. 13-08905/2025, Matafuegos Lugano). Vale para Roque Sáenz Peña 1190 y Lavalle 1240. La regla de la manguera sustituta no figura en este pliego: sí en los de Libertad y Sarmiento.</div>');
+    h+=l.length?l.map(function(o){return '<div class="card"><b>'+esc(o.t)+'</b><div style="margin:6px 0"><span class="pill '+(o.si?'ok':'warn')+'">'+(o.si?'Le corresponde a la contratista':'A confirmar')+'</span></div><div class="mut" style="color:var(--fg);margin-bottom:6px">'+esc(o.txt)+'</div><div class="mut"><b>Dónde dice:</b> '+esc(o.art)+'</div></div>'}).join(''):'<div class="empty">No encontré nada con eso.</div>';
+  }
+  return h;
+}
+/* ---------- fallas en trámite ---------- */
+function viewFallas(){
+  var fs=(DATA&&DATA.fallas)||[],ab=fs.filter(function(f){return f.estado!=='Resuelta'&&f.estado!=='Verificada'}).reverse(),cer=fs.filter(function(f){return f.estado==='Resuelta'||f.estado==='Verificada'}).reverse().slice(0,8),h='';
+  var ESTS=(DATA&&DATA.estados)||['Informada','Reclamada','En reparación','Resuelta','Verificada'],puede=!DATA||DATA.puede;
+  function card(f){
+    var x=byId(f.nicho),nom=x?nroT(x):('BIE '+f.nicho),pc=f.estado==='Informada'?'warn':(f.estado==='Resuelta'||f.estado==='Verificada'?'ok':'bad');
+    return '<div class="card"><b>'+esc(nom)+'</b> <span class="pill '+pc+'">'+esc(f.estado)+'</span><div class="mut">'+esc(f.ed)+' · '+esc(f.ub)+'<br>Empresa: '+esc(f.emp||'sin empresa vigente')+'<br>Informada el '+esc(f.fecha)+' por '+esc(f.por)+'</div><div class="note bad" style="margin:6px 0 0">'+esc(f.tipo)+(f.detalle?': '+esc(f.detalle):'')+'</div>'
+     +(puede?'<div class="chips" style="margin-top:10px;flex-wrap:wrap">'+ESTS.filter(function(e){return e!==f.estado}).map(function(e){return '<button class="chip" data-a="fest:'+esc(f.id)+':'+esc(e)+'">'+esc(e)+'</button>'}).join('')+'</div>':'')+'</div>';
+  }
+  h+=ab.length?'<h3 class="sec">En trámite ('+ab.length+')</h3>'+ab.map(card).join(''):'<div class="empty">No hay fallas en trámite.</div>';
+  if(cer.length)h+='<h3 class="sec">Resueltas hace poco</h3>'+cer.map(card).join('');
+  h+='<div class="mut" style="margin:8px 2px 20px">El reclamo por mail a la empresa se hace desde la agenda. Acá se sigue el estado de cada falla.</div>';
+  return h;
+}
+/* ---------- yo ---------- */
+function temaGet(){try{var t=localStorage.getItem('ifci_tema');return t==='light'||t==='dark'?t:'auto'}catch(e){return 'auto'}}
+function temaAplicar(){var t=temaGet(),r=document.documentElement;if(t==='auto')r.removeAttribute('data-t');else r.setAttribute('data-t',t)}
+function temaCard(){var t=temaGet();function b(v,l){return '<button class="btn '+(t===v?'':'sec')+'" data-a="tema:'+v+'">'+l+'</button>'}return '<div class="card"><h3>Apariencia</h3><div class="mut">Elegí cómo se ve la app. «Sistema» sigue el modo claro u oscuro del celular.</div><div style="height:10px"></div><div class="row">'+b('auto','Sistema')+b('light','Claro')+b('dark','Oscuro')+'</div></div>'}
+function viewYo(){
+  var h='<div class="card"><h3>'+esc((DATA&&DATA.yo)||'Mi usuario')+'</h3><div class="mut">'+(navigator.onLine?'Con señal':'Sin señal')+' · última actualización: '+esc(UI.last)+'</div><div style="height:10px"></div><button class="btn" data-a="sync"'+(UI.sync==='run'?' disabled':'')+'>'+(UI.sync==='run'?'Sincronizando…':'Sincronizar ahora')+'</button></div>';
+  h+=bioBanner();
+  h+='<h3 class="sec">Para enviar</h3>';
+  if(!QUEUE.length)h+='<div class="empty">No hay nada esperando señal.</div>';
+  else h+=QUEUE.map(function(q,i){
+    var t=q.t==='rec'?('Recorrida en '+q.ed+' · '+q.items.length+' BIE controladas'):((q.nuevo?'BIE nueva ':'Cambio en BIE ')+q.nro+' · '+q.ed);
+    return '<div class="card"><b>'+esc(t)+'</b><div class="mut">'+(q.err?'<span class="pill bad">No se pudo enviar</span> '+esc(q.err):'Esperando señal para enviarse')+'</div>'+(q.err?'<div class="row" style="margin-top:10px"><button class="btn sec" data-a="qreint:'+i+'">Reintentar</button><button class="btn bad" data-a="qdesc:'+i+'">Descartar</button></div>':'')+'</div>'}).join('');
+  h+=temaCard();
+  h+=lkCard();
+  h+='<div class="card"><div class="mut">IFCI · versión '+VERSION+'. Las BIE y las recorridas se guardan en el celular y se envían cuando hay señal.</div><div style="height:10px"></div><button class="btn bad" data-a="salir">Cerrar sesión</button></div>';
+  return h;
+}
+function render(){
+  var m0=$('main'),s0=$('.sheet'),mt=m0?m0.scrollTop:0,st=s0?s0.scrollTop:0,h='';
+  var enRec=!!REC;
+  h+='<header class="top">'+(enRec?'<button class="back" data-a="cancelrec" aria-label="Volver">'+IC.back+'</button>':'')+'<div style="flex:1;min-width:0"><h1>'+(enRec?'Recorrida':({eq:'IFCI',rec:'Recorrida',fal:'Fallas',guia:'Guía',yo:'Yo'}[ST.tab]))+'</h1><div class="sub">Instalación fija contra incendio · bocas (BIE)</div></div><span class="st'+(navigator.onLine?'':' off')+'"><i class="dot"></i>'+(navigator.onLine?'Con señal':'Sin señal')+'</span></header><main>';
+  h+=enRec?viewRecorrida():({eq:viewEquipos,rec:viewRecInicio,fal:viewFallas,guia:viewGuia,yo:viewYo}[ST.tab])();
+  h+='</main>';
+  if(enRec)h+='<div class="fab"><button class="btn" data-a="cerrarrec">Cerrar recorrida</button></div>';
+  else h+='<nav class="tabs">'+[['eq','Equipos',IC.list],['rec','Recorrida',IC.route],['fal','Fallas',IC.warn],['guia','Guía',IC.book],['yo','Yo',IC.user]].map(function(q){return '<button data-a="tab:'+q[0]+'" aria-current="'+(ST.tab===q[0])+'"><i>'+q[2]+'</i>'+q[1]+'</button>'}).join('')+'</nav>';
+  if(F)h+=sheetForm();else if(FA)h+=sheetFalla();else if(CL)h+=sheetCierre();else if(CX)h+=sheetCancel();
+  if(ST.toast)h+='<div class="toast '+ST.toast.k+'">'+esc(ST.toast.t)+'</div>';
+  lsok('if_cur_'+K,REC?JSON.stringify(REC):null);
+  $('#app').innerHTML=h;
+  if($('main'))$('main').scrollTop=mt;if($('.sheet'))$('.sheet').scrollTop=st;
+}
+var tt=null;
+function toast(t,k){ST.toast={t:t,k:k||'ok'};clearTimeout(tt);tt=setTimeout(function(){ST.toast=null;render()},4200);render()}
+
+
+/* ---------- conexión, sesión y datos ---------- */
+var API='https://script.google.com/macros/s/AKfycbwi5YL2canuA0DjBFioEs4F4biQScuJ799UTpLDXk3MpwOHmWlrKjZs4h_5kzr7WkKt/exec';
+var VERSION='1.0';
+function lsok(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true}catch(e){return false}}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
+function jget(k,d){try{var v=ls(k);return v?JSON.parse(v):d}catch(e){return d}}
+var K=new URLSearchParams(location.search).get('k')||ls('mf_k')||'';
+if(K)ls('mf_k',K);
+if(K){try{var _b=location.origin+location.pathname.replace(/[^\/]*$/,'');var _u=_b+'?k='+encodeURIComponent(K);
+var _m={name:'IFCI · Intendencia',short_name:'IFCI',start_url:_u,scope:_b,display:'standalone',orientation:'portrait',background_color:'#F6F4EE',theme_color:'#14213D',lang:'es',icons:[{src:_b+'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:_b+'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:_b+'icon-512-maskable.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]};
+var _l=document.querySelector('link[rel=manifest]');if(_l)_l.href=URL.createObjectURL(new Blob([JSON.stringify(_m)],{type:'application/manifest+json'}));}catch(e){}}
+var SK='ag_s_'+K; // misma sesión que la agenda y Matafuegos (mismo sitio)
+var S=ls(SK)||'';
+var DATA=jget('if_data_'+K,null), QUEUE=jget('if_q_'+K,[]), TMP=jget('if_tmp_'+K,{});
+function saveQ(){return lsok('if_q_'+K,JSON.stringify(QUEUE))}
+function saveTmp(){lsok('if_tmp_'+K,JSON.stringify(TMP))}
+function saveData(){ls('if_data_'+K,JSON.stringify(DATA))}
+function post(fn,args,s,n){n=n||0;
+  var c=new AbortController(),t=setTimeout(function(){c.abort()},45000);
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:K,s:s===undefined?S:s,fn:fn,args:args}),signal:c.signal})
+  .then(function(r){return r.json()}).then(function(j){clearTimeout(t);return j})
+  .catch(function(e){clearTimeout(t);if(n<2)return new Promise(function(ok){setTimeout(ok,1200*(n+1))}).then(function(){return post(fn,args,s,n+1)});throw e});
+}
+IC.fp='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v3c0 2 .5 4 1.5 6"/><path d="M8 11a4 4 0 018 0"/><path d="M5 12a7 7 0 0114 0c0 3 .3 5 1 7"/><path d="M8.5 15c0 2 .4 3.5 1 5"/></svg>';
+function edId(name){var b=B.filter(function(q){return q.n===name})[0];return b?b.id:null}
+function aId(id){return TMP[id]||id}
+function esTmp(id){return /^T-/.test(String(id))}
+
+/* datos del servidor + lo que todavía está en cola, todo mezclado para mostrar */
+function aplicarDatos(){
+  var list=[],abiertas={};
+  if(DATA){
+    (DATA.fallas||[]).forEach(function(f){if(f.estado==='Resuelta'||f.estado==='Verificada')return;(abiertas[f.nicho]=abiertas[f.nicho]||[]).push(f)});
+    (DATA.nichos||[]).forEach(function(n){
+      if(n.estado==='Baja')return;var id=edId(n.ed);if(!id)return;var d=n.datos||{};
+      var x=bie(n.id,id,n.piso,n.ub,n.nro,d.ph||'',String(n.uc||'').slice(0,10));
+      x.obs=n.obs||'';x.mang=d.sust==='taller_sin'?'sinsust':(d.sust==='sust'?'sust':'titular');
+      x.fallas=(abiertas[n.id]||[]).map(function(f){return f.tipo});
+      list.push(x);
+    });
+    B.forEach(function(b){EMP[b.id]={n:(DATA.emp&&DATA.emp[b.n])||'(sin empresa vigente)'}});
+  }
+  var per={};list.forEach(function(x){per[x.id]=x});
+  QUEUE.forEach(function(op){
+    if(op.err)return;
+    if(op.t==='nicho'){var id=edId(op.ed);if(!id)return;var cur=per[aId(op.id)]||per[op.id];
+      if(cur){cur.ed=id;cur.piso=op.piso;cur.ub=op.ub;cur.nro=op.nro;cur.obs=op.obs}
+      else{var x=bie(op.id,id,op.piso,op.ub,op.nro,'');x.obs=op.obs;list.push(x);per[op.id]=x}}
+    else if(op.t==='rec'){op.items.forEach(function(it){var x=per[aId(it.id)]||per[it.id];if(!x)return;x.ctl=op.fecha;x.fallas=it.list.slice();x.mang=it.mang;if(it.ph)x.ph=it.ph})}
+  });
+  ST.list=list;
+  list.forEach(function(x){var b=bld(x.ed);
+    if(x.piso&&b.pisos.indexOf(x.piso)<0&&ex(x.ed).pisos.indexOf(x.piso)<0)ex(x.ed).pisos.push(x.piso);
+    if(x.ub&&todasUbs(x.ed).indexOf(x.ub)<0)ex(x.ed).ubs.push(x.ub)});
+}
+function sesionCaida(){ls(SK,null);S='';arrancar()}
+function refrescar(sil){
+  if(!navigator.onLine||!S)return Promise.resolve(false);
+  return post('bieLista',[K]).then(function(j){
+    if(!j.ok){if(j.e==='sesion'){sesionCaida();return false}if(!sil)toast(j.e||'No se pudo actualizar','bad');return false}
+    DATA=j.r;saveData();UI.last=ahora();ls('if_last_'+K,UI.last);aplicarDatos();render();return true;
+  }).catch(function(){return false});
+}
+
+/* envío en orden de lo que quedó en cola (alta/edición de BIE y recorridas) */
+var TIPOS_F={vidrio:['Vidrio roto o faltante',''],puerta:['Otra (explicar en la nota)','Puerta, cerradura o señalética del gabinete en mal estado'],volante:['Falta el volante o la tapa de la válvula',''],perdida:['Válvula con pérdida',''],manguera:['Falta la manguera','Manguera dañada, faltante o mal adujada'],lanza:['Falta la lanza',''],llave:['Falta la llave de ajuste',''],canasto:['Otra (explicar en la nota)','Devanadera o canasto dañado']};
+function datosCtl(it){
+  var k={};(it.keys||[]).forEach(function(a){k[a]=1});
+  return {gab:k.puerta?'falta':'ok',vidrio:k.vidrio?'falta':'ok',valvula:k.perdida?'perdida':'ok',volante:k.volante?'falta':'ok',
+    manguera:k.manguera?'falla':(it.mang==='titular'?'titular':'taller'),sust:it.mang==='sinsust'?'taller_sin':(it.mang==='sust'?'sust':'no'),
+    ph:it.ph||'',lanza:k.lanza?'falta':'ok',llave:k.llave?'falta':'ok',devan:k.canasto?'falla':'ok',limpieza:'ok',obs:it.nota||''};
+}
+function fallasDe(it){
+  var m={},ord=[];
+  function add(t,d){if(!m[t]){m[t]=[];ord.push(t)}if(d&&m[t].indexOf(d)<0)m[t].push(d)}
+  (it.keys||[]).forEach(function(a){var q=TIPOS_F[a];if(q)add(q[0],q[1])});
+  if(it.mang==='sinsust')add('Manguera en taller sin sustituta','');
+  if(it.ph&&phVencida(it.ph))add('Manguera vencida o con prueba hidráulica vencida','Venció '+it.ph);
+  return ord.map(function(t){var d=m[t].slice();if(it.nota)d.push(it.nota);return{tipo:t,detalle:d.join(' · ')}});
+}
+function secuencia(arr,fn){return arr.reduce(function(p,x,i){return p.then(function(){return fn(x,i)})},Promise.resolve())}
+function falloOp(it,j){return {fallo:true,msg:(j&&j.e)||'No se pudo enviar'}}
+function enviarNicho(it){
+  var d={id:it.nuevo?'':aId(it.id),ed:it.ed,piso:it.piso,ub:it.ub,nro:it.nro,obs:it.obs};
+  return post('bieNichoGuardar',[K,d]).then(function(j){
+    if(!j.ok)return falloOp(it,j);
+    if(it.nuevo){TMP[it.id]=j.r.nicho.id;saveTmp()}
+    return {ok:true};
+  });
+}
+function enviarRec(it){
+  var p=it.rid?Promise.resolve({ok:true,r:{rec:{id:it.rid}}}):post('bieRecIniciar',[K,it.ed]);
+  return p.then(function(j){
+    if(!j.ok)return falloOp(it,j);
+    it.rid=j.r.rec.id;saveQ();
+    var err=null;
+    return secuencia(it.items,function(x){
+      if(err||x.hecho)return;
+      var nid=aId(x.id);
+      return post('bieControl',[K,nid,datosCtl(x),it.rid]).then(function(a){
+        if(!a.ok){err=falloOp(it,a);return}
+        var fs=x.e==='F'?fallasDe(x):[];
+        return secuencia(fs,function(f){
+          if(err)return;
+          return post('bieFallaInformar',[K,{nicho:nid,tipo:f.tipo,detalle:f.detalle,rec:it.rid}]).then(function(b){
+            if(!b.ok&&!/Ya hay una falla abierta/.test(b.e||''))err=falloOp(it,b);
+          });
+        }).then(function(){if(!err){x.hecho=true;saveQ()}});
+      });
+    }).then(function(){
+      if(err)return err;
+      return post('bieRecCerrar',[K,it.rid]).then(function(c){
+        if(!c.ok&&!/ya está cerrada/.test(c.e||''))return falloOp(it,c);
+        return {ok:true};
+      });
+    });
+  });
+}
+function sincronizar(manual){
+  if(UI.sync==='run')return Promise.resolve();
+  if(!S)return Promise.resolve();
+  if(!navigator.onLine){if(manual)toast('Sin señal. Se envía cuando vuelva la conexión.','bad');return Promise.resolve()}
+  UI.sync='run';render();
+  var hechos=0,fallo=null;
+  function sig(){
+    var it=QUEUE.filter(function(x){return !x.err})[0];
+    if(!it)return Promise.resolve();
+    return (it.t==='nicho'?enviarNicho(it):enviarRec(it)).then(function(r){
+      if(r&&r.ok){QUEUE=QUEUE.filter(function(x){return x!==it});saveQ();hechos++;return sig()}
+      it.err=(r&&r.msg)||'No se pudo enviar';saveQ();
+      if(/sesion/.test(it.err)){delete it.err;saveQ();fallo='sesion';return}
+      return sig();
+    }).catch(function(){fallo='red'});
+  }
+  return sig().then(function(){
+    UI.sync='';
+    if(fallo==='sesion'){sesionCaida();return}
+    return refrescar(true).then(function(){
+      if(hechos&&!QUEUE.length)toast('Enviado: todo quedó guardado en la agenda.','ok');
+      else if(fallo==='red'&&manual)toast('No se pudo conectar. Queda guardado en el celular.','bad');
+      else if(manual&&!QUEUE.length)toast('Todo al día.','ok');
+      render();
+    });
+  });
+}
+function cambiarEstadoFalla(id,est){
+  if(!navigator.onLine){toast('Para cambiar el estado hace falta señal.','bad');return}
+  post('bieFallaEstado',[K,id,est,'']).then(function(j){
+    if(!j.ok){if(j.e==='sesion'){sesionCaida();return}toast(j.e||'No se pudo cambiar el estado.','bad');return}
+    refrescar(true).then(function(){toast('Falla: '+est.toLowerCase()+'.','ok')});
+  }).catch(function(){toast('No se pudo conectar.','bad')});
+}
+
+/* ---------- login ---------- */
+function loginView(est){
+  var nuevo=est&&!est.tienePin;
+  return '<div class="login"><img class="logo" src="icon-192.png" alt=""><h2 style="text-align:center;margin:0 0 4px">'+(est?'Hola, '+esc(String(est.n||'').replace(/\s*\(.*\)$/,'')):'IFCI')+'</h2>'
+   +'<p class="mut" style="text-align:center">'+(est?(nuevo?'Primera vez: creá una clave de 4 a 6 números.':'Ingresá tu clave para abrir la app.'):'Un momento…')+'</p>'
+   +(est?'<form data-f="login"><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">'+(nuevo?'<input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Repetí la clave">':'')+'<div id="le" class="note bad" hidden></div><button class="btn" id="lb">'+(nuevo?'Crear clave y entrar':'Entrar')+'</button></form><button type="button" class="tl" data-a="kolv">¿Olvidaste tu clave?</button>':'')+'</div>';
+}
+var EST=null;
+function pedirLogin(){
+  if(!K){nombreInit();return}
+  if(!navigator.onLine){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">La primera vez necesitás conexión para entrar. Probá de nuevo cuando tengas señal.</p></div>';return}
+  post('estado',[K],'').then(function(j){
+    if(!j.ok){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">Este link no es válido. Pedí uno nuevo a la Intendencia.</p></div>';return}
+    EST=j.r;$('#app').innerHTML=loginView(EST);var p=$('#p1');if(p)p.focus();
+  }).catch(function(){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">No se pudo conectar. Revisá tu señal.</p><button class="btn" data-a="reload">Reintentar</button></div>'});
+}
+function doLogin(ev){
+  ev.preventDefault();var nuevo=EST&&!EST.tienePin,e=$('#le'),b=$('#lb'),p1=$('#p1').value,p2=$('#p2')?$('#p2').value:'';
+  e.hidden=true;
+  if(!/^\d{4,6}$/.test(p1)){e.textContent='La clave tiene que ser de 4 a 6 números.';e.hidden=false;return}
+  if(nuevo&&p1!==p2){e.textContent='Las dos claves no coinciden.';e.hidden=false;return}
+  b.disabled=true;b.textContent='Entrando…';
+  post(nuevo?'crearPin':'entrar',[K,p1],'').then(function(j){
+    if(!j.ok&&nuevo&&/Ya ten/.test(j.e||''))return post('entrar',[K,p1],'');return j}).then(function(j){
+    if(!j.ok){b.disabled=false;b.textContent=nuevo?'Crear clave y entrar':'Entrar';e.textContent=j.e||'No se pudo entrar.';e.hidden=false;return}
+    S=j.r.s;ls(SK,S);arrancar();
+  }).catch(function(){b.disabled=false;b.textContent='Entrar';e.textContent='No se pudo conectar. Intentá de nuevo.';e.hidden=false});
+}
+
+/* ---------- entrar eligiendo el nombre (misma clave de la agenda) ---------- */
+var NL={nombres:null,modo:'entrar',err:'',msg:'',nom:''};
+function pn(args){
+  var c=new AbortController(),t=setTimeout(function(){c.abort()},45000);
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:'',s:'',fn:'porNombre',args:args}),signal:c.signal})
+  .then(function(r){return r.json()}).then(function(j){clearTimeout(t);return j}).catch(function(e){clearTimeout(t);throw e});
+}
+function nErr(t){var e=$('#ne');if(e){e.textContent=t;e.hidden=false}}
+function nBusy(on,txt){var b=$('#nb');if(b){b.disabled=on;b.textContent=txt}}
+function nPintar(){$('#app').innerHTML=nombreView()}
+function nombreView(){
+  var h='<div class="login"><img class="logo" src="icon-192.png" alt=""><h2 style="text-align:center;margin:0 0 4px">IFCI</h2>';
+  if(!NL.nombres)return h+'<p class="mut" style="text-align:center">'+(NL.err?esc(NL.err):'Un momento…')+'</p>'+(NL.err?'<button class="btn" data-a="nreint">Reintentar</button>':'')+'</div>';
+  var sel=NL.nom||ls('mf_nom')||'';
+  if(NL.modo==='link')return h+'<p class="mut" style="text-align:center">Pegá acá el link que te pasó la Intendencia (el que termina en <b>?k=...</b>).</p><input id="pk" class="pl" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Pegá tu link"><div id="ne" class="note bad" hidden></div><button class="btn" id="nb" data-a="npegar">Guardar y entrar</button><button type="button" class="tl" data-a="nvolver">Volver</button></div>';
+  if(NL.modo==='olv1')return h+'<p class="mut" style="text-align:center">Hola, '+esc(NL.nom.replace(/\s*\(.*\)$/,''))+'. Te mandamos un código de 6 números a tu mail para que elijas una clave nueva.</p><div id="ne" class="note bad" hidden></div><button class="btn" id="nb" data-a="nenviar">Mandarme el código</button><button type="button" class="tl" data-a="nvolver">Volver</button></div>';
+  if(NL.modo==='olv2')return h+'<p class="mut" style="text-align:center">'+esc(NL.msg||'Ingresá el código que te llegó al mail y tu clave nueva.')+'</p><input id="nc" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Código"><input id="np1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Clave nueva"><input id="np2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Repetí la clave"><div id="ne" class="note bad" hidden></div><button class="btn" id="nb" data-a="nrest">Cambiar clave y entrar</button><button type="button" class="tl" data-a="nvolver">Volver</button></div>';
+  return h+'<p class="mut" style="text-align:center">Elegí tu nombre e ingresá tu clave (la misma de la agenda).</p><form data-f="nom"><select id="nsel"><option value="">Elegí tu nombre</option>'+NL.nombres.map(function(n){return '<option'+(n===sel?' selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select><input id="np1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Clave"><div id="ne" class="note bad" hidden></div><button class="btn" id="nb">Entrar</button></form><button type="button" class="tl" data-a="nolv">¿Olvidaste tu clave?</button><button type="button" class="tl" data-a="nlink">Primera vez: tengo un link</button></div>';
+}
+function nombreInit(){
+  if(!navigator.onLine){$('#app').innerHTML='<div class="login"><p class="mut" style="text-align:center">La primera vez necesitás conexión para entrar. Probá de nuevo cuando tengas señal.</p><button class="btn" data-a="reload">Reintentar</button></div>';return}
+  NL.err='';nPintar();
+  if(!NL.nombres)pn(['nombres']).then(function(j){if(!j.ok)throw 0;NL.nombres=j.r.slice().sort(function(a,b){return a.localeCompare(b)});nPintar()}).catch(function(){NL.err='No se pudo conectar. Revisá tu señal.';nPintar()});
+}
+function nListo(n,r){ls('mf_nom',n);ls('mf_k',r.k);ls('ag_s_'+r.k,r.s);nBusy(true,'Listo, abriendo…');location.replace(location.pathname)}
+function nSel(){var s=$('#nsel');return s?s.value:NL.nom}
+function nEntrar(){
+  var n=nSel(),p=($('#np1')||{}).value||'';NL.nom=n;
+  if(!n)return nErr('Elegí tu nombre.');
+  if(!/^\d{4,6}$/.test(p))return nErr('La clave tiene que ser de 4 a 6 números.');
+  $('#ne').hidden=true;nBusy(true,'Entrando…');
+  pn(['entrar',n,p]).then(function(j){
+    if(!j.ok){nBusy(false,'Entrar');return nErr((j.e||'No se pudo entrar.')+(/Todav/.test(j.e||'')?' Abrí el link que te pasó la Intendencia para crearla.':''))}
+    nListo(n,j.r);
+  }).catch(function(){nBusy(false,'Entrar');nErr('No se pudo conectar. Intentá de nuevo.')});
+}
+function nEnviar(){
+  $('#ne').hidden=true;nBusy(true,'Mandando…');
+  pn(['olvide',NL.nom]).then(function(j){
+    if(!j.ok){nBusy(false,'Mandarme el código');return nErr(j.e||'No se pudo mandar el código.')}
+    NL.modo='olv2';NL.msg='Te mandamos el código al mail. Vale 10 minutos. Ingresalo y elegí tu clave nueva.';nPintar();
+  }).catch(function(){nBusy(false,'Mandarme el código');nErr('No se pudo conectar. Intentá de nuevo.')});
+}
+function nRest(){
+  var cod=($('#nc')||{}).value||'',p1=($('#np1')||{}).value||'',p2=($('#np2')||{}).value||'';
+  if(!/^\d{6}$/.test(cod.replace(/\s/g,'')))return nErr('El código tiene 6 números.');
+  if(!/^\d{4,6}$/.test(p1))return nErr('La clave tiene que ser de 4 a 6 números.');
+  if(p1!==p2)return nErr('Las dos claves no coinciden.');
+  $('#ne').hidden=true;nBusy(true,'Entrando…');
+  pn(['restablecer',NL.nom,cod,p1]).then(function(j){
+    if(!j.ok){nBusy(false,'Cambiar clave y entrar');return nErr(j.e||'No se pudo cambiar la clave.')}
+    nListo(NL.nom,j.r);
+  }).catch(function(){nBusy(false,'Cambiar clave y entrar');nErr('No se pudo conectar. Intentá de nuevo.')});
+}
+function nPegar(){
+  var v=($('#pk')||{}).value||'',m=v.match(/[?&]k=([^&#\s]+)/),t=m?decodeURIComponent(m[1]):v.trim();
+  if(t.length<8)return nErr('No encuentro el link. Pegá el link completo que te pasó la Intendencia.');
+  nBusy(true,'Entrando…');ls('mf_k',t);location.replace(location.pathname+'?k='+encodeURIComponent(t));
+}
+function nAct(k){
+  if(k==='nentrar')nEntrar();else if(k==='nenviar')nEnviar();else if(k==='nrest')nRest();else if(k==='npegar')nPegar();
+  else if(k==='nolv'){NL.nom=nSel();NL.modo='olv1';if(!NL.nom){NL.modo='entrar';nErr('Primero elegí tu nombre.');return true}nPintar()}
+  else if(k==='nlink'){NL.nom=nSel();NL.modo='link';nPintar()}
+  else if(k==='nvolver'){NL.modo='entrar';if(!K)nPintar();else{NL.nombres=null;location.reload()}}
+  else if(k==='nreint'){nombreInit()}
+  else if(k==='kolv'){NL.nom=EST?EST.n:'';NL.nombres=NL.nombres||[NL.nom];NL.modo='olv1';nPintar()}
+  else return false;
+  return true;
+}
+
+/* ---------- bloqueo de la app (PIN de 4 números y huella / rostro del celular) ---------- */
+var LK=jget('if_lock',null),LKS={locked:false,mode:'',msg:'',bad:false,away:0},BIO=false;
+if(LK&&!LK.bio){LK=null;ls('if_lock',null)}
+try{if(window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(function(v){BIO=!!v;if(S&&!LKS.mode)render()}).catch(function(){})}catch(e){}
+function lkRand(n){var a=new Uint8Array(n);if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(a);else for(var i=0;i<n;i++)a[i]=Math.floor(Math.random()*256);return a}
+function b64u(a){var s='';for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s)}
+function ub64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+function lkDraw(){
+  var el=document.getElementById('lock');
+  if(!LKS.mode){if(el)el.parentNode.removeChild(el);return}
+  if(!el){el=document.createElement('div');el.id='lock';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el)}
+  if(LKS.mode==='offer'){el.innerHTML='<div class="lkbox"><div class="lkic">'+IC.fp+'</div><h2>Listo, ya entraste</h2><div class="lkmsg'+(LKS.bad?' bad':'')+'" aria-live="polite">'+esc(LKS.msg||'La próxima vez que abras la app, entrá con tu huella o rostro en lugar de escribir la clave. Si el celular lo pide, también sirve su código de bloqueo.')+'</div><button type="button" class="btn" data-a="lk:bioon">Usar huella o rostro la próxima vez</button><button type="button" class="lkl" data-a="lk:bioNo">Ahora no, sigo con la clave</button></div>';return}
+  el.innerHTML='<div class="lkbox"><div class="lkic">'+IC.fp+'</div><h2>Desbloqueá la app</h2><div class="lkmsg'+(LKS.bad?' bad':'')+'" aria-live="polite">'+esc(LKS.msg||'Usá tu huella o tu rostro. Si el celular lo pide, también sirve el código de bloqueo de pantalla.')+'</div><button type="button" class="btn" data-a="lk:bio">Desbloquear</button><button type="button" class="lkl" data-a="lk:forgot">Entrar con mi clave de la agenda</button></div>'}
+function lkShow(mode){LKS.mode=mode;LKS.msg='';LKS.bad=false;lkDraw()}
+function lkClose(){LKS.mode='';lkDraw()}
+function lkBio(){
+  if(!LK||!LK.bio||!navigator.credentials)return;
+  navigator.credentials.get({publicKey:{challenge:lkRand(32),allowCredentials:[{type:'public-key',id:ub64(LK.bio),transports:['internal']}],userVerification:'required',timeout:60000}}).then(function(c){
+    if(!c)return;LKS.locked=false;lkClose();render()}).catch(function(){LKS.bad=true;LKS.msg='No se pudo. Tocá Desbloquear para reintentar, o entrá con tu clave de la agenda.';lkDraw()})}
+function lkBioSet(){
+  if(!BIO||!navigator.credentials)return;
+  navigator.credentials.create({publicKey:{challenge:lkRand(32),rp:{name:'IFCI · Intendencia'},user:{id:lkRand(16),name:'ifci',displayName:'IFCI'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}}).then(function(c){
+    if(!c)return;LK={bio:b64u(new Uint8Array(c.rawId))};ls('if_lock',JSON.stringify(LK));LKS.mode='';lkDraw();toast('Listo: la próxima vez la app se abre con tu huella o rostro.','ok')}).catch(function(){if(LKS.mode==='offer'){LKS.bad=true;LKS.msg='No se pudo activar. Podés probar de nuevo o seguir con la clave.';lkDraw()}else toast('No se pudo activar el acceso con biometría en este celular.','bad')})}
+function lkKey(x){
+  if(x==='bio'){lkBio();return}
+  if(x==='forgot'){if(confirm('Para entrar con tu clave tenés que cerrar sesión y volver a entrar con tu nombre y tu clave de la agenda. ¿Seguimos?')){ls('if_lock',null);LK=null;ls(SK,null);S='';location.reload()}return}
+  if(x==='bioon'){lkBioSet();return}
+  if(x==='bioNo'){ls('if_bio_no','1');if(LKS.mode==='offer'){LKS.mode='';lkDraw()}render();return}
+  if(x==='biooff'){if(confirm('¿Dejar de usar huella o rostro? La app se abrirá sin pedir nada.')){LK=null;ls('if_lock',null);toast('Acceso con biometría desactivado.','ok')}return}
+}
+function bioBanner(){
+  if(!BIO||LK||ls('if_bio_no'))return '';
+  return '<div class="card"><h3>Entrá sin escribir la clave</h3><div class="mut">Activá el acceso con huella o rostro (o con el código de bloqueo de tu celular). Es opcional y lo podés cambiar después en «Yo».</div><div class="lkrow"><button class="btn" data-a="lk:bioon">Activar acceso con biometría</button><button class="btn sec" data-a="lk:bioNo">Ahora no</button></div></div>'}
+function lkCard(){
+  if(!BIO)return '<div class="card"><h3>Acceso con biometría</h3><div class="mut">Este celular no permite usar huella o rostro desde la app. Tu usuario queda recordado y la sesión se mantiene 30 días.</div></div>';
+  if(!LK)return '<div class="card"><h3>Acceso con biometría</h3><div class="mut">Abrí la app con tu huella o rostro, como en el banco, en lugar de escribir la clave. Tu usuario queda recordado en este celular.</div><div style="height:10px"></div><button class="btn sec" data-a="lk:bioon">'+IC.fp+'Activar acceso con biometría</button></div>';
+  return '<div class="card"><h3>Acceso con biometría <span class="pill ok">Activado</span></h3><div class="mut">Se pide la huella o el rostro (o el código de tu celular) al abrir la app y cuando volvés a ella después de un minuto.</div><div class="lkrow"><button class="btn sec" data-a="lk:biooff">Desactivar</button></div></div>'}
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){LKS.away=Date.now();return}
+  if(LK&&S&&!LKS.locked&&!LKS.mode&&LKS.away&&Date.now()-LKS.away>60000){LKS.locked=true;lkShow('unlock');if(LK.bio){try{lkBio()}catch(e){}}}
+});
+
+/* ---------- gestos: deslizar entre pestañas ---------- */
+(function(){
+var TABS=['eq','rec','fal','guia','yo'],g=null;
+function noDesliza(t){while(t&&t!==document.body){if(t.nodeType===1){var n=t.tagName;if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT')return true;var o=getComputedStyle(t).overflowX;if((o==='auto'||o==='scroll')&&t.scrollWidth>t.clientWidth+2)return true}t=t.parentNode}return false}
+document.addEventListener('touchstart',function(ev){g=null;if(ev.touches.length!==1||!S||LKS.locked||LKS.mode||REC||F||FA||CL||CX)return;var te=ev.touches[0];g={x:te.clientX,y:te.clientY,t:Date.now(),sob:noDesliza(ev.target)}},{passive:true});
+document.addEventListener('touchend',function(ev){if(!g)return;var o=g;g=null;var te=ev.changedTouches[0],dx=te.clientX-o.x,dy=te.clientY-o.y,dt=Math.max(Date.now()-o.t,1);
+  if(!o.sob&&Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5&&dt<700){var i=TABS.indexOf(ST.tab),j=i+(dx<0?1:-1);if(j>=0&&j<TABS.length){ST.tab=TABS[j];render()}}},{passive:true});
+})();
+
+/* ---------- acciones: alta / edición ---------- */
+function abrirNueva(){F={id:'',ed:ST.ed,piso:'',ub:'',nro:'',obs:'',addP:false,addU:false,np:'',nu:'',errP:'',errU:'',err:''};render()}
+function abrirEdit(id){var x=byId(id);if(!x)return;F={id:x.id,ed:x.ed,piso:x.piso,ub:x.ub,nro:x.nro,obs:x.obs,addP:false,addU:false,np:'',nu:'',errP:'',errU:'',err:''};render()}
+function agregar(tipo){
+  var isP=tipo==='p',v=(isP?F.np:F.nu).trim().replace(/\s+/g,' ');
+  if(!v){if(isP)F.errP='Escribí el nombre del piso.';else F.errU='Escribí el nombre de la ubicación.';render();return}
+  var lista=isP?todosPisos(F.ed):todasUbs(F.ed),hay=lista.filter(function(q){return norm(q)===norm(v)})[0];
+  if(hay){if(isP){F.piso=hay;F.addP=false;F.errP='';F.np=''}else{F.ub=hay;F.addU=false;F.errU='';F.nu=''}render();toast('«'+hay+'» ya estaba en la lista: lo dejé elegido.','ok');return}
+  if(isP){ex(F.ed).pisos.push(v);F.piso=v;F.addP=false;F.errP='';F.np='';render();toast(pisoDe(v).k===999?'Piso agregado. No lo reconozco para ordenar: conviene «Piso 3», «Subsuelo 1» o «Planta baja».':'Piso agregado a '+bld(F.ed).n+'.',pisoDe(v).k===999?'bad':'ok')}
+  else{ex(F.ed).ubs.push(v);F.ub=v;F.addU=false;F.errU='';F.nu='';render();toast('Ubicación agregada a '+bld(F.ed).n+'.','ok')}
+}
+function guardar(){
+  F.nro=F.nro.trim();
+  if(!F.piso){F.err='Elegí el piso.';render();return}
+  if(!F.nro){F.err='Falta el N° de BIE (lo pone la empresa; después se puede editar).';render();return}
+  F.err='';
+  var nuevo=!F.id,x=nuevo?null:byId(F.id);
+  if(!nuevo){var n=0;['ed','piso','ub','nro','obs'].forEach(function(k){var nv=k==='obs'?F.obs.trim():F[k];if(nv!==x[k])n++});
+    if(!n){F=null;render();toast('No hubo cambios.','bad');return}}
+  var op={t:'nicho',id:nuevo?('T-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)):F.id,nuevo:nuevo,ed:bld(F.ed).n,piso:F.piso,ub:F.ub,nro:F.nro,obs:F.obs.trim()};
+  ST.ed=F.ed;F=null;QUEUE.push(op);saveQ();aplicarDatos();render();
+  toast(nuevo?'BIE agregada.':'Cambios guardados.','ok');sincronizar(false);
+}
+
+/* ---------- acciones: recorrida ---------- */
+function abrirFalla(id){
+  var x=byId(id),it=REC.items[id],fl={};
+  if(it&&it.keys)it.keys.forEach(function(k){fl[k]=true});
+  FA={id:id,fallas:fl,mang:it?it.mang:x.mang,ph:it?it.ph:x.ph,nota:it?it.nota:'',fotos:it?it.fotos:0,err:''};render();
+}
+function guardarFalla(){
+  var x=byId(FA.id),keys=Object.keys(FA.fallas).filter(function(k){return FA.fallas[k]}),list=[];
+  FA.ph=FA.ph.trim();
+  if(FA.ph&&mesIdx(FA.ph)===null){FA.err='La fecha de la prueba hidráulica va como MM/AAAA, por ejemplo 10/2027.';render();return}
+  FL.forEach(function(f){if(keys.indexOf(f[0])>=0)list.push(f[2])});
+  if(FA.mang==='sinsust')list.push('Manguera retirada a taller SIN sustituta: nicho desprotegido (infracción contractual grave)');
+  if(FA.ph&&phVencida(FA.ph))list.push('Prueba hidráulica de la manguera vencida (venció '+FA.ph+')');
+  if(!list.length){FA.err='Marcá qué pasa. Si no hay nada, volvé y tocá «En orden».';render();return}
+  REC.items[FA.id]={e:'F',list:list,keys:keys,mang:FA.mang,ph:FA.ph,nota:FA.nota.trim(),fotos:FA.fotos};
+  FA=null;render();
+}
+function enOrden(id){
+  var x=byId(id);
+  if(x.ph&&phVencida(x.ph)){toast('Tiene la prueba hidráulica vencida ('+x.ph+'): marcala como falla.','bad');return}
+  REC.items[id]={e:'OK',list:[],keys:[],mang:x.mang,ph:x.ph,nota:'',fotos:0};render();
+}
+function cierreOk(){
+  var m=mailRec(),f=ahora(),r=resumenRec(),ed=bld(REC.ed).n,op={t:'rec',ed:ed,fecha:hoyTxt(),items:[]};
+  listaRec().forEach(function(x){var it=REC.items[x.id];if(!it)return;
+    op.items.push({id:x.id,e:it.e,list:it.list.slice(),keys:(it.keys||[]).slice(),mang:it.mang,ph:it.ph||'',nota:it.nota||''})});
+  ST.ed=REC.ed;ST.tab='eq';REC=null;CL=false;
+  if(op.items.length){QUEUE.push(op);saveQ();aplicarDatos()}
+  render();
+  toast(m.n?'Recorrida cerrada en '+ed+': '+r.f+' con falla. '+(navigator.onLine?'Enviando…':'Se envía cuando haya señal.'):'Recorrida cerrada en '+ed+': todo en orden.','ok');
+  if(op.items.length)sincronizar(false);
+}
+
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-a]');if(!el)return;
+  if(el.classList.contains('sheet-bg')&&e.target.closest('.sheet'))return;
+  var a=el.getAttribute('data-a'),p=a.split(':');
+  if(p[0]==='lk'){lkKey(p[1]);return}
+  if(nAct(p[0]))return;
+  switch(p[0]){
+   case 'reload':location.reload();break;
+   case 'fest':cambiarEstadoFalla(p[1],p.slice(2).join(':'));break;
+   case 'qdesc':QUEUE.splice(+p[1],1);saveQ();aplicarDatos();render();break;
+   case 'qreint':if(QUEUE[+p[1]]){delete QUEUE[+p[1]].err;saveQ();sincronizar(true)}break;
+   case 'nueva':abrirNueva();break;
+   case 'edit':abrirEdit(p[1]);break;
+   case 'cerrar':F=null;render();break;
+   case 'addp':agregar('p');break;
+   case 'addu':agregar('u');break;
+   case 'guardar':guardar();break;
+   case 'tab':ST.tab=p[1];render();break;
+   case 'gsec':UI.gsec=p[1];render();break;
+   case 'gc':UI.gc=p[1];render();break;
+   case 'tema':try{if(p[1]==='auto')localStorage.removeItem('ifci_tema');else localStorage.setItem('ifci_tema',p[1])}catch(er){}temaAplicar();render();break;
+   case 'sync':sincronizar(true);break;
+   case 'salir':if(confirm('¿Cerrar sesión? Lo que esté esperando señal se pierde si no se envió.')){ls('if_lock',null);LK=null;ls(SK,null);S='';location.reload()}break;
+   case 'iniciar':REC={ed:ST.recEd,items:{}};ST.filtro='faltan';render();break;
+   case 'filtro':ST.filtro=p[1];render();break;
+   case 'ok':enOrden(p[1]);break;
+   case 'falla':abrirFalla(p[1]);break;
+   case 'deshacer':delete REC.items[p[1]];render();break;
+   case 'fl':FA.fallas[p[1]]=!FA.fallas[p[1]];FA.err='';render();break;
+   case 'mg':FA.mang=p[1];FA.err='';render();break;
+   case 'foto':if(FA.fotos<3){FA.fotos++;render()}break;
+   case 'fgcancel':FA=null;render();break;
+   case 'fgsave':guardarFalla();break;
+   case 'corregir':var id=FA.id;FA=null;abrirEdit(id);break;
+   case 'cerrarrec':CL=true;render();break;
+   case 'seguir':CL=false;render();break;
+   case 'cierreok':cierreOk();break;
+   case 'cancelrec':CX=true;render();break;
+   case 'cxno':CX=false;render();break;
+   case 'cxsi':CX=false;REC=null;render();toast('Recorrida cancelada. No se guardó nada.','bad');break;
+   case 'lkx':break;
+  }
+});
+document.addEventListener('change',function(e){
+  var id=e.target.id,v=e.target.value;
+  if(id==='edsel'){ST.ed=v;render()}
+  else if(id==='recsel'){ST.recEd=v;render()}
+  else if(id==='f_ed'){F.ed=v;F.piso='';F.ub='';F.addP=false;F.addU=false;F.errP='';F.errU='';render()}
+  else if(id==='f_piso'){if(v==='__new'){F.addP=true;F.piso='';F.errP=''}else{F.piso=v;F.addP=false}render();if(F.addP&&$('#np'))$('#np').focus()}
+  else if(id==='f_ub'){if(v==='__new'){F.addU=true;F.ub='';F.errU=''}else{F.ub=v;F.addU=false}render();if(F.addU&&$('#nu'))$('#nu').focus()}
+});
+document.addEventListener('input',function(e){
+  var id=e.target.id,v=e.target.value;
+  if(id==='f_nro'){F.nro=v;var w=$('#nroW');if(w)w.innerHTML=dupHtml()}
+  else if(id==='gq'){UI.gq=v;var m=$('main'),pos=m.scrollTop;render();var g=$('#gq');if(g){g.focus();g.setSelectionRange(v.length,v.length)}m.scrollTop=pos}
+  else if(id==='f_obs')F.obs=v;
+  else if(id==='np')F.np=v;
+  else if(id==='nu')F.nu=v;
+  else if(id==='fa_ph'){FA.ph=v;FA.err='';var w2=$('#phW');if(w2)w2.innerHTML=(v.trim()&&phVencida(v.trim()))?'<div class="note bad">Esa fecha ya pasó: se agrega «prueba hidráulica vencida» como falla.</div>':''}
+  else if(id==='fa_nota')FA.nota=v;
+});
+document.addEventListener('submit',function(ev){var f=ev.target.getAttribute('data-f');if(f==='login')doLogin(ev);else if(f==='nom'){ev.preventDefault();nEntrar()}});
+window.addEventListener('online',function(){if(S){render();sincronizar(false)}});
+window.addEventListener('offline',function(){if(S)render()});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.id==='np'){e.preventDefault();agregar('p')}
+  if(e.key==='Enter'&&e.target.id==='nu'){e.preventDefault();agregar('u')}
+});
+temaAplicar();try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',temaAplicar)}catch(e){}
+function arrancar(){
+  if(!S){pedirLogin();return}
+  if(LK&&!LKS.locked&&!LKS.mode){LKS.locked=true;lkShow('unlock');if(LK.bio){try{lkBio()}catch(e){}}}
+  aplicarDatos();render();
+  sincronizar(false);
+}
+if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}}
+UI.last=ls('if_last_'+K)||'nunca';
+arrancar();
+window.__IF={ST:ST,UI:UI,get DATA(){return DATA},get QUEUE(){return QUEUE},get REC(){return REC}};
+})();
+</script></body></html>

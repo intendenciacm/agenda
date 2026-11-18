@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#003A74"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Stock">
+<title>Consulta de stock · Intendencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#003A74;--sky:#81BDE7;--blue:#477ABE;--gray:#626366;--red:#EF484C;--yellow:#FFDA4C;--paper:#F4F4F4;--ink:#222;--card:#fff;--line:#dcdfe4;--ok:#1f7a45}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Jost',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+.bar{height:14px;background:var(--gray);position:relative}
+.bar:after{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);border-left:34px solid transparent;border-right:34px solid transparent;border-top:30px solid var(--blue)}
+header{background:#fff;padding:22px 16px 14px;text-align:center;border-bottom:1px solid var(--line)}
+header img{display:block;margin:14px auto 0;width:min(78%,300px);height:auto}
+.wrap{width:100%;max-width:720px;margin:0 auto;padding:0 16px}
+.ttl{padding:22px 0 6px;text-align:center}
+.ttl h1{font-weight:700;font-size:26px;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+.rule{display:flex;align-items:center;gap:0;margin:10px auto 6px;max-width:300px}
+.rule i{width:7px;height:7px;border-radius:50%;background:var(--ink)}
+.rule b{flex:1;height:1px;background:var(--ink)}
+.sub{font-weight:300;letter-spacing:.06em;text-transform:uppercase;font-size:14px;color:#333}
+.search{position:sticky;top:0;z-index:5;background:var(--paper);padding:12px 0 8px}
+.field{position:relative}
+.field input{width:100%;font:inherit;font-size:18px;padding:15px 44px 15px 16px;border:2px solid var(--navy);border-radius:8px;background:#fff;color:var(--ink);outline:none;-webkit-appearance:none}
+.field input:focus{box-shadow:0 0 0 3px rgba(71,122,190,.35)}
+.field button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:none;font-size:22px;color:var(--gray);display:none;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0 2px}
+.chip{flex:none;font:inherit;font-size:14px;font-weight:500;padding:7px 13px;border-radius:999px;border:1.5px solid var(--blue);background:#fff;color:var(--navy);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+main{flex:1;padding:6px 0 28px}
+.hint{font-family:'Source Serif 4',serif;font-style:italic;color:var(--gray);text-align:center;padding:26px 8px;line-height:1.5}
+.count{font-size:13px;color:var(--gray);padding:8px 2px;letter-spacing:.03em}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:8px;margin:10px 0;overflow:hidden}
+.card h2{font-size:18px;font-weight:600;line-height:1.25;padding:13px 14px 2px}
+.rub{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);font-weight:600;padding:0 14px 8px}
+.loc{border-top:1px solid var(--line);padding:11px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:start}
+.ed{font-weight:600;font-size:15px;color:var(--navy)}
+.qty{grid-row:1/3;grid-column:2;text-align:right}
+.qty b{display:block;font-size:28px;font-weight:700;line-height:1}
+.qty span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray)}
+.qty.ok b{color:var(--ok)}.qty.zero b{color:var(--red)}
+.ub{font-family:'Source Serif 4',serif;font-size:15px;line-height:1.35;color:#333}
+.ub em{font-style:normal;font-weight:600;color:var(--gray);font-size:12px;letter-spacing:.05em;text-transform:uppercase;font-family:'Jost',sans-serif}
+.who{grid-column:1/3;margin-top:6px;font-size:14px;background:#fff8d6;border:1px solid var(--yellow);border-radius:6px;padding:6px 9px;line-height:1.35}
+.who b{font-weight:600}
+.empty{text-align:center;padding:30px 12px;font-family:'Source Serif 4',serif;color:var(--gray)}
+.spin{text-align:center;padding:26px;color:var(--gray)}
+footer{background:var(--navy);color:#fff;text-align:center;padding:20px 16px calc(20px + env(safe-area-inset-bottom));margin-top:auto}
+footer .t{font-weight:700;letter-spacing:.32em;font-size:17px;text-indent:.32em}
+footer .s{font-weight:300;font-size:12.5px;margin-top:6px;letter-spacing:.05em;color:#cfe2f3}
+footer .u{font-size:11.5px;margin-top:10px;color:#9fc3e6}
+@media(min-width:820px){.wrap{max-width:1040px;padding:0 32px}.ttl h1{font-size:34px}header img{width:340px}.field input{font-size:20px}#out{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;align-items:start}#out>.count,#out>.hint,#out>.empty,#out>.spin{grid-column:1/-1}}
+</style></head>
+<body>
+<div class="bar"></div>
+<header><img alt="Consejo de la Magistratura · Poder Judicial de la Nación" id="lg"></header>
+<div class="wrap">
+  <div class="ttl"><h1>Consulta de stock</h1><div class="rule"><i></i><b></b><i></i></div><div class="sub">Materiales y herramientas</div></div>
+  <div class="search">
+    <div class="field"><input id="q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="¿Qué buscás? Ej: taladro, llave tubo…" aria-label="Buscar material"><button id="x" type="button" aria-label="Borrar">×</button></div>
+    <div class="chips" id="chips" role="group" aria-label="Filtrar por edificio"></div>
+  </div>
+  <main id="out" aria-live="polite"><div class="hint">Escribí el nombre de un material o herramienta y te digo cuánto hay y dónde está.</div></main>
+</div>
+<footer><div class="t">INTENDENCIA</div><div class="s">Consejo de la Magistratura · Poder Judicial de la Nación</div><div class="u" id="upd"></div></footer>
+<script>
+(function(){var U="https://script.google.com/macros/s/AKfycbyGbeH9ybM2r1ZZW9QqdI9gEHplYDCVxDe8rYeMfNrJTVazLlC_wJmwoRW7lBBggzNd/exec";
+function call(a,q,ok,fl,n){n=n||0;var u=U+"?accion="+a+"&q="+encodeURIComponent(q.q||"")+"&ed="+encodeURIComponent(q.ed||"");
+fetch(u,{credentials:"omit"}).then(function(r){if(!r.ok)throw 0;return a==="logo"?r.text():r.json()}).then(function(d){if(d&&d.error)throw 0;ok&&ok(d)}).catch(function(){if(n<3)setTimeout(function(){call(a,q,ok,fl,n+1)},700);else fl&&fl()});}
+function R(ok,fl){return{withSuccessHandler:function(o){return R(o,fl)},withFailureHandler:function(f){return R(ok,f)},
+buscar:function(t,e){call("buscar",{q:t,ed:e},ok,fl)},edificiosLista:function(){call("edificios",{},ok,fl)}}}
+window.google={script:{run:R(null,null)}};
+call("logo",{},function(s){if(s)document.getElementById("lg").src=s},null);})();
+</script><script>
+(function(){
+var q=document.getElementById('q'),x=document.getElementById('x'),out=document.getElementById('out'),chips=document.getElementById('chips'),upd=document.getElementById('upd');
+var ed='',t=null,seq=0,eds=[];
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+function run(g){
+  var s=q.value.trim();x.style.display=s?'block':'none';
+  if(!s){out.replaceChildren(el('div','hint','Escribí el nombre de un material o herramienta y te digo cuánto hay y dónde está.'));return;}
+  var my=++seq;out.replaceChildren(el('div','spin','Buscando…'));
+  google.script.run.withSuccessHandler(function(r){if(my===seq)draw(r);}).withFailureHandler(function(){if(my===seq)out.replaceChildren(el('div','empty','No pude consultar ahora. Probá de nuevo en un momento.'));}).buscar(s,ed);
+}
+function setChips(list){
+  if(eds.join('|')===list.join('|'))return;eds=list;chips.replaceChildren();
+  [''].concat(list).forEach(function(n){var b=el('button','chip',n||'Todos');b.type='button';b.setAttribute('aria-pressed',String(n===ed));b.onclick=function(){ed=n;[].forEach.call(chips.children,function(c){c.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');run();};chips.appendChild(b);});
+}
+function draw(r){
+  setChips(r.edificios||[]);if(r.actualizado)upd.textContent='Datos al '+r.actualizado;
+  out.replaceChildren();
+  if(!r.items.length){out.appendChild(el('div','empty','No encontré nada con “'+q.value.trim()+'”. Probá con otra palabra o menos letras.'));return;}
+  out.appendChild(el('div','count',r.items.length+(r.items.length===1?' resultado':' resultados')+(r.mas?' (mostrando los primeros)':'')));
+  r.items.forEach(function(m){
+    var c=el('div','card');c.appendChild(el('h2',null,m.mat));c.appendChild(el('div','rub',m.rubro));
+    m.locs.forEach(function(l){
+      var d=el('div','loc');d.appendChild(el('div','ed',l.ed));
+      var qy=el('div','qty '+(l.dep>0?'ok':'zero'));qy.appendChild(el('b',null,String(l.dep)));qy.appendChild(el('span',null,'en depósito'+(l.un&&l.un!=='unidad'?' ('+l.un+')':'')));d.appendChild(qy);
+      var u=el('div','ub');if(l.ubic){u.appendChild(el('em',null,'Ubicación: '));u.appendChild(document.createTextNode(l.ubic));}else{u.appendChild(el('em',null,l.dep>0?'Ubicación: sin cargar':''));}
+      d.appendChild(u);
+      if(l.quien){var w=el('div','who');w.appendChild(el('b',null,'A cargo de: '));w.appendChild(document.createTextNode(l.quien));d.appendChild(w);}
+      c.appendChild(d);
+    });
+    out.appendChild(c);
+  });
+}
+q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(run,280);});
+q.addEventListener('keydown',function(e){if(e.key==='Enter'){clearTimeout(t);run();q.blur();}});
+x.onclick=function(){q.value='';run();q.focus();};
+google.script.run.withSuccessHandler(function(l){setChips(l);}).edificiosLista();
+})();
+</script></body></html>
